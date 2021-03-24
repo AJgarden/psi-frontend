@@ -93,6 +93,7 @@ class Supplier extends React.Component {
       },
       {
         title: "序",
+        width: 30,
         render: (a, b, i) => i + 1,
       },
       {
@@ -100,24 +101,12 @@ class Supplier extends React.Component {
         dataIndex: "vendorId",
       },
       {
-        title: "廠商名稱",
-        dataIndex: "name",
-      },
-      {
         title: "廠商簡稱",
         dataIndex: "shortName",
       },
       {
-        title: "負責人",
-        dataIndex: "principal",
-      },
-      {
         title: "聯絡人",
         dataIndex: "contactPerson",
-      },
-      {
-        title: "郵遞區號",
-        dataIndex: "postCode",
       },
       {
         title: "地址",
@@ -128,24 +117,12 @@ class Supplier extends React.Component {
         dataIndex: "phone1",
       },
       {
-        title: "電話2",
-        dataIndex: "phone2",
-      },
-      {
         title: "傳真號碼",
         dataIndex: "faxNumber",
       },
       {
         title: "行動電話",
         dataIndex: "cellPhone",
-      },
-      {
-        title: "備註1",
-        dataIndex: "note1",
-      },
-      {
-        title: "備註2",
-        dataIndex: "note2",
       },
     ];
   };
