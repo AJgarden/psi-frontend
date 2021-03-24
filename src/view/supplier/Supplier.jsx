@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Button, Col, Input, message, Row, Select, Space, Table } from "antd";
 import {
   EditOutlined,
@@ -133,9 +134,11 @@ class Supplier extends React.Component {
         <div style={{ marginBottom: 10 }}>
           <Row type="flex" justify="space-between">
             <Col>
-              <Button type="primary" icon={<PlusOutlined />}>
-                新增
-              </Button>
+              <Link to="/Basic/Supplier/AddSupplier">
+                <Button type="primary" icon={<PlusOutlined />}>
+                  新增
+                </Button>
+              </Link>
             </Col>
             <Col>
               <Space>

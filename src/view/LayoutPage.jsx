@@ -4,6 +4,7 @@ import { Layout, Button } from 'antd'
 import { LayoutSider } from './layout/Sider'
 import { Dashboard } from './dashboard/Dashboard'
 import Supplier from './supplier/Supplier'
+import AddSupplier from './supplier/AddSupplier'
 
 export default class LayoutPage extends React.Component {
   constructor(props) {
@@ -29,7 +30,8 @@ export default class LayoutPage extends React.Component {
           <Layout.Content className='layout-content-wrapper'>
             <Switch>
               <Route exact path='/' component={Dashboard} />
-              <Route path='/Basic/Supplier' component={Supplier} />
+              <Route exact path='/Basic/Supplier' component={Supplier} />
+              <Route path='/Basic/Supplier/AddSupplier' component={AddSupplier} />
             </Switch>
           </Layout.Content>
           <Layout.Footer>footer</Layout.Footer>
