@@ -1,16 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './index.css'
-import App from './App'
+import { HashRouter as Router, Route } from 'react-router-dom'
 import reportWebVitals from './reportWebVitals'
+import LayoutPage from './view/LayoutPage'
 
 import 'antd/dist/antd.css'
-import './style/index.css'
+import './style/index.sass'
+import './style/sider.sass'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Router>
+    <Route path='/:type?/:page?/:id?' component={LayoutPage} />
+  </Router>,
   document.getElementById('root')
 )
 
