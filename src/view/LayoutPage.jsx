@@ -3,6 +3,7 @@ import { Switch, Route } from 'react-router-dom'
 import { Layout, Button } from 'antd'
 import { LayoutSider } from './layout/Sider'
 import { Dashboard } from './dashboard/Dashboard'
+import Supplier from './supplier/Supplier'
 
 export default class LayoutPage extends React.Component {
   constructor(props) {
@@ -27,7 +28,8 @@ export default class LayoutPage extends React.Component {
           <Layout.Header>header</Layout.Header>
           <Layout.Content className='layout-content-wrapper'>
             <Switch>
-              <Route path='/' component={Dashboard} />
+              <Route exact path='/' component={Dashboard} />
+              <Route path='/Basic/Supplier' component={Supplier} />
             </Switch>
           </Layout.Content>
           <Layout.Footer>footer</Layout.Footer>
