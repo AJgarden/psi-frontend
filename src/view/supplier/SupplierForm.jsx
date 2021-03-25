@@ -154,7 +154,7 @@ class SupplierForm extends React.Component {
                     value={this.state.formData.vendorId}
                     block
                     id="vendorId"
-                    disabled={this.props.createFlag}
+                    disabled={!this.props.createFlag}
                   />
                 }
                 message="請輸入廠商代號"
