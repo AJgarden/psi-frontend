@@ -9,9 +9,11 @@ export const LayoutSider = (props) => {
 
   useEffect(() => {
     if (props.match.params.page !== undefined) {
-      setSelectedKeys(['Dashboard'])
-    } else {
       setSelectedKeys([props.match.params.page])
+    } else if (props.match.params.type !== undefined) {
+      setSelectedKeys([props.match.params.type])
+    } else {
+      setSelectedKeys(['Home'])
     }
   }, [])
 

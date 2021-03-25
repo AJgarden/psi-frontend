@@ -1,12 +1,19 @@
 import React from 'react'
-import { SiderMenuDashboardIcon, SiderMenuBasicIcon } from '../icon/Icon'
+import { SiderMenuHomeIcon, SiderMenuDashboardIcon, SiderMenuBasicIcon } from '../icon/Icon'
 
 export const menuType = [
+  {
+    key: 'Home',
+    routes: [''],
+    icon: <SiderMenuHomeIcon />,
+    title: '首頁',
+    accessRoles: []
+  },
   {
     key: 'Dashboard',
     routes: ['Dashboard'],
     icon: <SiderMenuDashboardIcon />,
-    title: 'Dashboard',
+    title: '儀表板',
     accessRoles: []
   },
   {
