@@ -10,4 +10,42 @@ body
 #root, .layout-wrapper
   height: 100%
 .layout-content-wrapper
+  height: calc(100vh - 104px)
   padding: 30px
+  overflow-y: auto
+
+.layout-header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  line-height: inherit
+  background: rgba(#264653, 0.9)
+  padding: 14px 30px
+  .layout-header-right
+    display: flex
+    align-items: center
+    .ant-btn
+      display: block
+      width: 34px
+      height: 34px
+      border: none
+      background: transparent
+      border-radius: 100%
+      padding: 3px
+      + .ant-btn
+        margin-left: 10px
+      .anticon,
+      .anticon svg
+        display: block
+        width: 28px
+        height: 28px
+      &.layout-header-account
+        background: #e9c46a
+.layout-footer
+  height: 40px
+  line-height: 24px
+  font-size: 0.75rem
+  color: #7f7f7f
+  background: #ffffff
+  text-align: right
+  padding: 8px 30px
