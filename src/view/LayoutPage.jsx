@@ -7,6 +7,7 @@ import { LayoutHeader } from './layout/Header'
 import { Dashboard } from './dashboard/Dashboard'
 import Supplier from './supplier/Supplier'
 import AddSupplier from './supplier/AddSupplier'
+import EditSupplier from './supplier/EditSupplier'
 
 export default class LayoutPage extends React.Component {
   constructor(props) {
@@ -34,6 +35,7 @@ export default class LayoutPage extends React.Component {
           </Layout.Header>
           <Layout.Content className='layout-content-wrapper'>
             <Switch>
+              <Route exact path='/Basic/Supplier/EditSupplier' component={EditSupplier} />
               <Route exact path='/Basic/Supplier/AddSupplier' component={AddSupplier} />
               <Route exact path='/Basic/Supplier' component={Supplier} />
               <Route path='/' component={Dashboard} />

@@ -1,7 +1,25 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Button, Col, Input, message, Row, Select, Space, Table } from 'antd'
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import {
+  Button,
+  Col,
+  Input,
+  message,
+  Row,
+  Select,
+  Space,
+  Table,
+  Tooltip,
+  Modal,
+  Typography
+} from 'antd'
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  SearchOutlined,
+  ExclamationCircleOutlined
+} from '@ant-design/icons'
 import SupplierAPI from '../../model/api/supplier'
 
 class Supplier extends React.Component {
@@ -63,10 +81,21 @@ class Supplier extends React.Component {
       {
         title: '執行',
         width: 50,
-        render: () => (
+        render: (item) => (
           <Space>
-            <Button type='primary' icon={<EditOutlined />} size='small' />
-            <Button danger icon={<DeleteOutlined />} size='small' />
+            <Tooltip title='編輯'>
+              <Link to='/Basic/Supplier/EditSupplier'>
+                <Button type='primary' icon={<EditOutlined />} size='small' />
+              </Link>
+            </Tooltip>
+            <Tooltip title='刪除'>
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                size='small'
+                onClick={this.handleDelete.bind(this, item)}
+              />
+            </Tooltip>
           </Space>
         )
       },
@@ -105,6 +134,8 @@ class Supplier extends React.Component {
       }
     ]
   }
+
+  handleDelete = () => {}
 
   onPageChange = (page, pageSize) => {
     const { pagination } = this.state
