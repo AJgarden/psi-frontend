@@ -3,18 +3,18 @@ import { createHashHistory } from 'history'
 import { Button, Col, Input, Row, Select, Space, Table, Tooltip, Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { ListAddIcon, ListSearchIcon, ListEditIcon, ListDeleteIcon } from '../icon/Icon'
-import SupplierAPI from '../../model/api/supplier'
+import CustomerAPI from '../../model/api/customer'
 
-export default class Supplier extends React.Component {
+export default class Customer extends React.Component {
   history = createHashHistory()
-  supplierAPI = new SupplierAPI()
+  customerAPI = new CustomerAPI()
 
   constructor(props) {
     super(props)
     this.state = {
       loading: true,
       search: {
-        id: 'VENDOR_ID',
+        id: 'CUSTOMER_ID',
         keyword: ''
       },
       list: [],
@@ -36,8 +36,8 @@ export default class Supplier extends React.Component {
       queryByEnum: search.id,
       queryKeyWord: search.keyword
     }
-    this.supplierAPI
-      .getSupplierList(requestData)
+    this.customerAPI
+      .getCustomerList(requestData)
       .then((response) => {
         pagination.total = response.data.total
         this.setState({ loading: false, list: response.data.list, pagination })
@@ -65,16 +65,16 @@ export default class Supplier extends React.Component {
     const { pagination } = this.state
     return [
       {
-        dataIndex: 'vendorId',
+        dataIndex: 'customerId',
         title: '執行',
         width: 50,
-        render: (vendorId) => (
+        render: (customerId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
               <Button
                 className='list-table-option-edit'
                 size='small'
-                onClick={_this.onEdit.bind(_this, vendorId)}
+                onClick={_this.onEdit.bind(_this, customerId)}
               >
                 <ListEditIcon />
               </Button>
@@ -83,7 +83,7 @@ export default class Supplier extends React.Component {
               <Button
                 className='list-table-option-delete'
                 size='small'
-                onClick={_this.handleDelete.bind(_this, vendorId)}
+                onClick={_this.handleDelete.bind(_this, customerId)}
               >
                 <ListDeleteIcon />
               </Button>
@@ -98,11 +98,11 @@ export default class Supplier extends React.Component {
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
-        title: '廠商代號',
-        dataIndex: 'vendorId'
+        title: '客戶代號',
+        dataIndex: 'customerId'
       },
       {
-        title: '廠商簡稱',
+        title: '客戶簡稱',
         dataIndex: 'shortName'
       },
       {
@@ -128,18 +128,18 @@ export default class Supplier extends React.Component {
     ]
   }
 
-  onEdit = (vendorId) => {
-    this.history.push(`/Basic/Supplier/${vendorId}`)
+  onEdit = (customerId) => {
+    this.history.push(`/Basic/Customer/${customerId}`)
   }
 
-  handleDelete = (vendorId) => {
+  handleDelete = (customerId) => {
     Modal.confirm({
       title: '確定要刪除此筆資料嗎',
       icon: <ExclamationCircleOutlined />,
       okText: '確認',
       cancelText: '取消',
       onOk: () => {
-        console.log('delete: ' + vendorId)
+        console.log('delete: ' + customerId)
       }
     })
   }
@@ -160,7 +160,7 @@ export default class Supplier extends React.Component {
               <Button
                 type='primary'
                 icon={<ListAddIcon />}
-                onClick={() => this.history.push('/Basic/Supplier/Add')}
+                onClick={() => this.history.push('/Basic/Customer/Add')}
                 className='list-header-add'
               >
                 新增
@@ -173,8 +173,8 @@ export default class Supplier extends React.Component {
                   value={this.state.search.id}
                   onChange={this.onSelectChange}
                 >
-                  <Select.Option value='VENDOR_ID'>廠商代號</Select.Option>
-                  <Select.Option value='NAME'>廠商名稱</Select.Option>
+                  <Select.Option value='CUSTOMER_ID'>客戶代號</Select.Option>
+                  <Select.Option value='NAME'>客戶名稱</Select.Option>
                 </Select>
                 <Input placeholder='搜尋內容' onChange={this.onInputChange} />
                 <Button
@@ -191,7 +191,7 @@ export default class Supplier extends React.Component {
         </div>
         <Table
           className='list-table-wrapper'
-          rowKey='vendorId'
+          rowKey='customerId'
           size='small'
           columns={this.getColumns()}
           loading={this.state.loading}

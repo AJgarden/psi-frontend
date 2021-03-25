@@ -1,0 +1,54 @@
+// list table
+.list-header-add,
+.list-header-search
+  display: flex
+  align-items: center
+  border: none
+  background: #2a9d8f
+  border-radius: 16px
+  &:hover,
+  &:focus,
+  &:active
+    background: #2a9d8f
+  &::after
+    border-color: #2a9d8f
+  .anticon,
+  .anticon svg
+    display: block
+    width: 18px
+    height: 18px
+  .anticon
+    + span
+      display: block
+      margin-left: 6px
+.list-table-wrapper
+  .ant-table-thead
+    > tr
+      > th
+        font-size: 0.875rem
+        border-right: 1px solid rgba(#ffffff, 0.5)
+        border-bottom: none
+        background: #a8dadc
+        &:last-child
+          border-right: none
+  .ant-table-tbody
+    > tr
+      > td
+        font-size: 0.875rem
+        .list-table-option
+          .ant-space-item
+            margin-right: 4px !important
+          .ant-btn
+            display: block
+            border: none
+            padding: 3px
+            &.list-table-option-edit
+              background: #f4a261
+            &.list-table-option-delete
+              background: #e63946
+            .anticon,
+            .anticon svg
+              display: block
+              width: 18px
+              height: 18px
+

@@ -1,6 +1,45 @@
 import React from 'react'
 import Icon from '@ant-design/icons'
 
+const ListDeleteSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z' />
+  </svg>
+)
+export const ListDeleteIcon = (props) => <Icon component={ListDeleteSvg} {...props} />
+const ListEditSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z' />
+  </svg>
+)
+export const ListEditIcon = (props) => <Icon component={ListEditSvg} {...props} />
+const ListSearchSvg = () => (
+  <svg
+    height='36px'
+    viewBox='0 0 24 24'
+    width='36px'
+    fill='#ffffff'
+  >
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' />
+  </svg>
+)
+export const ListSearchIcon = (props) => <Icon component={ListSearchSvg} {...props} />
+const ListAddSvg = () => (
+  <svg
+    height='36px'
+    viewBox='0 0 24 24'
+    width='36px'
+    fill='#ffffff'
+  >
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' />
+  </svg>
+)
+export const ListAddIcon = (props) => <Icon component={ListAddSvg} {...props} />
+
 const HeaderNotifyExistSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
@@ -57,12 +96,7 @@ export const SiderMenuDashboardIcon = (props) => (
   <Icon component={SiderMenuDashboardSvg} {...props} />
 )
 const SiderMenuHomeSvg = () => (
-  <svg
-    height='36px'
-    viewBox='0 0 24 24'
-    width='36px'
-    fill='#000000'
-  >
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z' />
   </svg>

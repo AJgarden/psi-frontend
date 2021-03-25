@@ -15,13 +15,13 @@ export const LayoutSider = (props) => {
     } else {
       setSelectedKeys(['Home'])
     }
-  }, [])
+  }, [props.match.params.type, props.match.params.page])
 
   const onMenuClick = ({ item }) => {
     const history = createHashHistory()
     const path = item.props.data.routes.map((route) => `/${route}`).join('')
     history.push(path)
-    setSelectedKeys(item.props.data.routes)
+    setSelectedKeys(item.props.data.routes[0] === '' ? ['Home'] : item.props.data.routes)
   }
 
   return (

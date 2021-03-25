@@ -7,6 +7,8 @@ import LayoutPage from './view/LayoutPage'
 import 'antd/dist/antd.css'
 import './style/index.sass'
 import './style/sider.sass'
+import './style/list.sass'
+import './style/form.sass'
 
 ReactDOM.render(
   <Router>

@@ -4,13 +4,13 @@ import { Breadcrumb, Card, Col, Row, Input, Button, Space, Modal, Spin, message 
 import { FormItem } from '../../component/FormItem'
 import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { createHashHistory } from 'history'
-import { initData, formRules } from './supplierType'
+import { initData, formRules } from './customerType'
 // import addressDistrict from '../../model/resource/addressDistrict.json'
-import SupplierAPI from '../../model/api/supplier'
+import CustomerAPI from '../../model/api/customer'
 
-export default class SupplierForm extends React.Component {
+export default class CustomerForm extends React.Component {
   history = createHashHistory()
-  supplierAPI = new SupplierAPI()
+  customerAPI = new CustomerAPI()
 
   constructor(props) {
     super(props)
@@ -21,32 +21,32 @@ export default class SupplierForm extends React.Component {
       canSubmit: false
     }
     if (!props.createFlag) {
-      this.getSupplierData()
+      this.getCustomerData()
     }
   }
 
   componentDidUpdate(prevProps) {
     if (!prevProps.createFlag && this.props.createFlag) {
       this.setState({ formData: { ...initData } })
-    } else if (!this.props.createFlag && prevProps.vendorId !== this.props.vendorId) {
-      this.setState({ loading: true, formData: { ...initData } }, () => this.getSupplierData())
+    } else if (!this.props.createFlag && prevProps.customerId !== this.props.customerId) {
+      this.setState({ loading: true, formData: { ...initData } }, () => this.getCustomerData())
     }
   }
 
-  getSupplierData = () => {
-    this.supplierAPI
-      .getSupplierData(this.props.vendorId)
+  getCustomerData = () => {
+    this.customerAPI
+      .getCustomerData(this.props.customerId)
       .then((response) => {
         if (response.code === 0) {
           this.setState({ loading: false, formData: response.data }, () => this.checkCanSubmit())
         } else {
           message.error(response.message)
-          this.history.push('/Basic/Supplier')
+          this.history.push('/Basic/Customer')
         }
       })
       .catch(() => {
         message.error('Error!')
-        this.history.push('/Basic/Supplier')
+        this.history.push('/Basic/Customer')
       })
   }
 
@@ -96,7 +96,7 @@ export default class SupplierForm extends React.Component {
     this.setState({ loading: true }, () => {
       setTimeout(() => {
         message.success('成功新增資料')
-        this.history.push('/Basic/Supplier')
+        this.history.push('/Basic/Customer')
       }, 1000)
     })
   }
@@ -104,7 +104,7 @@ export default class SupplierForm extends React.Component {
     this.setState({ loading: true }, () => {
       setTimeout(() => {
         message.success('成功更新資料')
-        this.history.push('/Basic/Supplier')
+        this.history.push('/Basic/Customer')
       }, 1000)
     })
   }
@@ -116,7 +116,7 @@ export default class SupplierForm extends React.Component {
       okText: '確認',
       cancelText: '取消',
       onOk: () => {
-        this.history.push('/Basic/Supplier')
+        this.history.push('/Basic/Customer')
       }
     })
   }
@@ -138,9 +138,9 @@ export default class SupplierForm extends React.Component {
       <>
         <Breadcrumb style={{ marginBottom: 10 }}>
           <Breadcrumb.Item>
-            <Link to='/Basic/Supplier'>廠商</Link>
+            <Link to='/Basic/Customer'>客戶</Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>{this.props.createFlag ? '新增廠商' : '修改廠商資料'}</Breadcrumb.Item>
+          <Breadcrumb.Item>{this.props.createFlag ? '新增客戶' : '修改客戶資料'}</Breadcrumb.Item>
         </Breadcrumb>
         <Spin spinning={this.state.loading}>
           <Card className='form-detail-card'>
@@ -148,23 +148,23 @@ export default class SupplierForm extends React.Component {
               <Col {...cloSetting}>
                 <FormItem
                   required={true}
-                  title='廠商代號'
+                  title='客戶代號'
                   content={
                     <Input
                       onChange={this.onInputChange}
-                      value={this.state.formData.vendorId}
-                      id='vendorId'
+                      value={this.state.formData.customerId}
+                      id='customerId'
                       disabled={!this.props.createFlag}
                     />
                   }
-                  message='請輸入廠商代號'
-                  error={this.getFormErrorStatus('vendorId')}
+                  message='請輸入客戶代號'
+                  error={this.getFormErrorStatus('customerId')}
                 />
               </Col>
               <Col {...cloSetting}>
                 <FormItem
                   required={true}
-                  title='廠商名稱'
+                  title='客戶名稱'
                   content={
                     <Input
                       onChange={this.onInputChange}
@@ -172,14 +172,14 @@ export default class SupplierForm extends React.Component {
                       id='name'
                     />
                   }
-                  message='請輸入廠商名稱'
+                  message='請輸入客戶名稱'
                   error={this.getFormErrorStatus('name')}
                 />
               </Col>
               <Col {...cloSetting}>
                 <FormItem
                   required={false}
-                  title='廠商簡稱'
+                  title='客戶簡稱'
                   content={
                     <Input
                       onChange={this.onInputChange}
@@ -336,6 +336,8 @@ export default class SupplierForm extends React.Component {
                   error={this.getFormErrorStatus('note1')}
                 />
               </Col>
+            </Row>
+            <Row {...rowSetting}>
               <Col span={24}>
                 <FormItem
                   required={false}

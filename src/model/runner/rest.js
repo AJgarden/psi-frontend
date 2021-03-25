@@ -21,6 +21,7 @@ export const restInstance = (method, requestUrl, data) => {
     axios(config)
       .then((response) => resolve(response))
       .catch((error) => {
+        reject(false)
         console.log(error.response)
       })
   })
