@@ -1,12 +1,26 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Button, Col, Input, message, Row, Select, Space, Table } from "antd";
+import {
+  Button,
+  Col,
+  Input,
+  message,
+  Row,
+  Select,
+  Space,
+  Table,
+  Tooltip,
+  Modal,
+  Typography
+} from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
   SearchOutlined,
+  ExclamationCircleOutlined
 } from "@ant-design/icons";
+
 class Supplier extends React.Component {
   constructor(props) {
     super(props);
@@ -28,32 +42,6 @@ class Supplier extends React.Component {
   componentDidMount() {
     this.getDataSource();
   }
-
-  onSelectChange = (value) => {
-    const { search } = this.state;
-    search.id = value;
-    this.setState({ search });
-  };
-
-  onInputChange = (e) => {
-    const { search } = this.state;
-    search.keyword = e.target.value;
-    this.setState({ search });
-  };
-
-  handleSearch = () => {
-    const { search } = this.state;
-    if (search.id === "") {
-      message.warning("請選擇搜尋欄位");
-    } else if (search.keyword === "") {
-      message.warning("請輸入搜尋內容");
-    }
-
-    this.setState({ loading: true }, () => {
-      //TODO SEARCH API
-      setTimeout(() => this.setState({ loading: false }), 1000);
-    });
-  };
 
   getDataSource = () => {
     const supplierList = [];
@@ -80,15 +68,62 @@ class Supplier extends React.Component {
     this.setState({ pagination, supplierList });
   };
 
+  onSelectChange = (value) => {
+    const { search } = this.state;
+    search.id = value;
+    this.setState({ search });
+  };
+
+  onInputChange = (e) => {
+    const { search } = this.state;
+    search.keyword = e.target.value;
+    this.setState({ search });
+  };
+
+  handleSearch = () => {
+    const { search } = this.state;
+    if (search.id === "") {
+      message.warning("請選擇搜尋欄位");
+      return;
+    } else if (search.keyword === "") {
+      message.warning("請輸入搜尋內容");
+      return;
+    }
+
+    this.setState({ loading: true }, () => {
+      //TODO SEARCH API
+      setTimeout(() => this.setState({ loading: false }), 1000);
+    });
+  };
+
+  handleDelete = (item) => {
+    console.log(item)
+    Modal.confirm({
+      title: `您是否確認刪除廠商 ${item.vendorId}`,
+      icon: <ExclamationCircleOutlined />,
+      okText: "確認",
+      cancelText: "取消",
+      onOk() {
+        console.log('delete')
+      },
+    });
+  }
+
   getColumns = () => {
     return [
       {
         title: "執行",
         width: 50,
-        render: () => (
+        render: (item) => (
           <Space>
-            <Button type="primary" icon={<EditOutlined />} size="small" />
-            <Button danger icon={<DeleteOutlined />} size="small" />
+            <Tooltip title="編輯">
+              <Link to="/Basic/Supplier/EditSupplier">
+                <Button type="primary" icon={<EditOutlined />} size="small" />
+              </Link>
+            </Tooltip>
+            <Tooltip title="刪除">
+              <Button danger icon={<DeleteOutlined />} size="small" onClick={this.handleDelete.bind(this, item)} />
+            </Tooltip>
           </Space>
         ),
       },
