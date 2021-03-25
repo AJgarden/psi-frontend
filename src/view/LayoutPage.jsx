@@ -1,7 +1,9 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 import { Layout, Button } from 'antd'
+import { SiderSwitchIcon } from './icon/Icon'
 import { LayoutSider } from './layout/Sider'
+import { LayoutHeader } from './layout/Header'
 import { Dashboard } from './dashboard/Dashboard'
 import Supplier from './supplier/Supplier'
 import AddSupplier from './supplier/AddSupplier'
@@ -21,20 +23,25 @@ export default class LayoutPage extends React.Component {
           collapsible
           collapsed={this.state.siderCollapsed}
           onCollapse={(siderCollapsed) => this.setState({ siderCollapsed })}
+          trigger={<SiderSwitchIcon />}
           className='layout-sider-wrapper'
         >
           <Route path='/:type?/:page?' component={LayoutSider} />
         </Layout.Sider>
-        <Layout>
-          <Layout.Header>header</Layout.Header>
+        <Layout className='layout-main'>
+          <Layout.Header className='layout-header'>
+            <LayoutHeader />
+          </Layout.Header>
           <Layout.Content className='layout-content-wrapper'>
             <Switch>
-              <Route exact path='/' component={Dashboard} />
+              <Route exact path='/Basic/Supplier/AddSupplier' component={AddSupplier} />
               <Route exact path='/Basic/Supplier' component={Supplier} />
-              <Route path='/Basic/Supplier/AddSupplier' component={AddSupplier} />
+              <Route path='/' component={Dashboard} />
             </Switch>
           </Layout.Content>
-          <Layout.Footer>footer</Layout.Footer>
+          <Layout.Footer className='layout-footer'>
+            2021 &copy; Copyright
+          </Layout.Footer>
         </Layout>
       </Layout>
     )
