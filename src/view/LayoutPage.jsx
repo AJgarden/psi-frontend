@@ -20,7 +20,6 @@ import Colour from './colour/Colour'
 import ColourDetail from './colour/ColourDetail'
 import Component from './component/Component'
 import ComponentDetail from './component/ComponentDetail'
-
 import { testRestInstance } from '../model/runner/rest'
 
 export default class LayoutPage extends React.Component {

@@ -22,6 +22,7 @@ export const Login = (props) => {
   const [isLogin, setIsLogin] = useState(false)
 
   useEffect(() => {
+    document.title = '登入 - MOTOBUY PSI'
     const history = createHashHistory()
     history.replace('/')
   }, [])

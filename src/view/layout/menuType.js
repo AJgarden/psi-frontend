@@ -6,6 +6,53 @@ import {
   SiderMenuWidgetIcon
 } from '../icon/Icon'
 
+export const routes = [
+  {
+    path: '/',
+    title: '首頁'
+  },
+  {
+    path: '/Dashboard',
+    title: '儀表板'
+  },
+  {
+    path: '/Basic',
+    title: '基本資料'
+  },
+  {
+    path: '/Basic/Supplier',
+    title: '廠商 - 基本資料'
+  },
+  {
+    path: '/Basic/Customer',
+    title: '客戶 - 基本資料'
+  },
+  {
+    path: '/Basic/Employee',
+    title: '員工 - 基本資料'
+  },
+  {
+    path: '/Parts',
+    title: '零件管理'
+  },
+  {
+    path: '/Parts/Vehicle',
+    title: '車種 - 零件管理'
+  },
+  {
+    path: '/Parts/Level',
+    title: '等級 - 零件管理'
+  },
+  {
+    path: '/Parts/Colour',
+    title: '顏色 - 零件管理'
+  },
+  {
+    path: '/Parts/Component',
+    title: '零件 - 零件管理'
+  }
+]
+
 export const menuType = [
   // {
   //   key: 'Home',

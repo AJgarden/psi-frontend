@@ -2,11 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { createHashHistory } from 'history'
 import { Menu } from 'antd'
-import { menuType } from './menuType'
+import { routes, menuType } from './menuType'
 
 export const LayoutSider = (props) => {
   const [selectedKeys, setSelectedKeys] = useState([])
-
+  useEffect(() => {
+    const unlisten = props.history.listen((location, action) => {
+      const route = routes.find((route) => route.path === location.pathname)
+      document.title = `${route.title} - MOTOBUY PSI`
+    })
+    return () => {
+      unlisten()
+    }
+  }, [])
   useEffect(() => {
     if (props.match.params.page !== undefined) {
       setSelectedKeys([props.match.params.page])
