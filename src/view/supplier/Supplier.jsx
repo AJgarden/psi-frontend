@@ -34,7 +34,7 @@ export default class Supplier extends React.Component {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
       queryByEnum: search.id,
-      queryKeyWord: search.keyword
+      queryKeyWord: `%${search.keyword}%`
     }
     this.supplierAPI
       .getSupplierList(requestData)
@@ -176,7 +176,7 @@ export default class Supplier extends React.Component {
                   <Select.Option value='VENDOR_ID'>廠商代號</Select.Option>
                   <Select.Option value='NAME'>廠商名稱</Select.Option>
                 </Select>
-                <Input placeholder='搜尋內容' onChange={this.onInputChange} />
+                <Input placeholder='搜尋內容' allowClear={true} onChange={this.onInputChange} />
                 <Button
                   type='primary'
                   icon={<ListSearchIcon />}

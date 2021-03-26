@@ -29,16 +29,14 @@ export const formRules = [
   {
     key: 'name',
     required: true,
-    length: [0, 30]
+    length: [30]
   },
   {
     key: 'address',
-    required: true,
-    length: [0, 100]
+    length: [100]
   },
   {
     key: 'cellPhone',
-    required: true,
     length: [10]
   },
   {

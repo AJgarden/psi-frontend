@@ -18,16 +18,17 @@ export const formRules = [
   {
     key: 'customerId',
     required: true,
-    length: [0, 10]
+    length: [10]
   },
   {
     key: 'name',
     required: true,
-    length: [0, 30]
+    length: [30]
   },
   {
     key: 'shortName',
-    length: [2, 10]
+    required: true,
+    length: [10]
   },
   {
     key: 'principal',
@@ -39,12 +40,10 @@ export const formRules = [
   },
   {
     key: 'address',
-    required: true,
-    length: [0, 100]
+    length: [100]
   },
   {
     key: 'phone1',
-    required: true,
     length: [10]
   },
   {

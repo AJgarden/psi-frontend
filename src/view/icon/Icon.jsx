@@ -16,24 +16,14 @@ const ListEditSvg = () => (
 )
 export const ListEditIcon = (props) => <Icon component={ListEditSvg} {...props} />
 const ListSearchSvg = () => (
-  <svg
-    height='36px'
-    viewBox='0 0 24 24'
-    width='36px'
-    fill='#ffffff'
-  >
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' />
   </svg>
 )
 export const ListSearchIcon = (props) => <Icon component={ListSearchSvg} {...props} />
 const ListAddSvg = () => (
-  <svg
-    height='36px'
-    viewBox='0 0 24 24'
-    width='36px'
-    fill='#ffffff'
-  >
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' />
   </svg>
@@ -79,6 +69,13 @@ const HeaderAccountSvg = () => (
 )
 export const HeaderAccountIcon = (props) => <Icon component={HeaderAccountSvg} {...props} />
 
+const SiderMenuWidgetSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M16.66 4.52l2.83 2.83-2.83 2.83-2.83-2.83 2.83-2.83M9 5v4H5V5h4m10 10v4h-4v-4h4M9 15v4H5v-4h4m7.66-13.31L11 7.34 16.66 13l5.66-5.66-5.66-5.65zM11 3H3v8h8V3zm10 10h-8v8h8v-8zm-10 0H3v8h8v-8z' />
+  </svg>
+)
+export const SiderMenuWidgetIcon = (props) => <Icon component={SiderMenuWidgetSvg} {...props} />
 const SiderMenuBasicSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
@@ -87,9 +84,23 @@ const SiderMenuBasicSvg = () => (
 )
 export const SiderMenuBasicIcon = (props) => <Icon component={SiderMenuBasicSvg} {...props} />
 const SiderMenuDashboardSvg = () => (
-  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
-    <path d='M0 0h24v24H0V0z' fill='none' />
-    <path d='M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z' />
+  <svg
+    enableBackground='new 0 0 24 24'
+    height='36px'
+    viewBox='0 0 24 24'
+    width='36px'
+    fill='#000000'
+  >
+    <g>
+      <rect fill='none' height='24' width='24' />
+      <g>
+        <path d='M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M19,19H5V5h14V19z' />
+        <rect height='5' width='2' x='7' y='12' />
+        <rect height='10' width='2' x='15' y='7' />
+        <rect height='3' width='2' x='11' y='14' />
+        <rect height='2' width='2' x='11' y='10' />
+      </g>
+    </g>
   </svg>
 )
 export const SiderMenuDashboardIcon = (props) => (
@@ -110,3 +121,32 @@ const SiderSwitchSvg = () => (
   </svg>
 )
 export const SiderSwitchIcon = (props) => <Icon component={SiderSwitchSvg} {...props} />
+
+const LoginPasswordOffSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0zm0 0h24v24H0z' fill='none' />
+    <path d='M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z' />
+  </svg>
+)
+export const LoginPasswordOffIcon = (props) => <Icon component={LoginPasswordOffSvg} {...props} />
+const LoginPasswordOnSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0z' fill='none' />
+    <path d='M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z' />
+  </svg>
+)
+export const LoginPasswordOnIcon = (props) => <Icon component={LoginPasswordOnSvg} {...props} />
+const LoginPasswordSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0z' fill='none' />
+    <path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z' />
+  </svg>
+)
+export const LoginPasswordIcon = (props) => <Icon component={LoginPasswordSvg} {...props} />
+const LoginAccountSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0z' fill='none' />
+    <path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' />
+  </svg>
+)
+export const LoginAccountIcon = (props) => <Icon component={LoginAccountSvg} {...props} />

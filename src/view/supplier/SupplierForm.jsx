@@ -17,7 +17,7 @@ export default class SupplierForm extends React.Component {
     this.state = {
       loading: !props.createFlag,
       formData: { ...initData },
-      formStatus: formRules,
+      formStatus: JSON.parse(JSON.stringify(formRules)),
       canSubmit: false
     }
     if (!props.createFlag) {
@@ -27,9 +27,21 @@ export default class SupplierForm extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.createFlag && this.props.createFlag) {
-      this.setState({ formData: { ...initData } })
+      this.setState({
+        formData: { ...initData },
+        formStatus: JSON.parse(JSON.stringify(formRules)),
+        canSubmit: false
+      })
     } else if (!this.props.createFlag && prevProps.vendorId !== this.props.vendorId) {
-      this.setState({ loading: true, formData: { ...initData } }, () => this.getSupplierData())
+      this.setState(
+        {
+          loading: true,
+          formData: { ...initData },
+          formStatus: JSON.parse(JSON.stringify(formRules)),
+          canSubmit: false
+        },
+        () => this.getSupplierData()
+      )
     }
   }
 
@@ -77,7 +89,10 @@ export default class SupplierForm extends React.Component {
       if (field.length && field.length.length > 0 && value) {
         if (field.length.length === 1 && value.length > field.length[0]) {
           error = true
-        } else if (value.length < field.length[0] || value.length > field.length[1]) {
+        } else if (
+          field.length.length > 1 &&
+          (value.length < field.length[0] || value.length > field.length[1])
+        ) {
           error = true
         }
       }
@@ -92,20 +107,50 @@ export default class SupplierForm extends React.Component {
     this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) })
   }
 
-  handleCreate = () => {
+  // 新增
+  handleCreate = (back) => {
     this.setState({ loading: true }, () => {
       setTimeout(() => {
         message.success('成功新增資料')
-        this.history.push('/Basic/Supplier')
+        if (back) this.history.push('/Basic/Supplier')
       }, 1000)
     })
   }
-  handleSubmit = () => {
+  // 修改
+  handleSubmit = (back) => {
     this.setState({ loading: true }, () => {
-      setTimeout(() => {
-        message.success('成功更新資料')
-        this.history.push('/Basic/Supplier')
-      }, 1000)
+      this.supplierAPI
+        .updateSupplierData(this.props.vendorId, this.state.formData)
+        .then((response) => {
+          if (response.code === 0) {
+            message.success('成功更新資料')
+            if (back) {
+              this.history.push('/Basic/Supplier')
+            } else {
+              this.getSupplierData()
+            }
+          } else {
+            Modal.error({
+              title: response.message,
+              icon: <ExclamationCircleOutlined />,
+              content: response.data.map((tip, index) => (
+                <>
+                  {index > 0 && <br />}
+                  {tip.split(': ')[1]}
+                </>
+              )),
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                this.setState({ loading: false })
+              }
+            })
+          }
+        })
+        .catch(() => {
+          message.error('資料更新失敗')
+          this.setState({ loading: false })
+        })
     })
   }
 
@@ -157,7 +202,7 @@ export default class SupplierForm extends React.Component {
                       disabled={!this.props.createFlag}
                     />
                   }
-                  message='請輸入廠商代號'
+                  message='廠商代號為必填,長度需在10字內'
                   error={this.getFormErrorStatus('vendorId')}
                 />
               </Col>
@@ -172,13 +217,13 @@ export default class SupplierForm extends React.Component {
                       id='name'
                     />
                   }
-                  message='請輸入廠商名稱'
+                  message='廠商名稱為必填,長度需在30字內'
                   error={this.getFormErrorStatus('name')}
                 />
               </Col>
               <Col {...cloSetting}>
                 <FormItem
-                  required={false}
+                  required={true}
                   title='廠商簡稱'
                   content={
                     <Input
@@ -187,7 +232,7 @@ export default class SupplierForm extends React.Component {
                       id='shortName'
                     />
                   }
-                  message='長度需在2~10字'
+                  message='廠商簡稱為必填,長度需在10字內'
                   error={this.getFormErrorStatus('shortName')}
                 />
               </Col>
@@ -232,13 +277,13 @@ export default class SupplierForm extends React.Component {
                       id='faxNumber'
                     />
                   }
-                  message='長度需在10字以內'
+                  message='長度需在10字內'
                   error={this.getFormErrorStatus('faxNumber')}
                 />
               </Col>
               <Col {...cloSetting}>
                 <FormItem
-                  required={false}
+                  required={true}
                   title='電話1'
                   content={
                     <Input
@@ -247,7 +292,7 @@ export default class SupplierForm extends React.Component {
                       id='phone1'
                     />
                   }
-                  message='請輸入電話1'
+                  message='電話1為必填,長度需在10字內'
                   error={this.getFormErrorStatus('phone1')}
                 />
               </Col>
@@ -262,7 +307,7 @@ export default class SupplierForm extends React.Component {
                       id='phone2'
                     />
                   }
-                  message='長度需在10字以內'
+                  message='長度需在10字內'
                   error={this.getFormErrorStatus('phone2')}
                 />
               </Col>
@@ -277,7 +322,7 @@ export default class SupplierForm extends React.Component {
                       id='cellPhone'
                     />
                   }
-                  message='長度需在10字以內'
+                  message='長度需在10字內'
                   error={this.getFormErrorStatus('cellPhone')}
                 />
               </Col>
@@ -311,7 +356,7 @@ export default class SupplierForm extends React.Component {
                       </Row>
                     </>
                   }
-                  message='長度需在255字以內'
+                  message='長度需在100字內'
                   error={this.getFormErrorStatus('address')}
                 />
               </Col>
@@ -332,7 +377,7 @@ export default class SupplierForm extends React.Component {
                       autoSize={{ minRows: 4, maxRows: 4 }}
                     />
                   }
-                  message='長度需在255字以內'
+                  message='長度需在255字內'
                   error={this.getFormErrorStatus('note1')}
                 />
               </Col>
@@ -349,7 +394,7 @@ export default class SupplierForm extends React.Component {
                       autoSize={{ minRows: 4, maxRows: 4 }}
                     />
                   }
-                  message='長度需在255字以內'
+                  message='長度需在255字內'
                   error={this.getFormErrorStatus('note2')}
                 />
               </Col>
@@ -358,13 +403,43 @@ export default class SupplierForm extends React.Component {
           <div style={{ margin: '20px', textAlign: 'center' }}>
             <Space>
               {this.props.createFlag ? (
-                <Button type='primary' icon={<CheckOutlined />} onClick={this.handleCreate}>
-                  新增
-                </Button>
+                <>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleCreate.bind(this, false)}
+                  >
+                    新增
+                  </Button>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleCreate.bind(this, true)}
+                  >
+                    新增並返回
+                  </Button>
+                </>
               ) : (
-                <Button type='primary' icon={<CheckOutlined />} onClick={this.handleSubmit}>
-                  儲存
-                </Button>
+                <>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleSubmit.bind(this, false)}
+                  >
+                    儲存
+                  </Button>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleSubmit.bind(this, true)}
+                  >
+                    儲存並返回
+                  </Button>
+                </>
               )}
               <Button danger icon={<CloseOutlined />} onClick={this.handleCancel}>
                 取消

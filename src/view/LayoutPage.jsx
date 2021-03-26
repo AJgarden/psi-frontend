@@ -1,7 +1,8 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
-import { Layout } from 'antd'
+import { Layout, message } from 'antd'
 import { SiderSwitchIcon } from './icon/Icon'
+import { Login } from './Login'
 import { LayoutSider } from './layout/Sider'
 import { LayoutHeader } from './layout/Header'
 import { Dashboard } from './dashboard/Dashboard'
@@ -11,76 +12,180 @@ import Customer from './customer/Customer'
 import CustomerDetail from './customer/CustomerDetail'
 import Employee from './employee/Employee'
 import EmployeeDetail from './employee/EmployeeDetail'
+import Vehicle from './vehicle/Vehicle'
+import VehicleDetail from './vehicle/VehicleDetail'
+import Level from './level/Level'
+import LevelDetail from './level/LevelDetail'
+import Colour from './colour/Colour'
+import ColourDetail from './colour/ColourDetail'
+import Component from './component/Component'
+import ComponentDetail from './component/ComponentDetail'
+
+import { testRestInstance } from '../model/runner/rest'
 
 export default class LayoutPage extends React.Component {
   constructor(props) {
     super(props)
+    const cookies = document.cookie.split(';')
     this.state = {
+      isLand: !cookies.find((cookie) => cookie.includes('MOTOBUY_AUTH')),
+      isAuth: false,
       siderCollapsed: false
+    }
+    if (cookies.find((cookie) => cookie.includes('MOTOBUY_AUTH'))) {
+      testRestInstance('get', '/auth')
+        .then((response) => {
+          if (response.data.code === 0) {
+            this.setState({ isLand: true, isAuth: true })
+          } else {
+            this.setState({ isLand: true })
+          }
+        })
+        .catch(() => this.setState({ isLand: true }))
     }
   }
 
+  componentDidMount() {
+    window.addEventListener('beforeunload', this.clearCookie)
+  }
+  componentWillUnmount() {
+    this.clearCookie()
+  }
+
+  clearCookie = () => {
+    const cookies = document.cookie.split(';')
+    if (
+      !(
+        cookies.find((cookie) => cookie.includes('MOTOBUY_KEEP_LOGIN')) &&
+        cookies.find((cookie) => cookie.includes('MOTOBUY_KEEP_LOGIN')).split('=')[1] === 'true'
+      )
+    ) {
+      document.cookie = 'MOTOBUY_AUTH=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    }
+  }
+
+  onLogin = () => {
+    this.setState({ isAuth: true })
+  }
+  onLogout = () => {
+    message.success('已成功登出')
+    document.cookie = 'MOTOBUY_AUTH=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    this.setState({ isAuth: false })
+  }
+
   render() {
-    return (
-      <Layout className='layout-wrapper'>
-        <Layout.Sider
-          collapsible
-          collapsed={this.state.siderCollapsed}
-          onCollapse={(siderCollapsed) => this.setState({ siderCollapsed })}
-          trigger={<SiderSwitchIcon />}
-          className='layout-sider-wrapper'
-        >
-          <Route path='/:type?/:page?' component={LayoutSider} />
-        </Layout.Sider>
-        <Layout className='layout-main'>
-          <Layout.Header className='layout-header'>
-            <LayoutHeader />
-          </Layout.Header>
-          <Layout.Content className='layout-content-wrapper'>
-            <Switch>
-              {/* Basic */}
-              {/* Supplier */}
-              <Route
-                exact
-                path='/Basic/Supplier/Add'
-                render={(props) => <SupplierDetail {...props} createFlag={true} />}
-              />
-              <Route
-                exact
-                path='/Basic/Supplier/:vendorId'
-                render={(props) => <SupplierDetail {...props} createFlag={false} />}
-              />
-              <Route exact path='/Basic/Supplier' component={Supplier} />
-              {/* Customer */}
-              <Route
-                exact
-                path='/Basic/Customer/Add'
-                render={(props) => <CustomerDetail {...props} createFlag={true} />}
-              />
-              <Route
-                exact
-                path='/Basic/Customer/:customerId'
-                render={(props) => <CustomerDetail {...props} createFlag={false} />}
-              />
-              <Route exact path='/Basic/Customer' component={Customer} />
-              {/* Employee */}
-              <Route
-                exact
-                path='/Basic/Employee/Add'
-                render={(props) => <EmployeeDetail {...props} createFlag={true} />}
-              />
-              <Route
-                exact
-                path='/Basic/Employee/:employeeId'
-                render={(props) => <EmployeeDetail {...props} createFlag={false} />}
-              />
-              <Route exact path='/Basic/Employee' component={Employee} />
-              <Route path='/' component={Dashboard} />
-            </Switch>
-          </Layout.Content>
-          <Layout.Footer className='layout-footer'>2021 &copy; Copyright</Layout.Footer>
+    return this.state.isLand ? (
+      this.state.isAuth ? (
+        <Layout className='layout-wrapper'>
+          <Layout.Sider
+            collapsible
+            collapsed={this.state.siderCollapsed}
+            onCollapse={(siderCollapsed) => this.setState({ siderCollapsed })}
+            trigger={<SiderSwitchIcon />}
+            className='layout-sider-wrapper'
+          >
+            <Route path='/:type?/:page?' component={LayoutSider} />
+          </Layout.Sider>
+          <Layout className='layout-main'>
+            <Layout.Header className='layout-header'>
+              <LayoutHeader onLogout={this.onLogout} />
+            </Layout.Header>
+            <Layout.Content className='layout-content-wrapper'>
+              <Switch>
+                {/* Basic */}
+                {/* Supplier */}
+                <Route
+                  exact
+                  path='/Basic/Supplier/Add'
+                  render={(props) => <SupplierDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Basic/Supplier/:vendorId'
+                  render={(props) => <SupplierDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Basic/Supplier' component={Supplier} />
+                {/* Customer */}
+                <Route
+                  exact
+                  path='/Basic/Customer/Add'
+                  render={(props) => <CustomerDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Basic/Customer/:customerId'
+                  render={(props) => <CustomerDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Basic/Customer' component={Customer} />
+                {/* Employee */}
+                <Route
+                  exact
+                  path='/Basic/Employee/Add'
+                  render={(props) => <EmployeeDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Basic/Employee/:employeeId'
+                  render={(props) => <EmployeeDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Basic/Employee' component={Employee} />
+                {/* Vehicle */}
+                <Route
+                  exact
+                  path='/Parts/Vehicle/Add'
+                  render={(props) => <VehicleDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Parts/Vehicle/:kindId'
+                  render={(props) => <VehicleDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Parts/Vehicle' component={Vehicle} />
+                {/* Level */}
+                <Route
+                  exact
+                  path='/Parts/Level/Add'
+                  render={(props) => <LevelDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Parts/Level/:gradeId'
+                  render={(props) => <LevelDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Parts/Level' component={Level} />
+                {/* Colour */}
+                <Route
+                  exact
+                  path='/Parts/Colour/Add'
+                  render={(props) => <ColourDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Parts/Colour/:colorId'
+                  render={(props) => <ColourDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Parts/Colour' component={Colour} />
+                {/* Component */}
+                <Route
+                  exact
+                  path='/Parts/Component/Add'
+                  render={(props) => <ComponentDetail {...props} createFlag={true} />}
+                />
+                <Route
+                  exact
+                  path='/Parts/Component/:partId'
+                  render={(props) => <ComponentDetail {...props} createFlag={false} />}
+                />
+                <Route exact path='/Parts/Component' component={Component} />
+                <Route path='/' component={Dashboard} />
+              </Switch>
+            </Layout.Content>
+            <Layout.Footer className='layout-footer'>2021 &copy; Copyright</Layout.Footer>
+          </Layout>
         </Layout>
-      </Layout>
-    )
+      ) : (
+        <Login onLogin={this.onLogin} />
+      )
+    ) : null
   }
 }

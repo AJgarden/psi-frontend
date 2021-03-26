@@ -8,4 +8,8 @@ export default class CustomerAPI {
   getCustomerData = (customerId) => {
     return restInstance('get', `/customers/${customerId}`).then((response) => response.data)
   }
+
+  updateCustomerData = (customerId, data) => {
+    return restInstance('patch', `/customers/${customerId}`, data).then((response) => response.data)
+  }
 }

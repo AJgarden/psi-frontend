@@ -31,7 +31,7 @@ export default class EmployeeForm extends React.Component {
     this.state = {
       loading: !props.createFlag,
       formData: { ...initData },
-      formStatus: formRules,
+      formStatus: JSON.parse(JSON.stringify(formRules)),
       canSubmit: false
     }
     if (!props.createFlag) {
@@ -41,9 +41,21 @@ export default class EmployeeForm extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.createFlag && this.props.createFlag) {
-      this.setState({ formData: { ...initData } })
+      this.setState({
+        formData: { ...initData },
+        formStatus: JSON.parse(JSON.stringify(formRules)),
+        canSubmit: false
+      })
     } else if (!this.props.createFlag && prevProps.employeeId !== this.props.employeeId) {
-      this.setState({ loading: true, formData: { ...initData } }, () => this.getEmployeeData())
+      this.setState(
+        {
+          loading: true,
+          formData: { ...initData },
+          formStatus: JSON.parse(JSON.stringify(formRules)),
+          canSubmit: false
+        },
+        () => this.getEmployeeData()
+      )
     }
   }
 
@@ -52,7 +64,17 @@ export default class EmployeeForm extends React.Component {
       .getEmployeeData(this.props.employeeId)
       .then((response) => {
         if (response.code === 0) {
-          this.setState({ loading: false, formData: response.data }, () => this.checkCanSubmit())
+          this.setState(
+            {
+              loading: false,
+              formData: {
+                ...response.data,
+                birthday: moment(response.data.birthday.join('-'), 'YYYY-MM-DD').valueOf(),
+                takeOfficeDay: moment(response.data.takeOfficeDay.join('-'), 'YYYY-MM-DD').valueOf()
+              }
+            },
+            () => this.checkCanSubmit()
+          )
         } else {
           message.error(response.message)
           this.history.push('/Basic/Employee')
@@ -101,7 +123,10 @@ export default class EmployeeForm extends React.Component {
       if (field.length && field.length.length > 0 && value) {
         if (field.length.length === 1 && value.length > field.length[0]) {
           error = true
-        } else if (value.length < field.length[0] || value.length > field.length[1]) {
+        } else if (
+          field.length.length > 1 &&
+          (value.length < field.length[0] || value.length > field.length[1])
+        ) {
           error = true
         }
       }
@@ -116,20 +141,54 @@ export default class EmployeeForm extends React.Component {
     this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) })
   }
 
-  handleCreate = () => {
+  // 新增
+  handleCreate = (back) => {
     this.setState({ loading: true }, () => {
       setTimeout(() => {
         message.success('成功新增資料')
-        this.history.push('/Basic/Employee')
+        if (back) this.history.push('/Parts/Vehicle')
       }, 1000)
     })
   }
-  handleSubmit = () => {
+  // 修改
+  handleSubmit = (back) => {
     this.setState({ loading: true }, () => {
-      setTimeout(() => {
-        message.success('成功更新資料')
-        this.history.push('/Basic/Employee')
-      }, 1000)
+      this.employeeAPI
+        .updateEmployeeData(this.props.employeeId, {
+          ...this.state.formData,
+          birthday: moment(this.state.formData.birthday).format('YYYY-MM-DD'),
+          takeOfficeDay: moment(this.state.formData.takeOfficeDay).format('YYYY-MM-DD')
+        })
+        .then((response) => {
+          if (response.code === 0) {
+            message.success('成功更新資料')
+            if (back) {
+              this.history.push('/Basic/Employee')
+            } else {
+              this.getEmployeeData()
+            }
+          } else {
+            Modal.error({
+              title: response.message,
+              icon: <ExclamationCircleOutlined />,
+              content: response.data.map((tip, index) => (
+                <>
+                  {index > 0 && <br />}
+                  {tip.split(': ')[1]}
+                </>
+              )),
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                this.setState({ loading: false })
+              }
+            })
+          }
+        })
+        .catch((error) => {
+          message.error('資料更新失敗')
+          this.setState({ loading: false })
+        })
     })
   }
 
@@ -181,7 +240,7 @@ export default class EmployeeForm extends React.Component {
                       disabled={!this.props.createFlag}
                     />
                   }
-                  message='請輸入員工編號'
+                  message='員工編號為必填,長度需在10字內'
                   error={this.getFormErrorStatus('employeeId')}
                 />
               </Col>
@@ -196,7 +255,7 @@ export default class EmployeeForm extends React.Component {
                       id='identityCardNumber'
                     />
                   }
-                  message='請輸入身分證字號'
+                  message='身分證號為必填,長度需在10字內'
                   error={this.getFormErrorStatus('identityCardNumber')}
                 />
               </Col>
@@ -211,7 +270,7 @@ export default class EmployeeForm extends React.Component {
                       id='name'
                     />
                   }
-                  message='請輸入姓名'
+                  message='姓名為必填,長度需在30字內'
                   error={this.getFormErrorStatus('name')}
                 />
               </Col>
@@ -245,7 +304,7 @@ export default class EmployeeForm extends React.Component {
                       id='cellPhone'
                     />
                   }
-                  message='長度需在10字以內'
+                  message='長度需在10字內'
                   error={this.getFormErrorStatus('cellPhone')}
                 />
               </Col>
@@ -260,7 +319,7 @@ export default class EmployeeForm extends React.Component {
                       id='phone'
                     />
                   }
-                  message='長度需在10字以內'
+                  message='長度需在10字內'
                   error={this.getFormErrorStatus('phone')}
                 />
               </Col>
@@ -294,7 +353,7 @@ export default class EmployeeForm extends React.Component {
                       id='education'
                     />
                   }
-                  message='長度需在10字以內'
+                  message='長度需在10字內'
                   error={this.getFormErrorStatus('education')}
                 />
               </Col>
@@ -376,7 +435,7 @@ export default class EmployeeForm extends React.Component {
                       </Row>
                     </>
                   }
-                  message='長度需在255字以內'
+                  message='長度需在100字內'
                   error={this.getFormErrorStatus('address')}
                 />
               </Col>
@@ -397,7 +456,7 @@ export default class EmployeeForm extends React.Component {
                       autoSize={{ minRows: 4, maxRows: 4 }}
                     />
                   }
-                  message='長度需在255字以內'
+                  message='長度需在255字內'
                   error={this.getFormErrorStatus('experience')}
                 />
               </Col>
@@ -416,7 +475,7 @@ export default class EmployeeForm extends React.Component {
                       autoSize={{ minRows: 4, maxRows: 4 }}
                     />
                   }
-                  message='長度需在255字以內'
+                  message='長度需在255字內'
                   error={this.getFormErrorStatus('note')}
                 />
               </Col>
@@ -425,13 +484,43 @@ export default class EmployeeForm extends React.Component {
           <div style={{ margin: '20px', textAlign: 'center' }}>
             <Space>
               {this.props.createFlag ? (
-                <Button type='primary' icon={<CheckOutlined />} onClick={this.handleCreate}>
-                  新增
-                </Button>
+                <>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleCreate.bind(this, false)}
+                  >
+                    新增
+                  </Button>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleCreate.bind(this, true)}
+                  >
+                    新增並返回
+                  </Button>
+                </>
               ) : (
-                <Button type='primary' icon={<CheckOutlined />} onClick={this.handleSubmit}>
-                  儲存
-                </Button>
+                <>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleSubmit.bind(this, false)}
+                  >
+                    儲存
+                  </Button>
+                  <Button
+                    type='primary'
+                    icon={<CheckOutlined />}
+                    disabled={!this.state.canSubmit}
+                    onClick={this.handleSubmit.bind(this, true)}
+                  >
+                    儲存並返回
+                  </Button>
+                </>
               )}
               <Button danger icon={<CloseOutlined />} onClick={this.handleCancel}>
                 取消

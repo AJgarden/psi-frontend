@@ -1,21 +1,21 @@
 import React from 'react'
 import { createHashHistory } from 'history'
-import { Button, Col, Input, Row, Select, Space, Table, Tooltip, Modal } from 'antd'
+import { Button, Col, Input, Row, Space, Table, Tooltip, Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { ListAddIcon, ListSearchIcon, ListEditIcon, ListDeleteIcon } from '../icon/Icon'
-import EmployeeAPI from '../../model/api/employee'
+import ComponentAPI from '../../model/api/component'
 
-export default class Customer extends React.Component {
+export default class Component extends React.Component {
   history = createHashHistory()
-  employeeAPI = new EmployeeAPI()
+  componentAPI = new ComponentAPI()
 
   constructor(props) {
     super(props)
     this.state = {
       loading: true,
       search: {
-        id: 'EMPLOYEE_ID',
-        keyword: ''
+        partId: '',
+        name: ''
       },
       list: [],
       pagination: {
@@ -33,11 +33,11 @@ export default class Customer extends React.Component {
     const requestData = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      queryByEnum: search.id,
-      queryKeyWord: `%${search.keyword}%`
+      partId: `%${search.partId}%`,
+      name: `%${search.name}%`
     }
-    this.employeeAPI
-      .getEmployeeList(requestData)
+    this.componentAPI
+      .getComponentList(requestData)
       .then((response) => {
         pagination.total = response.data.total
         this.setState({ loading: false, list: response.data.list, pagination })
@@ -46,14 +46,9 @@ export default class Customer extends React.Component {
   }
 
   // search
-  onSelectChange = (value) => {
+  onInputChange = (key, e) => {
     const { search } = this.state
-    search.id = value
-    this.setState({ search })
-  }
-  onInputChange = (e) => {
-    const { search } = this.state
-    search.keyword = e.target.value
+    search[key] = e.target.value
     this.setState({ search })
   }
   handleSearch = () => {
@@ -65,16 +60,16 @@ export default class Customer extends React.Component {
     const { pagination } = this.state
     return [
       {
-        dataIndex: 'employeeId',
+        dataIndex: 'partId',
         title: '執行',
         width: 50,
-        render: (employeeId) => (
+        render: (partId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
               <Button
                 className='list-table-option-edit'
                 size='small'
-                onClick={_this.onEdit.bind(_this, employeeId)}
+                onClick={_this.onEdit.bind(_this, partId)}
               >
                 <ListEditIcon />
               </Button>
@@ -83,7 +78,7 @@ export default class Customer extends React.Component {
               <Button
                 className='list-table-option-delete'
                 size='small'
-                onClick={_this.handleDelete.bind(_this, employeeId)}
+                onClick={_this.handleDelete.bind(_this, partId)}
               >
                 <ListDeleteIcon />
               </Button>
@@ -98,36 +93,28 @@ export default class Customer extends React.Component {
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
-        title: '員工編號',
-        dataIndex: 'employeeId'
+        title: '零件代號',
+        dataIndex: 'partId'
       },
       {
-        title: '姓名',
+        title: '零件名稱',
         dataIndex: 'name'
-      },
-      {
-        title: '手機號碼',
-        dataIndex: 'cellPhone'
-      },
-      {
-        title: '市內電話',
-        dataIndex: 'phone'
       }
     ]
   }
 
-  onEdit = (employeeId) => {
-    this.history.push(`/Basic/Employee/${employeeId}`)
+  onEdit = (partId) => {
+    this.history.push(`/Parts/Component/${partId}`)
   }
 
-  handleDelete = (employeeId) => {
+  handleDelete = (partId) => {
     Modal.confirm({
       title: '確定要刪除此筆資料嗎',
       icon: <ExclamationCircleOutlined />,
       okText: '確認',
       cancelText: '取消',
       onOk: () => {
-        console.log('delete: ' + employeeId)
+        console.log('delete: ' + partId)
       }
     })
   }
@@ -148,7 +135,7 @@ export default class Customer extends React.Component {
               <Button
                 type='primary'
                 icon={<ListAddIcon />}
-                onClick={() => this.history.push('/Basic/Employee/Add')}
+                onClick={() => this.history.push('/Parts/Component/Add')}
                 className='list-header-add'
               >
                 新增
@@ -156,15 +143,17 @@ export default class Customer extends React.Component {
             </Col>
             <Col>
               <Space>
-                <Select
-                  placeholder='搜尋欄位'
-                  value={this.state.search.id}
-                  onChange={this.onSelectChange}
-                >
-                  <Select.Option value='EMPLOYEE_ID'>員工編號</Select.Option>
-                  <Select.Option value='NAME'>姓名</Select.Option>
-                </Select>
-                <Input placeholder='搜尋內容' allowClear={true} onChange={this.onInputChange} />
+                <Input
+                  placeholder='搜尋零件代號'
+                  allowClear={true}
+                  onChange={this.onInputChange.bind(this, 'partId')}
+                  style={{ width: 140 }}
+                />
+                <Input
+                  placeholder='搜尋零件名稱'
+                  allowClear={true}
+                  onChange={this.onInputChange.bind(this, 'name')}
+                />
                 <Button
                   type='primary'
                   icon={<ListSearchIcon />}
@@ -179,7 +168,7 @@ export default class Customer extends React.Component {
         </div>
         <Table
           className='list-table-wrapper'
-          rowKey='employeeId'
+          rowKey='vendorId'
           size='small'
           columns={this.getColumns()}
           loading={this.state.loading}

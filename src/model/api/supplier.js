@@ -8,4 +8,8 @@ export default class SupplierAPI {
   getSupplierData = (vendorId) => {
     return restInstance('get', `/vendor/${vendorId}`).then((response) => response.data)
   }
+
+  updateSupplierData = (vendorId, data) => {
+    return restInstance('patch', `/vendor/${vendorId}`, data).then((response) => response.data)
+  }
 }

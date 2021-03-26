@@ -38,25 +38,39 @@ export const LayoutSider = (props) => {
       </h1>
       <Menu className='layout-sider-menu' selectedKeys={selectedKeys} onClick={onMenuClick}>
         {menuType.map((menu) => {
-          return menu.children && menu.children.length > 0 ? (
-            // <Menu.Item key={menu.key} icon={menu.icon}>
-            //   {menu.title}
-            // </Menu.Item>
-            <Menu.SubMenu
-              key={menu.key}
-              icon={menu.icon}
-              title={menu.title}
-              popupClassName='layout-sider-popup'
-            >
-              {menu.children.map((children) => (
-                <Menu.Item key={children.key} data={children}>{children.title}</Menu.Item>
-              ))}
-            </Menu.SubMenu>
-          ) : (
-            <Menu.Item key={menu.key} icon={menu.icon} data={menu}>
-              {menu.title}
-            </Menu.Item>
-          )
+          const roles = JSON.parse(localStorage.getItem('MOTOBUY_ROLES'))
+          if (
+            menu.accessRoles.length < 1 ||
+            menu.accessRoles.filter((role) => roles.includes(role)).length > 0
+          ) {
+            return menu.children && menu.children.length > 0 ? (
+              <Menu.SubMenu
+                key={menu.key}
+                icon={menu.icon}
+                title={menu.title}
+                popupClassName='layout-sider-popup'
+              >
+                {menu.children.map((children) => {
+                  if (
+                    children.accessRoles.length < 1 ||
+                    children.accessRoles.filter((role) => roles.includes(role)).length > 0
+                  ) {
+                    return (
+                      <Menu.Item key={children.key} data={children}>
+                        {children.title}
+                      </Menu.Item>
+                    )
+                  }
+                  return null
+                })}
+              </Menu.SubMenu>
+            ) : (
+              <Menu.Item key={menu.key} icon={menu.icon} data={menu}>
+                {menu.title}
+              </Menu.Item>
+            )
+          }
+          return null
         })}
       </Menu>
     </>

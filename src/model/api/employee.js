@@ -8,4 +8,8 @@ export default class EmployeeAPI {
   getEmployeeData = (employeeId) => {
     return restInstance('get', `/employees/${employeeId}`).then((response) => response.data)
   }
+
+  updateEmployeeData = (employeeId, data) => {
+    return restInstance('patch', `/employees/${employeeId}`, data).then((response) => response.data)
+  }
 }

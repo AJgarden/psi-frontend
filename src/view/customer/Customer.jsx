@@ -34,7 +34,7 @@ export default class Customer extends React.Component {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
       queryByEnum: search.id,
-      queryKeyWord: search.keyword
+      queryKeyWord: `%${search.keyword}%`
     }
     this.customerAPI
       .getCustomerList(requestData)
@@ -176,7 +176,7 @@ export default class Customer extends React.Component {
                   <Select.Option value='CUSTOMER_ID'>客戶代號</Select.Option>
                   <Select.Option value='NAME'>客戶名稱</Select.Option>
                 </Select>
-                <Input placeholder='搜尋內容' onChange={this.onInputChange} />
+                <Input placeholder='搜尋內容' allowClear={true} onChange={this.onInputChange} />
                 <Button
                   type='primary'
                   icon={<ListSearchIcon />}
