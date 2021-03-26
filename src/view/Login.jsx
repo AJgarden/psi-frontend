@@ -12,23 +12,24 @@ import { restInstanceWithoutAuth } from '../model/runner/rest'
 
 export const Login = (props) => {
   const cookies = document.cookie.split(';')
-  const loginData = {
-    userId: '',
-    password: ''
-  }
   let keepLogin =
     cookies.find((cookie) => cookie.includes('MOTOBUY_KEEP_LOGIN')) &&
     cookies.find((cookie) => cookie.includes('MOTOBUY_KEEP_LOGIN')).split('=')[1] === 'true'
   const [isLogin, setIsLogin] = useState(false)
+  const [loginData, setLoginData] = useState({
+    userId: '',
+    password: ''
+  })
 
   useEffect(() => {
     document.title = '登入 - MOTOBUY PSI'
     const history = createHashHistory()
     history.replace('/')
-  }, [])
+  }, [loginData])
 
   const onInputChange = (key, e) => {
     loginData[key] = e.target.value
+    setLoginData(loginData)
   }
 
   const onLogin = () => {
