@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/psi-frontend/static/css/main.24434aa6.chunk.css",
-    "main.js": "/psi-frontend/static/js/main.6861026e.chunk.js",
-    "main.js.map": "/psi-frontend/static/js/main.6861026e.chunk.js.map",
+    "main.js": "/psi-frontend/static/js/main.26ac5593.chunk.js",
+    "main.js.map": "/psi-frontend/static/js/main.26ac5593.chunk.js.map",
     "runtime-main.js": "/psi-frontend/static/js/runtime-main.514e884d.js",
     "runtime-main.js.map": "/psi-frontend/static/js/runtime-main.514e884d.js.map",
     "static/css/2.98e7ac70.chunk.css": "/psi-frontend/static/css/2.98e7ac70.chunk.css",
@@ -20,6 +20,6 @@
     "static/css/2.98e7ac70.chunk.css",
     "static/js/2.f1a13a18.chunk.js",
     "static/css/main.24434aa6.chunk.css",
-    "static/js/main.6861026e.chunk.js"
+    "static/js/main.26ac5593.chunk.js"
   ]
 }
