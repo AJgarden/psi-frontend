@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/psi-frontend/static/css/main.24434aa6.chunk.css",
-    "main.js": "/psi-frontend/static/js/main.ea3ddff7.chunk.js",
-    "main.js.map": "/psi-frontend/static/js/main.ea3ddff7.chunk.js.map",
-    "runtime-main.js": "/psi-frontend/static/js/runtime-main.514e884d.js",
-    "runtime-main.js.map": "/psi-frontend/static/js/runtime-main.514e884d.js.map",
+    "main.css": "/psi-frontend/static/css/main.4198ab9c.chunk.css",
+    "main.js": "/psi-frontend/static/js/main.532242d6.chunk.js",
+    "main.js.map": "/psi-frontend/static/js/main.532242d6.chunk.js.map",
+    "runtime-main.js": "/psi-frontend/static/js/runtime-main.1fc13dad.js",
+    "runtime-main.js.map": "/psi-frontend/static/js/runtime-main.1fc13dad.js.map",
     "static/css/2.98e7ac70.chunk.css": "/psi-frontend/static/css/2.98e7ac70.chunk.css",
-    "static/js/2.82a87da2.chunk.js": "/psi-frontend/static/js/2.82a87da2.chunk.js",
-    "static/js/2.82a87da2.chunk.js.map": "/psi-frontend/static/js/2.82a87da2.chunk.js.map",
-    "static/js/3.7ad47083.chunk.js": "/psi-frontend/static/js/3.7ad47083.chunk.js",
-    "static/js/3.7ad47083.chunk.js.map": "/psi-frontend/static/js/3.7ad47083.chunk.js.map",
+    "static/js/2.b2abf9ee.chunk.js": "/psi-frontend/static/js/2.b2abf9ee.chunk.js",
+    "static/js/2.b2abf9ee.chunk.js.map": "/psi-frontend/static/js/2.b2abf9ee.chunk.js.map",
+    "static/js/3.2611a128.chunk.js": "/psi-frontend/static/js/3.2611a128.chunk.js",
+    "static/js/3.2611a128.chunk.js.map": "/psi-frontend/static/js/3.2611a128.chunk.js.map",
     "index.html": "/psi-frontend/index.html",
     "static/css/2.98e7ac70.chunk.css.map": "/psi-frontend/static/css/2.98e7ac70.chunk.css.map",
-    "static/css/main.24434aa6.chunk.css.map": "/psi-frontend/static/css/main.24434aa6.chunk.css.map",
-    "static/js/2.82a87da2.chunk.js.LICENSE.txt": "/psi-frontend/static/js/2.82a87da2.chunk.js.LICENSE.txt"
+    "static/css/main.4198ab9c.chunk.css.map": "/psi-frontend/static/css/main.4198ab9c.chunk.css.map",
+    "static/js/2.b2abf9ee.chunk.js.LICENSE.txt": "/psi-frontend/static/js/2.b2abf9ee.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.514e884d.js",
+    "static/js/runtime-main.1fc13dad.js",
     "static/css/2.98e7ac70.chunk.css",
-    "static/js/2.82a87da2.chunk.js",
-    "static/css/main.24434aa6.chunk.css",
-    "static/js/main.ea3ddff7.chunk.js"
+    "static/js/2.b2abf9ee.chunk.js",
+    "static/css/main.4198ab9c.chunk.css",
+    "static/js/main.532242d6.chunk.js"
   ]
 }
