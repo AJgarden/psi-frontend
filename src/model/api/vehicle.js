@@ -9,6 +9,10 @@ export default class VehicleAPI {
     return restInstance('get', `/kinds/${kindId}`).then((response) => response.data)
   }
 
+  addVehicleData = (data) => {
+    return restInstance('post', `/kinds/${data.kindId}`, data).then((response) => response.data)
+  }
+
   updateVehicleData = (kindId, data) => {
     return restInstance('patch', `/kinds/${kindId}`, data).then((response) => response.data)
   }

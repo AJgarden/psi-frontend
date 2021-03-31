@@ -42,6 +42,7 @@ export default class EmployeeForm extends React.Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.createFlag && this.props.createFlag) {
       this.setState({
+        loading: false,
         formData: { ...initData },
         formStatus: JSON.parse(JSON.stringify(formRules)),
         canSubmit: false
@@ -144,10 +145,39 @@ export default class EmployeeForm extends React.Component {
   // 新增
   handleCreate = (back) => {
     this.setState({ loading: true }, () => {
-      setTimeout(() => {
-        message.success('成功新增資料')
-        if (back) this.history.push('/Parts/Vehicle')
-      }, 1000)
+      this.employeeAPI
+        .addEmployeeData(this.state.formData)
+        .then((response) => {
+          if (response.code === 0) {
+            message.success('成功新增資料')
+            if (back) {
+              this.history.push('/Basic/Employee')
+            } else {
+              const layoutContent = document.getElementById('layout-content-wrapper')
+              layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
+              this.setState({
+                loading: false,
+                formData: { ...initData },
+                formStatus: JSON.parse(JSON.stringify(formRules)),
+                canSubmit: false
+              })
+            }
+          } else {
+            Modal.error({
+              title: response.message,
+              icon: <ExclamationCircleOutlined />,
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                this.setState({ loading: false })
+              }
+            })
+          }
+        })
+        .catch((error) => {
+          message.error(error.response.data.message)
+          this.setState({ loading: false })
+        })
     })
   }
   // 修改
@@ -165,6 +195,8 @@ export default class EmployeeForm extends React.Component {
             if (back) {
               this.history.push('/Basic/Employee')
             } else {
+              const layoutContent = document.getElementById('layout-content-wrapper')
+              layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
               this.getEmployeeData()
             }
           } else {
@@ -211,7 +243,7 @@ export default class EmployeeForm extends React.Component {
       align: 'middle',
       style: { marginBottom: 24, marginTop: 24 }
     }
-    const cloSetting = {
+    const colSetting = {
       xs: 24,
       sm: 24,
       md: 24,
@@ -228,7 +260,7 @@ export default class EmployeeForm extends React.Component {
         <Spin spinning={this.state.loading}>
           <Card className='form-detail-card'>
             <Row {...rowSetting}>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={true}
                   title='員工編號'
@@ -244,7 +276,7 @@ export default class EmployeeForm extends React.Component {
                   error={this.getFormErrorStatus('employeeId')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={true}
                   title='身分證號'
@@ -259,7 +291,7 @@ export default class EmployeeForm extends React.Component {
                   error={this.getFormErrorStatus('identityCardNumber')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={true}
                   title='姓名'
@@ -274,7 +306,7 @@ export default class EmployeeForm extends React.Component {
                   error={this.getFormErrorStatus('name')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='出生年月日'
@@ -293,7 +325,7 @@ export default class EmployeeForm extends React.Component {
                   }
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='手機號碼'
@@ -308,7 +340,7 @@ export default class EmployeeForm extends React.Component {
                   error={this.getFormErrorStatus('cellPhone')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='市內電話'
@@ -323,7 +355,7 @@ export default class EmployeeForm extends React.Component {
                   error={this.getFormErrorStatus('phone')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='就職日期'
@@ -342,7 +374,7 @@ export default class EmployeeForm extends React.Component {
                   }
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='學歷'
@@ -357,7 +389,7 @@ export default class EmployeeForm extends React.Component {
                   error={this.getFormErrorStatus('education')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='薪資'
@@ -373,7 +405,7 @@ export default class EmployeeForm extends React.Component {
                   }
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='職務津貼'
@@ -389,7 +421,7 @@ export default class EmployeeForm extends React.Component {
                   }
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={false}
                   title='全勤津貼'
@@ -489,17 +521,17 @@ export default class EmployeeForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     disabled={!this.state.canSubmit}
-                    onClick={this.handleCreate.bind(this, false)}
+                    onClick={this.handleCreate.bind(this, true)}
                   >
-                    新增
+                    儲存
                   </Button>
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
                     disabled={!this.state.canSubmit}
-                    onClick={this.handleCreate.bind(this, true)}
+                    onClick={this.handleCreate.bind(this, false)}
                   >
-                    新增並返回
+                    儲存並繼續新增
                   </Button>
                 </>
               ) : (
@@ -518,7 +550,7 @@ export default class EmployeeForm extends React.Component {
                     disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, true)}
                   >
-                    儲存並返回
+                    儲存並返回列表
                   </Button>
                 </>
               )}

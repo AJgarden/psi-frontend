@@ -3,21 +3,14 @@ import {
   SiderMenuHomeIcon,
   SiderMenuDashboardIcon,
   SiderMenuBasicIcon,
-  SiderMenuWidgetIcon
+  SiderMenuWidgetIcon,
+  SiderMenuProductIcon
 } from '../icon/Icon'
 
 export const routes = [
   {
-    path: '/',
-    title: '首頁'
-  },
-  {
     path: '/Dashboard',
     title: '儀表板'
-  },
-  {
-    path: '/Basic',
-    title: '基本資料'
   },
   {
     path: '/Basic/Supplier',
@@ -32,8 +25,8 @@ export const routes = [
     title: '員工 - 基本資料'
   },
   {
-    path: '/Parts',
-    title: '零件管理'
+    path: '/Basic',
+    title: '基本資料'
   },
   {
     path: '/Parts/Vehicle',
@@ -50,6 +43,14 @@ export const routes = [
   {
     path: '/Parts/Component',
     title: '零件 - 零件管理'
+  },
+  {
+    path: '/Parts',
+    title: '零件管理'
+  },
+  {
+    path: '/',
+    title: '首頁'
   }
 ]
 
@@ -76,19 +77,19 @@ export const menuType = [
     accessRoles: ['ROLE_BASIC_MENU'],
     children: [
       {
-        key: 'Supplier',
+        key: 'BasicSupplier',
         routes: ['Basic', 'Supplier'],
         title: '廠商',
         accessRoles: ['ROLE_VENDOR']
       },
       {
-        key: 'Customer',
+        key: 'BasicCustomer',
         routes: ['Basic', 'Customer'],
         title: '客戶',
         accessRoles: ['ROLE_CUSTOMER']
       },
       {
-        key: 'Employee',
+        key: 'BasicEmployee',
         routes: ['Basic', 'Employee'],
         title: '員工',
         accessRoles: ['ROLE_EMPLOYEE']
@@ -103,28 +104,49 @@ export const menuType = [
     accessRoles: ['ROLE_PART_MENU'],
     children: [
       {
-        key: 'Vehicle',
+        key: 'PartsVehicle',
         routes: ['Parts', 'Vehicle'],
         title: '車種',
         accessRoles: ['ROLE_KIND']
       },
       {
-        key: 'Level',
+        key: 'PartsLevel',
         routes: ['Parts', 'Level'],
         title: '等級',
         accessRoles: ['ROLE_GRADE']
       },
       {
-        key: 'Colour',
+        key: 'PartsColour',
         routes: ['Parts', 'Colour'],
         title: '顏色',
         accessRoles: ['ROLE_COLOR']
       },
       {
-        key: 'Component',
+        key: 'PartsComponent',
         routes: ['Parts', 'Component'],
         title: '零件',
         accessRoles: ['ROLE_PART']
+      }
+    ]
+  },
+  {
+    key: 'Products',
+    routes: ['Products'],
+    icon: <SiderMenuProductIcon />,
+    title: '商品管理',
+    accessRoles: ['ROLE_PRODUCT_MENU'],
+    children: [
+      {
+        key: 'ProductsList',
+        routes: ['Products', 'List'],
+        title: '列表',
+        accessRoles: ['ROLE_PRODUCT']
+      },
+      {
+        key: 'ProductsImport',
+        routes: ['Products', 'Import'],
+        title: '匯入',
+        accessRoles: ['ROLE_PRODUCT_IMPORT']
       }
     ]
   }

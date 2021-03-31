@@ -69,6 +69,13 @@ const HeaderAccountSvg = () => (
 )
 export const HeaderAccountIcon = (props) => <Icon component={HeaderAccountSvg} {...props} />
 
+const SiderMenuProductSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z' />
+  </svg>
+)
+export const SiderMenuProductIcon = (props) => <Icon component={SiderMenuProductSvg} {...props} />
 const SiderMenuWidgetSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
@@ -150,3 +157,11 @@ const LoginAccountSvg = () => (
   </svg>
 )
 export const LoginAccountIcon = (props) => <Icon component={LoginAccountSvg} {...props} />
+
+const UtilCloseSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z' />
+  </svg>
+)
+export const UtilCloseIcon = (props) => <Icon component={UtilCloseSvg} {...props} />

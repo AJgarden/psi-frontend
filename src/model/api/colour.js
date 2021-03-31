@@ -9,6 +9,10 @@ export default class ColourAPI {
     return restInstance('get', `/colors/${colorId}`).then((response) => response.data)
   }
 
+  addColourData = (data) => {
+    return restInstance('post', `/colors/${data.colorId}`, data).then((response) => response.data)
+  }
+
   updateColourData = (colorId, data) => {
     return restInstance('patch', `/colors/${colorId}`, data).then((response) => response.data)
   }

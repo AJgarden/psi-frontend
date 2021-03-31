@@ -37,9 +37,9 @@ export const restInstance = (method, requestUrl, data) => {
     url,
     method,
     timeout: 60000,
-    // headers: {
-    //   Authorization: 'Basic ' + getAuth()
-    // }
+    headers: {
+      Authorization: 'Basic ' + getAuth()
+    }
   }
   if (method === 'get' && data && Object.keys(data).length > 0) {
     config.params = data

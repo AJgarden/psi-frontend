@@ -27,6 +27,7 @@ export default class ComponentForm extends React.Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.createFlag && this.props.createFlag) {
       this.setState({
+        loading: false,
         formData: { ...initData },
         formStatus: JSON.parse(JSON.stringify(formRules)),
         canSubmit: false
@@ -109,10 +110,39 @@ export default class ComponentForm extends React.Component {
   // 新增
   handleCreate = (back) => {
     this.setState({ loading: true }, () => {
-      setTimeout(() => {
-        message.success('成功新增資料')
-        if (back) this.history.push('/Parts/Component')
-      }, 1000)
+      this.levelAPI
+        .addLevelData(this.state.formData)
+        .then((response) => {
+          if (response.code === 0) {
+            message.success('成功新增資料')
+            if (back) {
+              this.history.push('/Basic/Level')
+            } else {
+              const layoutContent = document.getElementById('layout-content-wrapper')
+              layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
+              this.setState({
+                loading: false,
+                formData: { ...initData },
+                formStatus: JSON.parse(JSON.stringify(formRules)),
+                canSubmit: false
+              })
+            }
+          } else {
+            Modal.error({
+              title: response.message,
+              icon: <ExclamationCircleOutlined />,
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                this.setState({ loading: false })
+              }
+            })
+          }
+        })
+        .catch((error) => {
+          message.error(error.response.data.message)
+          this.setState({ loading: false })
+        })
     })
   }
   // 修改
@@ -126,6 +156,8 @@ export default class ComponentForm extends React.Component {
             if (back) {
               this.history.push('/Parts/Component')
             } else {
+              const layoutContent = document.getElementById('layout-content-wrapper')
+              layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
               this.getComponentData()
             }
           } else {
@@ -172,7 +204,7 @@ export default class ComponentForm extends React.Component {
       align: 'middle',
       style: { marginBottom: 24, marginTop: 24 }
     }
-    const cloSetting = {
+    const colSetting = {
       xs: 24,
       sm: 24,
       md: 24,
@@ -189,7 +221,7 @@ export default class ComponentForm extends React.Component {
         <Spin spinning={this.state.loading}>
           <Card className='form-detail-card'>
             <Row {...rowSetting}>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={true}
                   title='零件代號'
@@ -205,7 +237,7 @@ export default class ComponentForm extends React.Component {
                   error={this.getFormErrorStatus('partId')}
                 />
               </Col>
-              <Col {...cloSetting}>
+              <Col {...colSetting}>
                 <FormItem
                   required={true}
                   title='零件名稱'
@@ -230,17 +262,17 @@ export default class ComponentForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     disabled={!this.state.canSubmit}
-                    onClick={this.handleCreate.bind(this, false)}
+                    onClick={this.handleCreate.bind(this, true)}
                   >
-                    新增
+                    儲存
                   </Button>
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
                     disabled={!this.state.canSubmit}
-                    onClick={this.handleCreate.bind(this, true)}
+                    onClick={this.handleCreate.bind(this, false)}
                   >
-                    新增並返回
+                    儲存並繼續新增
                   </Button>
                 </>
               ) : (
@@ -259,7 +291,7 @@ export default class ComponentForm extends React.Component {
                     disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, true)}
                   >
-                    儲存並返回
+                    儲存並返回列表
                   </Button>
                 </>
               )}

@@ -3,6 +3,7 @@ import { createHashHistory } from 'history'
 import { Button, Col, Input, Row, Select, Space, Table, Tooltip, Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { ListAddIcon, ListSearchIcon, ListEditIcon, ListDeleteIcon } from '../icon/Icon'
+import { getPaginationSetting } from '../../component/paginationSetting'
 import EmployeeAPI from '../../model/api/employee'
 
 export default class Customer extends React.Component {
@@ -57,7 +58,7 @@ export default class Customer extends React.Component {
     this.setState({ search })
   }
   handleSearch = () => {
-    this.setState({ loading: true }, () => this.getList())
+    this.setState({ loading: true, list: [] }, () => this.getList())
   }
 
   getColumns = () => {
@@ -136,13 +137,13 @@ export default class Customer extends React.Component {
     const { pagination } = this.state
     pagination.current = page
     pagination.pageSize = pageSize
-    this.setState({ loading: true }, () => this.getList())
+    this.setState({ loading: true, list: [] }, () => this.getList())
   }
 
   render() {
     return (
       <>
-        <div className='' style={{ marginBottom: 10 }}>
+        <div className='list-header'>
           <Row type='flex' justify='space-between'>
             <Col>
               <Button
@@ -184,12 +185,7 @@ export default class Customer extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
-          pagination={{
-            ...this.state.pagination,
-            showTotal: (total, range) => `${range[0]} - ${range[1]} 共 ${total} 筆`,
-            showSizeChanger: true,
-            onChange: this.onPageChange
-          }}
+          pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>
     )

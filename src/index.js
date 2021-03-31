@@ -10,6 +10,7 @@ import './style/login.sass'
 import './style/sider.sass'
 import './style/list.sass'
 import './style/form.sass'
+import './style/drawer.sass'
 
 ReactDOM.render(
   <Router>

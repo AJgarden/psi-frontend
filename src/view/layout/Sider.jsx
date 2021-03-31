@@ -7,9 +7,9 @@ import { routes, menuType } from './menuType'
 export const LayoutSider = (props) => {
   const [selectedKeys, setSelectedKeys] = useState([])
   useEffect(() => {
-    const unlisten = props.history.listen((location, action) => {
-      const route = routes.find((route) => route.path === location.pathname)
-      document.title = `${route.title} - MOTOBUY PSI`
+    changeTitle(props.match.url)
+    const unlisten = props.history.listen((location) => {
+      changeTitle(location.pathname)
     })
     return () => {
       unlisten()
@@ -17,13 +17,18 @@ export const LayoutSider = (props) => {
   }, [])
   useEffect(() => {
     if (props.match.params.page !== undefined) {
-      setSelectedKeys([props.match.params.page])
+      setSelectedKeys([props.match.params.type + props.match.params.page])
     } else if (props.match.params.type !== undefined) {
       setSelectedKeys([props.match.params.type])
     } else {
       setSelectedKeys(['Home'])
     }
   }, [props.match.params.type, props.match.params.page])
+
+  const changeTitle = (url) => {
+    const route = routes.find((route) => new RegExp(`^(${route.path})`).test(url))
+    if (route) document.title = `${route.title} - MOTOBUY PSI`
+  }
 
   const onMenuClick = ({ item }) => {
     const history = createHashHistory()

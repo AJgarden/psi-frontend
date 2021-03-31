@@ -1,6 +1,7 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
-import { Layout, message } from 'antd'
+import { ConfigProvider, Layout, message } from 'antd'
+import zhTW from 'antd/lib/locale/zh_TW'
 import { SiderSwitchIcon } from './icon/Icon'
 import { Login } from './Login'
 import { LayoutSider } from './layout/Sider'
@@ -20,9 +21,16 @@ import Colour from './colour/Colour'
 import ColourDetail from './colour/ColourDetail'
 import Component from './component/Component'
 import ComponentDetail from './component/ComponentDetail'
+import Product from './product/Product'
+import ProductDetail from './product/ProductDetail'
+import StaticStorage from '../model/storage/static'
+import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
 
 export default class LayoutPage extends React.Component {
+  staticStorage = new StaticStorage()
+  globalAPI = new GlobalAPI()
+
   constructor(props) {
     super(props)
     const cookies = document.cookie.split(';')
@@ -35,7 +43,9 @@ export default class LayoutPage extends React.Component {
       testRestInstance('get', '/auth')
         .then((response) => {
           if (response.data.code === 0) {
-            this.setState({ isLand: true, isAuth: true })
+            this.getGlobalData().then(() => {
+              this.setState({ isLand: true, isAuth: true })
+            })
           } else {
             this.setState({ isLand: true })
           }
@@ -51,6 +61,15 @@ export default class LayoutPage extends React.Component {
     this.clearCookie()
   }
 
+  getGlobalData = async () => {
+    await new Promise((resolve) => {
+      this.globalAPI.getUnitList().then((response) => {
+        this.staticStorage.setUnitList(response.data)
+        resolve(true)
+      })
+    })
+  }
+
   clearCookie = () => {
     const cookies = document.cookie.split(';')
     if (
@@ -64,7 +83,7 @@ export default class LayoutPage extends React.Component {
   }
 
   onLogin = () => {
-    this.setState({ isAuth: true })
+    this.getGlobalData().then(() => this.setState({ isAuth: true }))
   }
   onLogout = () => {
     message.success('已成功登出')
@@ -75,115 +94,131 @@ export default class LayoutPage extends React.Component {
   render() {
     return this.state.isLand ? (
       this.state.isAuth ? (
-        <Layout className='layout-wrapper'>
-          <Layout.Sider
-            collapsible
-            collapsed={this.state.siderCollapsed}
-            onCollapse={(siderCollapsed) => this.setState({ siderCollapsed })}
-            trigger={<SiderSwitchIcon />}
-            className='layout-sider-wrapper'
-          >
-            <Route path='/:type?/:page?' component={LayoutSider} />
-          </Layout.Sider>
-          <Layout className='layout-main'>
-            <Layout.Header className='layout-header'>
-              <LayoutHeader onLogout={this.onLogout} />
-            </Layout.Header>
-            <Layout.Content className='layout-content-wrapper'>
-              <Switch>
-                {/* Basic */}
-                {/* Supplier */}
-                <Route
-                  exact
-                  path='/Basic/Supplier/Add'
-                  render={(props) => <SupplierDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Basic/Supplier/:vendorId'
-                  render={(props) => <SupplierDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Basic/Supplier' component={Supplier} />
-                {/* Customer */}
-                <Route
-                  exact
-                  path='/Basic/Customer/Add'
-                  render={(props) => <CustomerDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Basic/Customer/:customerId'
-                  render={(props) => <CustomerDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Basic/Customer' component={Customer} />
-                {/* Employee */}
-                <Route
-                  exact
-                  path='/Basic/Employee/Add'
-                  render={(props) => <EmployeeDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Basic/Employee/:employeeId'
-                  render={(props) => <EmployeeDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Basic/Employee' component={Employee} />
-                {/* Vehicle */}
-                <Route
-                  exact
-                  path='/Parts/Vehicle/Add'
-                  render={(props) => <VehicleDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Parts/Vehicle/:kindId'
-                  render={(props) => <VehicleDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Parts/Vehicle' component={Vehicle} />
-                {/* Level */}
-                <Route
-                  exact
-                  path='/Parts/Level/Add'
-                  render={(props) => <LevelDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Parts/Level/:gradeId'
-                  render={(props) => <LevelDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Parts/Level' component={Level} />
-                {/* Colour */}
-                <Route
-                  exact
-                  path='/Parts/Colour/Add'
-                  render={(props) => <ColourDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Parts/Colour/:colorId'
-                  render={(props) => <ColourDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Parts/Colour' component={Colour} />
-                {/* Component */}
-                <Route
-                  exact
-                  path='/Parts/Component/Add'
-                  render={(props) => <ComponentDetail {...props} createFlag={true} />}
-                />
-                <Route
-                  exact
-                  path='/Parts/Component/:partId'
-                  render={(props) => <ComponentDetail {...props} createFlag={false} />}
-                />
-                <Route exact path='/Parts/Component' component={Component} />
-                <Route path='/' component={Dashboard} />
-              </Switch>
-            </Layout.Content>
-            <Layout.Footer className='layout-footer'>2021 &copy; Copyright</Layout.Footer>
+        <ConfigProvider locale={zhTW}>
+          <Layout className='layout-wrapper'>
+            <Layout.Sider
+              collapsible
+              collapsed={this.state.siderCollapsed}
+              onCollapse={(siderCollapsed) => this.setState({ siderCollapsed })}
+              trigger={<SiderSwitchIcon />}
+              className='layout-sider-wrapper'
+            >
+              <Route path='/:type?/:page?' component={LayoutSider} />
+            </Layout.Sider>
+            <Layout className='layout-main'>
+              <Layout.Header className='layout-header'>
+                <LayoutHeader onLogout={this.onLogout} />
+              </Layout.Header>
+              <Layout.Content id='layout-content-wrapper' className='layout-content-wrapper'>
+                <Switch>
+                  {/* Basic */}
+                  {/* Supplier */}
+                  <Route
+                    exact
+                    path='/Basic/Supplier/Add'
+                    render={(props) => <SupplierDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Basic/Supplier/:vendorId'
+                    render={(props) => <SupplierDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Basic/Supplier' component={Supplier} />
+                  {/* Customer */}
+                  <Route
+                    exact
+                    path='/Basic/Customer/Add'
+                    render={(props) => <CustomerDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Basic/Customer/:customerId'
+                    render={(props) => <CustomerDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Basic/Customer' component={Customer} />
+                  {/* Employee */}
+                  <Route
+                    exact
+                    path='/Basic/Employee/Add'
+                    render={(props) => <EmployeeDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Basic/Employee/:employeeId'
+                    render={(props) => <EmployeeDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Basic/Employee' component={Employee} />
+                  {/* Vehicle */}
+                  <Route
+                    exact
+                    path='/Parts/Vehicle/Add'
+                    render={(props) => <VehicleDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Parts/Vehicle/:kindId'
+                    render={(props) => <VehicleDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Parts/Vehicle' component={Vehicle} />
+                  {/* Level */}
+                  <Route
+                    exact
+                    path='/Parts/Level/Add'
+                    render={(props) => <LevelDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Parts/Level/:gradeId'
+                    render={(props) => <LevelDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Parts/Level' component={Level} />
+                  {/* Colour */}
+                  <Route
+                    exact
+                    path='/Parts/Colour/Add'
+                    render={(props) => <ColourDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Parts/Colour/:colorId'
+                    render={(props) => <ColourDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Parts/Colour' component={Colour} />
+                  {/* Component */}
+                  <Route
+                    exact
+                    path='/Parts/Component/Add'
+                    render={(props) => <ComponentDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Parts/Component/:partId'
+                    render={(props) => <ComponentDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Parts/Component' component={Component} />
+                  {/* Product */}
+                  <Route
+                    exact
+                    path='/Products/List/Add'
+                    render={(props) => <ProductDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Products/List/:seqNo'
+                    render={(props) => <ProductDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Products/List' component={Product} />
+                  <Route path='/' component={Dashboard} />
+                </Switch>
+              </Layout.Content>
+              <Layout.Footer className='layout-footer'>2021 &copy; Copyright</Layout.Footer>
+            </Layout>
           </Layout>
-        </Layout>
+        </ConfigProvider>
       ) : (
-        <Login onLogin={this.onLogin} />
+        <ConfigProvider locale={zhTW}>
+          <Login onLogin={this.onLogin} />
+        </ConfigProvider>
       )
     ) : null
   }

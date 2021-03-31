@@ -3,6 +3,7 @@ import { createHashHistory } from 'history'
 import { Button, Col, Input, Row, Space, Table, Tooltip, Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { ListAddIcon, ListSearchIcon, ListEditIcon, ListDeleteIcon } from '../icon/Icon'
+import { getPaginationSetting } from '../../component/paginationSetting'
 import ColourAPI from '../../model/api/colour'
 
 export default class Colour extends React.Component {
@@ -127,7 +128,7 @@ export default class Colour extends React.Component {
   render() {
     return (
       <>
-        <div className='' style={{ marginBottom: 10 }}>
+        <div className='list-header'>
           <Row type='flex' justify='space-between'>
             <Col>
               <Button
@@ -166,12 +167,7 @@ export default class Colour extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
-          pagination={{
-            ...this.state.pagination,
-            showTotal: (total, range) => `${range[0]} - ${range[1]} 共 ${total} 筆`,
-            showSizeChanger: true,
-            onChange: this.onPageChange
-          }}
+          pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>
     )
