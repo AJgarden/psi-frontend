@@ -49,6 +49,14 @@ export const routes = [
     title: '零件管理'
   },
   {
+    path: '/Products/List',
+    title: '列表 - 商品管理'
+  },
+  {
+    path: '/Products',
+    title: '商品管理'
+  },
+  {
     path: '/',
     title: '首頁'
   }
