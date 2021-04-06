@@ -371,12 +371,12 @@ export default class SupplierForm extends React.Component {
                   content={
                     <Input
                       onChange={this.onInputChange}
-                      value={this.state.formData.cellPhone}
-                      id='cellPhone'
+                      value={this.state.formData.cellphone}
+                      id='cellphone'
                     />
                   }
                   message='長度需在10字內'
-                  error={this.getFormErrorStatus('cellPhone')}
+                  error={this.getFormErrorStatus('cellphone')}
                 />
               </Col>
             </Row>
@@ -460,7 +460,7 @@ export default class SupplierForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
                     onClick={this.handleCreate.bind(this, true)}
                   >
                     儲存
@@ -468,7 +468,7 @@ export default class SupplierForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
                     onClick={this.handleCreate.bind(this, false)}
                   >
                     儲存並繼續新增
@@ -479,7 +479,7 @@ export default class SupplierForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, false)}
                   >
                     儲存
@@ -487,7 +487,7 @@ export default class SupplierForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, true)}
                   >
                     儲存並返回列表

@@ -4,7 +4,7 @@ export const initData = {
   name: '',
   birthday: null,
   address: '',
-  cellPhone: '',
+  cellphone: '',
   phone: '',
   takeOfficeDay: null,
   education: '',
@@ -36,7 +36,7 @@ export const formRules = [
     length: [100]
   },
   {
-    key: 'cellPhone',
+    key: 'cellphone',
     length: [10]
   },
   {

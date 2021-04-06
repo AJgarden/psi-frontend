@@ -2,6 +2,8 @@ import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 import { ConfigProvider, Layout, message } from 'antd'
 import zhTW from 'antd/lib/locale/zh_TW'
+import moment from 'moment'
+import 'moment/locale/zh-tw'
 import { SiderSwitchIcon } from './icon/Icon'
 import { Login } from './Login'
 import { LayoutSider } from './layout/Sider'
@@ -23,9 +25,12 @@ import Component from './component/Component'
 import ComponentDetail from './component/ComponentDetail'
 import Product from './product/Product'
 import ProductDetail from './product/ProductDetail'
+import Purchase from './purchase/Purchase'
 import StaticStorage from '../model/storage/static'
 import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
+
+moment.locale('zh-tw')
 
 export default class LayoutPage extends React.Component {
   staticStorage = new StaticStorage()
@@ -208,6 +213,8 @@ export default class LayoutPage extends React.Component {
                     render={(props) => <ProductDetail {...props} createFlag={false} />}
                   />
                   <Route exact path='/Products/List' component={Product} />
+                  {/* Purchase */}
+                  <Route exact path='/Purchase/List' component={Purchase} />
                   <Route path='/' component={Dashboard} />
                 </Switch>
               </Layout.Content>

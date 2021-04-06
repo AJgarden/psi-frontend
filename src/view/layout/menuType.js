@@ -4,7 +4,8 @@ import {
   SiderMenuDashboardIcon,
   SiderMenuBasicIcon,
   SiderMenuWidgetIcon,
-  SiderMenuProductIcon
+  SiderMenuProductIcon,
+  SiderMenuPurchaseIcon
 } from '../icon/Icon'
 
 export const routes = [
@@ -55,6 +56,14 @@ export const routes = [
   {
     path: '/Products',
     title: '商品管理'
+  },
+  {
+    path: '/Purchase/List',
+    title: '列表 - 進貨單'
+  },
+  {
+    path: '/Purchase',
+    title: '進貨單'
   },
   {
     path: '/',
@@ -157,5 +166,12 @@ export const menuType = [
         accessRoles: ['ROLE_PRODUCT_IMPORT']
       }
     ]
+  },
+  {
+    key: 'PurchaseL',
+    routes: ['Purchase', 'List'],
+    icon: <SiderMenuPurchaseIcon />,
+    title: '進貨',
+    accessRoles: ['ROLE_PURCHASE_MENU']
   }
 ]

@@ -9,7 +9,7 @@ export const initData = {
   phone1: '',
   phone2: '',
   faxNumber: '',
-  cellPhone: '',
+  cellphone: '',
   note1: '',
   note2: ''
 }
@@ -56,7 +56,7 @@ export const formRules = [
     length: [10]
   },
   {
-    key: 'cellPhone',
+    key: 'cellphone',
     length: [10]
   },
   {
