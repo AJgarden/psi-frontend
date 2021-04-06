@@ -108,7 +108,8 @@ export default class Purchase extends React.Component {
         width: 50,
         render: (purchaseId) => (
           <Space className='list-table-option'>
-            <Tooltip title='編輯'>
+            to do
+            {/* <Tooltip title='編輯'>
               <Button
                 className='list-table-option-edit'
                 size='small'
@@ -125,7 +126,7 @@ export default class Purchase extends React.Component {
               >
                 <ListDeleteIcon />
               </Button>
-            </Tooltip>
+            </Tooltip> */}
           </Space>
         )
       },
