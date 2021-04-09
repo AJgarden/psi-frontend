@@ -113,24 +113,26 @@ export default class LevelForm extends React.Component {
 
   checkId = () => {
     const { formData } = this.state
-    this.setState({ validId: false }, () => {
-      this.levelAPI.getLevelData(formData.gradeId).then((response) => {
-        if (response.code === 0) {
-          Modal.error({
-            title: '此編號已重複，請重新輸入',
-            icon: <ExclamationCircleOutlined />,
-            okText: '確認',
-            cancelText: null,
-            onOk: () => {
-              formData.gradeId = ''
-              this.setState({ formData })
-            }
-          })
-        } else {
-          this.setState({ validId: true })
-        }
+    if (formData.gradeId !== '') {
+      this.setState({ validId: false }, () => {
+        this.levelAPI.getLevelData(formData.gradeId).then((response) => {
+          if (response.code === 0) {
+            Modal.error({
+              title: '此編號已重複，請重新輸入',
+              icon: <ExclamationCircleOutlined />,
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                formData.gradeId = ''
+                this.setState({ formData })
+              }
+            })
+          } else {
+            this.setState({ validId: true })
+          }
+        })
       })
-    })
+    }
   }
 
   // 新增

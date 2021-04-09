@@ -409,6 +409,7 @@ export default class PurchaseForm extends React.Component {
               </Col>
             </Row>
           </Card>
+          <Card className='form-detail-card'></Card>
           <div style={{ margin: '20px', textAlign: 'center' }}>
             <Space>
               {this.props.createFlag ? (

@@ -113,24 +113,26 @@ export default class CustomerForm extends React.Component {
 
   checkId = () => {
     const { formData } = this.state
-    this.setState({ validId: false }, () => {
-      this.customerAPI.getCustomerData(formData.customerId).then((response) => {
-        if (response.code === 0) {
-          Modal.error({
-            title: '此編號已重複，請重新輸入',
-            icon: <ExclamationCircleOutlined />,
-            okText: '確認',
-            cancelText: null,
-            onOk: () => {
-              formData.customerId = ''
-              this.setState({ formData })
-            }
-          })
-        } else {
-          this.setState({ validId: true })
-        }
+    if (formData.customerId !== '') {
+      this.setState({ validId: false }, () => {
+        this.customerAPI.getCustomerData(formData.customerId).then((response) => {
+          if (response.code === 0) {
+            Modal.error({
+              title: '此編號已重複，請重新輸入',
+              icon: <ExclamationCircleOutlined />,
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                formData.customerId = ''
+                this.setState({ formData })
+              }
+            })
+          } else {
+            this.setState({ validId: true })
+          }
+        })
       })
-    })
+    }
   }
 
   // 新增
