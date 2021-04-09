@@ -17,6 +17,7 @@ export default class ColourForm extends React.Component {
       loading: !props.createFlag,
       formData: { ...initData },
       formStatus: JSON.parse(JSON.stringify(formRules)),
+      validId: false,
       canSubmit: false
     }
     if (!props.createFlag) {
@@ -30,6 +31,7 @@ export default class ColourForm extends React.Component {
         loading: false,
         formData: { ...initData },
         formStatus: JSON.parse(JSON.stringify(formRules)),
+        validId: false,
         canSubmit: false
       })
     } else if (!this.props.createFlag && prevProps.colorId !== this.props.colorId) {
@@ -38,6 +40,7 @@ export default class ColourForm extends React.Component {
           loading: true,
           formData: { ...initData },
           formStatus: JSON.parse(JSON.stringify(formRules)),
+          validId: true,
           canSubmit: false
         },
         () => this.getColourData()
@@ -105,6 +108,28 @@ export default class ColourForm extends React.Component {
   }
   checkCanSubmit = () => {
     this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) })
+  }
+
+  checkId = () => {
+    const { formData } = this.state
+    this.setState({ validId: false }, () => {
+      this.colourAPI.getColourData(formData.colorId).then((response) => {
+        if (response.code === 0) {
+          Modal.error({
+            title: '此編號已重複，請重新輸入',
+            icon: <ExclamationCircleOutlined />,
+            okText: '確認',
+            cancelText: null,
+            onOk: () => {
+              formData.colorId = ''
+              this.setState({ formData })
+            }
+          })
+        } else {
+          this.setState({ validId: true })
+        }
+      })
+    })
   }
 
   // 新增
@@ -227,6 +252,7 @@ export default class ColourForm extends React.Component {
                   title='顏色代號'
                   content={
                     <Input
+                      onBlur={this.checkId}
                       onChange={this.onInputChange}
                       value={this.state.formData.colorId}
                       id='colorId'
@@ -248,7 +274,7 @@ export default class ColourForm extends React.Component {
                       id='name'
                     />
                   }
-                  message='顏色名稱為必填,長度需在10字'
+                  message={'顏色名稱為必填,長度需在10字'}
                   error={this.getFormErrorStatus('name')}
                 />
               </Col>
@@ -261,7 +287,8 @@ export default class ColourForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
+                    disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, true)}
                   >
                     儲存
@@ -269,7 +296,8 @@ export default class ColourForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
+                    disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, false)}
                   >
                     儲存並繼續新增
@@ -280,7 +308,7 @@ export default class ColourForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, false)}
                   >
                     儲存
@@ -288,7 +316,7 @@ export default class ColourForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    // disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, true)}
                   >
                     儲存並返回列表

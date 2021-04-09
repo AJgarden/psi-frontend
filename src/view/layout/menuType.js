@@ -58,7 +58,7 @@ export const routes = [
     title: '商品管理'
   },
   {
-    path: '/Purchase/List',
+    path: '/Purchase',
     title: '列表 - 進貨單'
   },
   {
@@ -168,10 +168,24 @@ export const menuType = [
     ]
   },
   {
-    key: 'PurchaseL',
-    routes: ['Purchase', 'List'],
+    key: 'Purchase',
+    routes: ['Purchase'],
     icon: <SiderMenuPurchaseIcon />,
     title: '進貨',
-    accessRoles: ['ROLE_PURCHASE_MENU']
+    accessRoles: ['ROLE_PURCHASE_MENU'],
+    children: [
+      {
+        key: 'PurchaseList',
+        routes: ['Purchase', 'List'],
+        title: '列表',
+        accessRoles: ['ROLE_PURCHASE_LIST']
+      },
+      {
+        key: 'PurchaseAdd',
+        routes: ['Purchase', 'Add'],
+        title: '新增',
+        accessRoles: ['ROLE_PRODUCT_ADD']
+      }
+    ]
   }
 ]

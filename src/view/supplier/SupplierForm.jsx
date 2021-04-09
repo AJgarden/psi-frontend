@@ -18,6 +18,7 @@ export default class SupplierForm extends React.Component {
       loading: !props.createFlag,
       formData: { ...initData },
       formStatus: JSON.parse(JSON.stringify(formRules)),
+      validId: false,
       canSubmit: false
     }
     if (!props.createFlag) {
@@ -31,6 +32,7 @@ export default class SupplierForm extends React.Component {
         loading: false,
         formData: { ...initData },
         formStatus: JSON.parse(JSON.stringify(formRules)),
+        validId: false,
         canSubmit: false
       })
     } else if (!this.props.createFlag && prevProps.vendorId !== this.props.vendorId) {
@@ -39,6 +41,7 @@ export default class SupplierForm extends React.Component {
           loading: true,
           formData: { ...initData },
           formStatus: JSON.parse(JSON.stringify(formRules)),
+          validId: true,
           canSubmit: false
         },
         () => this.getSupplierData()
@@ -105,28 +108,29 @@ export default class SupplierForm extends React.Component {
     this.setState({ formData, formStatus }, () => this.checkCanSubmit())
   }
   checkCanSubmit = () => {
-    let canSubmit = true
-    const { formData, formStatus } = this.state
-    formStatus.forEach((field) => {
-      if (field.error) {
-        canSubmit = false
-      } else if (field.required && !formData[field.key]) {
-        canSubmit = false
-      } else if (field.length && field.length.length > 0 && formData[field.key]) {
-        if (field.length.length === 1 && formData[field.key].length > field.length[0]) {
-          canSubmit = false
-        } else if (
-          field.length.length > 1 &&
-          (formData[field.key].length < field.length[0] ||
-            formData[field.key].length > field.length[1])
-        ) {
-          canSubmit = false
+    this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) })
+  }
+
+  checkId = () => {
+    const { formData } = this.state
+    this.setState({ validId: false }, () => {
+      this.supplierAPI.getSupplierData(formData.vendorId).then((response) => {
+        if (response.code === 0) {
+          Modal.error({
+            title: '此編號已重複，請重新輸入',
+            icon: <ExclamationCircleOutlined />,
+            okText: '確認',
+            cancelText: null,
+            onOk: () => {
+              formData.vendorId = ''
+              this.setState({ formData })
+            }
+          })
+        } else {
+          this.setState({ validId: true })
         }
-      } else if (field.regExp && !field.regExp.test(formData[field.key])) {
-        canSubmit = false
-      }
+      })
     })
-    this.setState({ canSubmit })
   }
 
   // 新增
@@ -249,6 +253,7 @@ export default class SupplierForm extends React.Component {
                   title='廠商代號'
                   content={
                     <Input
+                      onBlur={this.checkId}
                       onChange={this.onInputChange}
                       value={this.state.formData.vendorId}
                       id='vendorId'
@@ -461,6 +466,7 @@ export default class SupplierForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     // disabled={!this.state.canSubmit}
+                    disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, true)}
                   >
                     儲存
@@ -469,6 +475,7 @@ export default class SupplierForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     // disabled={!this.state.canSubmit}
+                    disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, false)}
                   >
                     儲存並繼續新增

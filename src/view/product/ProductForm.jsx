@@ -58,7 +58,7 @@ export default class ProductForm extends React.Component {
     if (
       (!prevProps.createFlag && this.props.createFlag) ||
       (!prevProps.drawModeVisible && this.props.drawModeVisible) ||
-      (!this.props.createFlag && prevProps.gradeId !== this.props.gradeId)
+      (!this.props.createFlag && prevProps.seqNo !== this.props.seqNo)
     ) {
       this.setState(
         {
@@ -174,10 +174,10 @@ export default class ProductForm extends React.Component {
       const { formData, search } = this.state
       if (key !== 'partId') {
         formData[key] = value.toUpperCase()
-        formData.productId = `${formData.partId}${
-          formData.customCode1 ? `-${formData.customCode1}` : ''
-        }${formData.customCode2 ? `-${formData.customCode2}` : ''}${
-          formData.customCode3 ? `-${formData.customCode3}` : ''
+        formData.productId = `${formData.partId ? `${formData.partId}-` : ''}${
+          formData.customCode1 ? `${formData.customCode1}-` : ''
+        }${formData.customCode2 ? `${formData.customCode2}-` : ''}${
+          formData.customCode3 ? formData.customCode3 : ''
         }`
       }
       search[key] = value.toUpperCase()
@@ -196,10 +196,10 @@ export default class ProductForm extends React.Component {
       const kind = kindsList.find((kind) => kind.kindId.toLowerCase() === value.toLowerCase())
       if (kind) formData.kindShortName = kind.shortName
     }
-    formData.productId = `${formData.partId}${
-      formData.customCode1 ? `-${formData.customCode1}` : ''
-    }${formData.customCode2 ? `-${formData.customCode2}` : ''}${
-      formData.customCode3 ? `-${formData.customCode3}` : ''
+    formData.productId = `${formData.partId ? `${formData.partId}-` : ''}${
+      formData.customCode1 ? `${formData.customCode1}-` : ''
+    }${formData.customCode2 ? `${formData.customCode2}-` : ''}${
+      formData.customCode3 ? formData.customCode3 : ''
     }`
     this.setState({ search }, () => this.checkData(formData, key))
   }
@@ -214,7 +214,7 @@ export default class ProductForm extends React.Component {
       )
       .map((part) => {
         return {
-          label: part.partId,
+          label: `${part.partId} - ${part.name}`,
           value: part.partId
         }
       })
@@ -227,11 +227,11 @@ export default class ProductForm extends React.Component {
         (search.customCode1 && kind.kindId.toLowerCase().includes(search.customCode1.toLowerCase()))
     )
     if (search.customCode1 && !kinds.find((kind) => kind.kindId === search.customCode1)) {
-      kinds.unshift({ kindId: search.customCode1 })
+      kinds.unshift({ kindId: search.customCode1, name: '自訂代碼1' })
     }
     return kinds.map((kind) => {
       return {
-        label: kind.kindId,
+        label: `${kind.kindId} - ${kind.name}`,
         value: kind.kindId
       }
     })
@@ -245,11 +245,11 @@ export default class ProductForm extends React.Component {
           grade.gradeId.toLowerCase().includes(search.customCode2.toLowerCase()))
     )
     if (search.customCode2 && !grades.find((grade) => grade.gradeId === search.customCode2)) {
-      grades.unshift({ gradeId: search.customCode2 })
+      grades.unshift({ gradeId: search.customCode2, name: '自訂代碼2' })
     }
     return grades.map((grade) => {
       return {
-        label: grade.gradeId,
+        label: `${grade.gradeId} - ${grade.name}`,
         value: grade.gradeId
       }
     })
@@ -263,11 +263,11 @@ export default class ProductForm extends React.Component {
           color.colorId.toLowerCase().includes(search.customCode3.toLowerCase()))
     )
     if (search.customCode3 && !colors.find((color) => color.colorId === search.customCode3)) {
-      colors.unshift({ colorId: search.customCode3 })
+      colors.unshift({ colorId: search.customCode3, name: '自訂代碼3' })
     }
     return colors.map((color) => {
       return {
-        label: color.colorId,
+        label: `${color.colorId} - ${color.name}`,
         value: color.colorId
       }
     })

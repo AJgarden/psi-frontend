@@ -51,7 +51,9 @@ export default class Vehicle extends React.Component {
     this.setState({ search })
   }
   handleSearch = () => {
-    this.setState({ loading: true }, () => this.getList())
+    const { pagination } = this.state
+    pagination.current = 1
+    this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
   getColumns = () => {
@@ -130,7 +132,7 @@ export default class Vehicle extends React.Component {
     const { pagination } = this.state
     pagination.current = page
     pagination.pageSize = pageSize
-    this.setState({ loading: true }, () => this.getList())
+    this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
   render() {

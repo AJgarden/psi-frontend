@@ -26,6 +26,7 @@ import ComponentDetail from './component/ComponentDetail'
 import Product from './product/Product'
 import ProductDetail from './product/ProductDetail'
 import Purchase from './purchase/Purchase'
+import PurchaseDetail from './purchase/PurchaseDetail'
 import StaticStorage from '../model/storage/static'
 import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
@@ -204,16 +205,26 @@ export default class LayoutPage extends React.Component {
                   {/* Product */}
                   <Route
                     exact
-                    path='/Products/List/Add'
+                    path='/Products/Add'
                     render={(props) => <ProductDetail {...props} createFlag={true} />}
                   />
                   <Route
                     exact
-                    path='/Products/List/:seqNo'
+                    path='/Products/Detail/:seqNo'
                     render={(props) => <ProductDetail {...props} createFlag={false} />}
                   />
                   <Route exact path='/Products/List' component={Product} />
                   {/* Purchase */}
+                  <Route
+                    exact
+                    path='/Purchase/Add'
+                    render={(props) => <PurchaseDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Purchase/Detail/:purchaseId'
+                    render={(props) => <PurchaseDetail {...props} createFlag={false} />}
+                  />
                   <Route exact path='/Purchase/List' component={Purchase} />
                   <Route path='/' component={Dashboard} />
                 </Switch>

@@ -2,7 +2,15 @@ import React from 'react'
 import { createHashHistory } from 'history'
 import { Button, Col, Input, Row, Space, Table, Tooltip, Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
-import { ListAddIcon, ListSearchIcon, ListEditIcon, ListDeleteIcon, UtilCloseIcon } from '../icon/Icon'
+import {
+  ListAddIcon,
+  ListSearchIcon,
+  ListEditIcon,
+  ListDeleteIcon,
+  ListOpenIcon,
+  UtilCloseIcon,
+  ListImageIcon
+} from '../icon/Icon'
 import { PageDrawer } from '../../component/PageDrawer'
 import { getPaginationSetting } from '../../component/paginationSetting'
 import ProductDetail from './ProductDetail'
@@ -61,7 +69,9 @@ export default class Product extends React.Component {
     this.setState({ search })
   }
   handleSearch = () => {
-    this.setState({ loading: true, list: [] }, () => this.getList())
+    const { pagination } = this.state
+    pagination.current = 1
+    this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
   getColumns = () => {
@@ -126,47 +136,64 @@ export default class Product extends React.Component {
         dataIndex: 'norm'
       },
       {
-        title: '原廠料號',
-        dataIndex: 'vendorProductId'
-      },
-      {
-        title: '定價1',
-        dataIndex: 'price1',
-        align: 'right',
-        render: (data) => {
-          return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        title: '額外資訊',
+        dataIndex: 'productType',
+        render: (data, row) => {
+          return data === 'REAL' ? (
+            <div className='list-table-addition'>
+              <Button type='link'>
+                <span>顯示圖片(todo)</span>
+                <ListImageIcon />
+              </Button>
+            </div>
+          ) : data === 'VIRTUAL' ? (
+            <div className='list-table-addition'>
+              <Button type='link'>
+                <span>對應料號{row.mappingProductSeqNo}(todo)</span>
+                <ListOpenIcon />
+              </Button>
+            </div>
+          ) : null
         }
-      },
-      {
-        title: '定價2',
-        dataIndex: 'price2',
-        align: 'right',
-        render: (data) => {
-          return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-        }
-      },
-      {
-        title: '定價3',
-        dataIndex: 'price3',
-        align: 'right',
-        render: (data) => {
-          return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-        }
-      },
-      {
-        title: '安全量',
-        align: 'right',
-        dataIndex: 'safetyStock'
-      },
-      {
-        title: '庫存地點',
-        dataIndex: 'storingPlace'
       }
+      // {
+      //   title: '原廠料號',
+      //   dataIndex: 'vendorProductId'
+      // },
+      // {
+      //   title: '定價1',
+      //   dataIndex: 'price1',
+      //   align: 'right',
+      //   render: (data) => {
+      //     return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      //   }
+      // },
+      // {
+      //   title: '定價2',
+      //   dataIndex: 'price2',
+      //   align: 'right',
+      //   render: (data) => {
+      //     return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      //   }
+      // },
+      // {
+      //   title: '定價3',
+      //   dataIndex: 'price3',
+      //   align: 'right',
+      //   render: (data) => {
+      //     return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      //   }
+      // },
+      // {
+      //   title: '安全量',
+      //   align: 'right',
+      //   dataIndex: 'safetyStock'
+      // },
+      // {
+      //   title: '庫存地點',
+      //   dataIndex: 'storingPlace'
+      // }
     ]
-  }
-
-  onEdit = (seqNo) => {
-    console.log(seqNo)
   }
 
   handleDelete = (seqNo) => {
@@ -185,7 +212,7 @@ export default class Product extends React.Component {
     const { pagination } = this.state
     pagination.current = page
     pagination.pageSize = pageSize
-    this.setState({ loading: true, list: [] }, () => this.getList())
+    this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
   onDetailOpen = (detailCreate, detailSeqNo) =>
@@ -201,7 +228,7 @@ export default class Product extends React.Component {
               <Button
                 type='primary'
                 icon={<ListAddIcon />}
-                onClick={() => this.onDetailOpen(true, 0)}
+                onClick={() => this.history.push('/Products/Add')}
                 className='list-header-add'
               >
                 新增

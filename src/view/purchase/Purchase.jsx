@@ -23,6 +23,7 @@ import {
 } from '../icon/Icon'
 import { PageDrawer } from '../../component/PageDrawer'
 import { getPaginationSetting } from '../../component/paginationSetting'
+import PurchaseDetail from './PurchaseDetail'
 import PurchaseAPI from '../../model/api/purchase'
 
 export default class Purchase extends React.Component {
@@ -35,10 +36,8 @@ export default class Purchase extends React.Component {
       loading: true,
       search: {
         date: [
-          moment()
-            .subtract(3, 'month')
-            .startOf('day'),
-          moment().startOf('day')
+          moment().startOf('month').startOf('day'),
+          moment().endOf('month').startOf('day')
         ],
         id: undefined,
         keyword: ''
@@ -49,7 +48,9 @@ export default class Purchase extends React.Component {
         total: 0,
         pageSize: 10,
         position: ['bottomLeft']
-      }
+      },
+      detailPurchaseId: 0,
+      detailVisible: false
     }
     this.getList()
   }
@@ -95,7 +96,9 @@ export default class Purchase extends React.Component {
     this.setState({ search })
   }
   handleSearch = () => {
-    this.setState({ loading: true, list: [] }, () => this.getList())
+    const { pagination } = this.state
+    pagination.current = 1
+    this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
   getColumns = () => {
@@ -108,8 +111,7 @@ export default class Purchase extends React.Component {
         width: 50,
         render: (purchaseId) => (
           <Space className='list-table-option'>
-            to do
-            {/* <Tooltip title='編輯'>
+            <Tooltip title='編輯'>
               <Button
                 className='list-table-option-edit'
                 size='small'
@@ -126,7 +128,7 @@ export default class Purchase extends React.Component {
               >
                 <ListDeleteIcon />
               </Button>
-            </Tooltip> */}
+            </Tooltip>
           </Space>
         )
       },
@@ -138,7 +140,7 @@ export default class Purchase extends React.Component {
       },
       {
         title: '日期',
-        dataIndex: 'crDate'
+        dataIndex: 'accountDate'
       },
       {
         title: '進貨編號',
@@ -163,10 +165,6 @@ export default class Purchase extends React.Component {
     ]
   }
 
-  onEdit = (seqNo) => {
-    console.log(seqNo)
-  }
-
   handleDelete = (seqNo) => {
     Modal.confirm({
       title: '確定要刪除此筆資料嗎',
@@ -183,11 +181,11 @@ export default class Purchase extends React.Component {
     const { pagination } = this.state
     pagination.current = page
     pagination.pageSize = pageSize
-    this.setState({ loading: true, list: [] }, () => this.getList())
+    this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
-  onDetailOpen = (detailCreate, detailSeqNo) =>
-    this.setState({ detailCreate, detailSeqNo, detailVisible: true })
+  onDetailOpen = (detailPurchaseId) =>
+    this.setState({ detailPurchaseId, detailVisible: true })
   onDetailClose = () => this.setState({ detailVisible: false })
 
   render() {
@@ -200,7 +198,7 @@ export default class Purchase extends React.Component {
                 <Button
                   type='primary'
                   icon={<ListAddIcon />}
-                  onClick={() => this.onDetailOpen(true, 0)}
+                  onClick={() => this.history.push('/Purchase/Add')}
                   className='list-header-add'
                 >
                   新增
@@ -253,6 +251,22 @@ export default class Purchase extends React.Component {
             this.onPageChange
           )}
         />
+        <PageDrawer
+          width={480}
+          placement='right'
+          closeIcon={<UtilCloseIcon />}
+          title={this.state.detailCreate ? '新增商品' : '編輯商品資料'}
+          visible={this.state.detailVisible}
+          onClose={this.onDetailClose}
+        >
+          <PurchaseDetail
+            createFlag={false}
+            isDrawMode={true}
+            drawModeVisible={this.state.detailVisible}
+            purchaseId={this.state.detailPurchaseId}
+            onClose={this.onDetailClose}
+          />
+        </PageDrawer>
       </>
     )
   }

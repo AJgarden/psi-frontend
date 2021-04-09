@@ -32,6 +32,7 @@ export default class EmployeeForm extends React.Component {
       loading: !props.createFlag,
       formData: { ...initData },
       formStatus: JSON.parse(JSON.stringify(formRules)),
+      validId: false,
       canSubmit: false
     }
     if (!props.createFlag) {
@@ -45,6 +46,7 @@ export default class EmployeeForm extends React.Component {
         loading: false,
         formData: { ...initData },
         formStatus: JSON.parse(JSON.stringify(formRules)),
+        validId: false,
         canSubmit: false
       })
     } else if (!this.props.createFlag && prevProps.employeeId !== this.props.employeeId) {
@@ -53,6 +55,7 @@ export default class EmployeeForm extends React.Component {
           loading: true,
           formData: { ...initData },
           formStatus: JSON.parse(JSON.stringify(formRules)),
+          validId: true,
           canSubmit: false
         },
         () => this.getEmployeeData()
@@ -140,6 +143,28 @@ export default class EmployeeForm extends React.Component {
   }
   checkCanSubmit = () => {
     this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) })
+  }
+
+  checkId = () => {
+    const { formData } = this.state
+    this.setState({ validId: false }, () => {
+      this.employeeAPI.getEmployeeData(formData.employeeId).then((response) => {
+        if (response.code === 0) {
+          Modal.error({
+            title: '此編號已重複，請重新輸入',
+            icon: <ExclamationCircleOutlined />,
+            okText: '確認',
+            cancelText: null,
+            onOk: () => {
+              formData.employeeId = ''
+              this.setState({ formData })
+            }
+          })
+        } else {
+          this.setState({ validId: true })
+        }
+      })
+    })
   }
 
   // 新增
@@ -266,6 +291,7 @@ export default class EmployeeForm extends React.Component {
                   title='員工編號'
                   content={
                     <Input
+                      onBlur={this.checkId}
                       onChange={this.onInputChange}
                       value={this.state.formData.employeeId}
                       id='employeeId'
@@ -521,6 +547,7 @@ export default class EmployeeForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     // disabled={!this.state.canSubmit}
+                    disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, true)}
                   >
                     儲存
@@ -529,6 +556,7 @@ export default class EmployeeForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     // disabled={!this.state.canSubmit}
+                    disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, false)}
                   >
                     儲存並繼續新增
