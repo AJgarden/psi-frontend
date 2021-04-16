@@ -152,7 +152,10 @@ export default class Product extends React.Component {
             </div>
           ) : data === 'VIRTUAL' ? (
             <div className='list-table-addition'>
-              <Button type='link' onClick={_this.onProductOpen.bind(_this, row.mappingProductSeqNo)}>
+              <Button
+                type='link'
+                onClick={_this.onProductOpen.bind(_this, row.mappingProductSeqNo)}
+              >
                 <span>對應商品編號: {row.mappingProductId}</span>
                 <ListOpenIcon />
               </Button>
@@ -231,7 +234,8 @@ export default class Product extends React.Component {
         photoList: []
       },
       () => {
-        this.productAPI.getProductAdditionData(seqNo)
+        this.productAPI
+          .getProductAdditionData(seqNo)
           .then((response) => {
             if (response.code === 0) {
               const photoList = []
@@ -311,6 +315,13 @@ export default class Product extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
+          rowClassName={(row) =>
+            row.productType === 'VIRTUAL'
+              ? 'product-virtual'
+              : row.productType === 'OTHERS'
+              ? 'product-others'
+              : ''
+          }
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
         <PageDrawer
