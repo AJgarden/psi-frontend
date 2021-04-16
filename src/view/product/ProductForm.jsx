@@ -56,13 +56,20 @@ export default class ProductForm extends React.Component {
       productSearchLoading: false,
       canSubmit: false
     }
-    this.getInitData().then(() => {
-      if (!props.createFlag) {
+    if (!props.createFlag) {
+      this.getInitData(false).then(() =>
         this.getProductData().then(() => this.setState({ inited: true, loading: false }))
-      } else {
-        this.setState({ inited: true, loading: false })
-      }
-    })
+      )
+    } else {
+      this.getInitData(true).then(() => this.setState({ inited: true, loading: false }))
+    }
+    // this.getInitData().then(() => {
+    //   if (!props.createFlag) {
+    //     this.getProductData().then(() => this.setState({ inited: true, loading: false }))
+    //   } else {
+    //     this.setState({ inited: true, loading: false })
+    //   }
+    // })
   }
 
   componentDidUpdate(prevProps) {
@@ -91,44 +98,54 @@ export default class ProductForm extends React.Component {
           productSearchLoading: false,
           canSubmit: false
         },
-        () =>
-          this.getInitData().then(() => {
-            if (!this.props.createFlag) {
+        () => {
+          if (!this.props.createFlag) {
+            this.getInitData(false).then(() =>
               this.getProductData().then(() => this.setState({ inited: true, loading: false }))
-            } else {
-              this.setState({ inited: true, loading: false })
-            }
-          })
+            )
+          } else {
+            this.getInitData(true).then(() => this.setState({ inited: true, loading: false }))
+          }
+          // this.getInitData().then(() => {
+          //   if (!this.props.createFlag) {
+          //     this.getProductData().then(() => this.setState({ inited: true, loading: false }))
+          //   } else {
+          //     this.setState({ inited: true, loading: false })
+          //   }
+          // })
+        }
       )
     }
   }
 
-  getInitData = async () => {
+  getInitData = async (isCreate) => {
     await new Promise((resolve) => {
       this.productAPI.getProductType().then((response) => {
         this.setState({ productType: response.data }, () => resolve(true))
       })
     })
-    await new Promise((resolve) => {
-      this.productAPI.getPartsList().then((response) => {
-        this.setState({ partsList: response.data.list }, () => resolve(true))
+    if (isCreate) {
+      await new Promise((resolve) => {
+        this.productAPI.getPartsList().then((response) => {
+          this.setState({ partsList: response.data.list }, () => resolve(true))
+        })
       })
-    })
-    await new Promise((resolve) => {
-      this.productAPI.getKindsList().then((response) => {
-        this.setState({ kindsList: response.data.list }, () => resolve(true))
+      await new Promise((resolve) => {
+        this.productAPI.getKindsList().then((response) => {
+          this.setState({ kindsList: response.data.list }, () => resolve(true))
+        })
       })
-    })
-    await new Promise((resolve) => {
-      this.productAPI.getGradesList().then((response) => {
-        this.setState({ gradesList: response.data.list }, () => resolve(true))
+      await new Promise((resolve) => {
+        this.productAPI.getGradesList().then((response) => {
+          this.setState({ gradesList: response.data.list }, () => resolve(true))
+        })
       })
-    })
-    await new Promise((resolve) => {
-      this.productAPI.getColorsList().then((response) => {
-        this.setState({ colorsList: response.data.list }, () => resolve(true))
+      await new Promise((resolve) => {
+        this.productAPI.getColorsList().then((response) => {
+          this.setState({ colorsList: response.data.list }, () => resolve(true))
+        })
       })
-    })
+    }
   }
 
   getProductData = async () => {
@@ -263,14 +280,15 @@ export default class ProductForm extends React.Component {
 
   // code select
   onCodeSearch = (key, value) => {
+    console.log('search', value)
     if (!value.includes(' ')) {
       const { formData, search } = this.state
       if (key !== 'partId') {
         formData[key] = value.toUpperCase()
-        formData.productId = `${formData.partId ? `${formData.partId}-` : ''}${
-          formData.customCode1 ? `${formData.customCode1}-` : ''
-        }${formData.customCode2 ? `${formData.customCode2}-` : ''}${
-          formData.customCode3 ? formData.customCode3 : ''
+        formData.productId = `${formData.partId ? formData.partId : ''}${
+          formData.customCode1 ? `-${formData.customCode1}` : ''
+        }${formData.customCode2 ? `-${formData.customCode2}` : ''}${
+          formData.customCode3 ? `-${formData.customCode3}` : ''
         }`
       }
       search[key] = value.toUpperCase()
@@ -278,6 +296,7 @@ export default class ProductForm extends React.Component {
     }
   }
   onCodeSelect = (key, value) => {
+    console.log(key, value)
     const { formData, search, kindsList } = this.state
     if (key === 'partId') {
       search.partId = ''
@@ -289,10 +308,10 @@ export default class ProductForm extends React.Component {
       const kind = kindsList.find((kind) => kind.kindId.toLowerCase() === value.toLowerCase())
       if (kind) formData.kindShortName = kind.shortName
     }
-    formData.productId = `${formData.partId ? `${formData.partId}-` : ''}${
-      formData.customCode1 ? `${formData.customCode1}-` : ''
-    }${formData.customCode2 ? `${formData.customCode2}-` : ''}${
-      formData.customCode3 ? formData.customCode3 : ''
+    formData.productId = `${formData.partId ? formData.partId : ''}${
+      formData.customCode1 ? `-${formData.customCode1}` : ''
+    }${formData.customCode2 ? `-${formData.customCode2}` : ''}${
+      formData.customCode3 ? `-${formData.customCode3}` : ''
     }`
     this.setState({ search }, () => this.checkData(formData, key))
   }
@@ -316,15 +335,16 @@ export default class ProductForm extends React.Component {
     const { formData, search, kindsList } = this.state
     const kinds = kindsList.filter(
       (kind) =>
-        formData.kindId === kind.kindId ||
+        formData.customCode1 === kind.kindId ||
         (search.customCode1 && kind.kindId.toLowerCase().includes(search.customCode1.toLowerCase()))
     )
     if (search.customCode1 && !kinds.find((kind) => kind.kindId === search.customCode1)) {
-      kinds.unshift({ kindId: search.customCode1, name: '自訂代碼1' })
+      kinds.unshift({ kindId: search.customCode1, name: '' })
     }
+    console.log(kinds)
     return kinds.map((kind) => {
       return {
-        label: `${kind.kindId} - ${kind.name}`,
+        label: kind.name !== '' ? `${kind.kindId} - ${kind.name}` : kind.kindId,
         value: kind.kindId
       }
     })
@@ -333,16 +353,16 @@ export default class ProductForm extends React.Component {
     const { formData, search, gradesList } = this.state
     const grades = gradesList.filter(
       (grade) =>
-        formData.gradeId === grade.gradeId ||
+        formData.customCode2 === grade.gradeId ||
         (search.customCode2 &&
           grade.gradeId.toLowerCase().includes(search.customCode2.toLowerCase()))
     )
     if (search.customCode2 && !grades.find((grade) => grade.gradeId === search.customCode2)) {
-      grades.unshift({ gradeId: search.customCode2, name: '自訂代碼2' })
+      grades.unshift({ gradeId: search.customCode2, name: '' })
     }
     return grades.map((grade) => {
       return {
-        label: `${grade.gradeId} - ${grade.name}`,
+        label: grade.name !== '' ? `${grade.gradeId} - ${grade.name}` : grade.gradeId,
         value: grade.gradeId
       }
     })
@@ -351,16 +371,16 @@ export default class ProductForm extends React.Component {
     const { formData, search, colorsList } = this.state
     const colors = colorsList.filter(
       (color) =>
-        formData.colorId === color.colorId ||
+        formData.customCode3 === color.colorId ||
         (search.customCode3 &&
           color.colorId.toLowerCase().includes(search.customCode3.toLowerCase()))
     )
     if (search.customCode3 && !colors.find((color) => color.colorId === search.customCode3)) {
-      colors.unshift({ colorId: search.customCode3, name: '自訂代碼3' })
+      colors.unshift({ colorId: search.customCode3, name: '' })
     }
     return colors.map((color) => {
       return {
-        label: `${color.colorId} - ${color.name}`,
+        label: color.name !== '' ? `${color.colorId} - ${color.name}` : color.colorId,
         value: color.colorId
       }
     })
@@ -648,42 +668,64 @@ export default class ProductForm extends React.Component {
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
+                              className='product-search'
                             />
                           </Col>
                           <Col {...codeColSetting}>
-                            <AutoComplete
+                            <Select
                               placeholder='車種或自訂代碼1'
-                              value={this.state.formData.customCode1}
+                              value={
+                                this.state.formData.customCode1 === ''
+                                  ? null
+                                  : this.state.formData.customCode1
+                              }
+                              showSearch={true}
+                              showArrow={false}
                               options={this.getKindOptions()}
                               onSearch={this.onCodeSearch.bind(this, 'customCode1')}
                               onSelect={this.onCodeSelect.bind(this, 'customCode1')}
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
+                              className='product-search'
                             />
                           </Col>
                           <Col {...codeColSetting}>
-                            <AutoComplete
+                            <Select
                               placeholder='等級或自訂代碼2'
-                              value={this.state.formData.customCode2}
+                              value={
+                                this.state.formData.customCode2 === ''
+                                  ? null
+                                  : this.state.formData.customCode2
+                              }
+                              showSearch={true}
+                              showArrow={false}
                               options={this.getGradeOptions()}
                               onSearch={this.onCodeSearch.bind(this, 'customCode2')}
                               onSelect={this.onCodeSelect.bind(this, 'customCode2')}
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
+                              className='product-search'
                             />
                           </Col>
                           <Col {...codeColSetting}>
-                            <AutoComplete
+                            <Select
                               placeholder='顏色或自訂代碼3'
-                              value={this.state.formData.customCode3}
+                              value={
+                                this.state.formData.customCode3 === ''
+                                  ? null
+                                  : this.state.formData.customCode3
+                              }
+                              showSearch={true}
+                              showArrow={false}
                               options={this.getColorOptions()}
                               onSearch={this.onCodeSearch.bind(this, 'customCode3')}
                               onSelect={this.onCodeSelect.bind(this, 'customCode3')}
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
+                              className='product-search'
                             />
                           </Col>
                         </Row>
@@ -749,6 +791,7 @@ export default class ProductForm extends React.Component {
                           <Spin spinning={this.state.productSearchLoading}>
                             <Select
                               showSearch={true}
+                              showArrow={false}
                               value={this.state.formData.mappingProductId}
                               searchValue={this.state.search.productId}
                               onSearch={this.onMappingSearch}
@@ -756,7 +799,7 @@ export default class ProductForm extends React.Component {
                               optionFilterProp='children'
                               style={{ width: '100%' }}
                               notFoundContent={null}
-                              suffixIcon={null}
+                              className='product-search'
                             >
                               {this.state.productList.map((product) => (
                                 <Select.Option key={product.productId} value={product.productId}>
