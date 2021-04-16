@@ -1,4 +1,4 @@
-import { restInstance } from '../runner/rest'
+import { restInstance, restUploadInstance } from '../runner/rest'
 
 export default class ProductAPI {
   getProductList = (data) => {
@@ -19,6 +19,16 @@ export default class ProductAPI {
 
   updateProductData = (data) => {
     return restInstance('patch', `/products/${data.seqNo}`, data).then((response) => response.data)
+  }
+
+  getProductAdditionData = (seqNo) => {
+    return restInstance('get', `/products/additional/${seqNo}`).then((response) => response.data)
+  }
+
+  uploadProductPic = (seqNo, picEnum, data) => {
+    return restUploadInstance('patch', `/products/additional/${seqNo}/${picEnum}`, data).then(
+      (response) => response.data
+    )
   }
 
   getPartsList = () => {

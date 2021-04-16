@@ -1,6 +1,6 @@
 import React from 'react'
 import { createHashHistory } from 'history'
-import { Button, Col, Input, Row, Space, Table, Tooltip, Modal } from 'antd'
+import { Button, Col, Input, Row, Space, Table, Tooltip, Modal, Spin, message } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import {
   ListAddIcon,
@@ -13,6 +13,7 @@ import {
 } from '../icon/Icon'
 import { PageDrawer } from '../../component/PageDrawer'
 import { getPaginationSetting } from '../../component/paginationSetting'
+import { PhotoCarousel } from '../../component/PhotoCarousel'
 import ProductDetail from './ProductDetail'
 import StaticStorage from '../../model/storage/static'
 import ProductAPI from '../../model/api/product'
@@ -39,7 +40,10 @@ export default class Product extends React.Component {
       },
       detailCreate: true,
       detailSeqNo: 0,
-      detailVisible: false
+      detailVisible: false,
+      photoVisible: false,
+      photoLoading: true,
+      photoList: []
     }
     this.getList()
   }
@@ -141,15 +145,15 @@ export default class Product extends React.Component {
         render: (data, row) => {
           return data === 'REAL' ? (
             <div className='list-table-addition'>
-              <Button type='link'>
-                <span>顯示圖片(todo)</span>
+              <Button type='link' onClick={_this.onPhotoOpen.bind(_this, row.seqNo)}>
+                <span>查看商品照片</span>
                 <ListImageIcon />
               </Button>
             </div>
           ) : data === 'VIRTUAL' ? (
             <div className='list-table-addition'>
-              <Button type='link'>
-                <span>對應料號{row.mappingProductSeqNo}(todo)</span>
+              <Button type='link' onClick={_this.onProductOpen.bind(_this, row.mappingProductSeqNo)}>
+                <span>對應商品編號: {row.mappingProductId}</span>
                 <ListOpenIcon />
               </Button>
             </div>
@@ -218,6 +222,40 @@ export default class Product extends React.Component {
   onDetailOpen = (detailCreate, detailSeqNo) =>
     this.setState({ detailCreate, detailSeqNo, detailVisible: true })
   onDetailClose = () => this.setState({ detailVisible: false })
+
+  onPhotoOpen = (seqNo) => {
+    this.setState(
+      {
+        photoVisible: true,
+        photoLoading: true,
+        photoList: []
+      },
+      () => {
+        this.productAPI.getProductAdditionData(seqNo)
+          .then((response) => {
+            if (response.code === 0) {
+              const photoList = []
+              if (response.data.pic1Url) photoList.push(response.data.pic1Url)
+              if (response.data.pic2Url) photoList.push(response.data.pic2Url)
+              if (response.data.pic3Url) photoList.push(response.data.pic3Url)
+              if (response.data.pic4Url) photoList.push(response.data.pic4Url)
+              this.setState({ photoLoading: false, photoList })
+            } else {
+              message.error('資料載入失敗')
+              this.setState({ photoVisible: false })
+            }
+          })
+          .catch(() => {
+            message.error('資料載入失敗')
+            this.setState({ photoVisible: false })
+          })
+      }
+    )
+  }
+
+  onProductOpen = (seqNo) => {
+    window.open(`${window.location.href.split('#')[0]}#/Products/Detail/${seqNo}`)
+  }
 
   render() {
     return (
@@ -291,6 +329,17 @@ export default class Product extends React.Component {
             onClose={this.onDetailClose}
           />
         </PageDrawer>
+        <Modal
+          className='product-real-pic-modal'
+          visible={this.state.photoVisible}
+          title={null}
+          footer={null}
+          onCancel={() => this.setState({ photoVisible: false })}
+        >
+          <Spin spinning={this.state.photoLoading}>
+            <PhotoCarousel picList={this.state.photoList} />
+          </Spin>
+        </Modal>
       </>
     )
   }

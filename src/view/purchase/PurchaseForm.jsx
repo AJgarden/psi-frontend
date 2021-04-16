@@ -306,6 +306,14 @@ export default class PurchaseForm extends React.Component {
     })
   }
 
+  handleCancel = () => {
+    if (this.props.isDrawMode) {
+      this.props.onClose()
+    } else {
+      this.history.push('/Purchase/List')
+    }
+  }
+
   render() {
     const rowSetting = this.props.isDrawMode
       ? {

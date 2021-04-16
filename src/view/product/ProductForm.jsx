@@ -10,46 +10,57 @@ import {
   Input,
   InputNumber,
   AutoComplete,
+  Upload,
   Space,
   Button,
   Modal,
   message
 } from 'antd'
 import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
+import { ListAddIcon, PhotoViewIcon, PhotoUploadIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
-import { initData, formRules } from './productType'
+import { initData, additionData, formRules } from './productType'
 import ProductAPI from '../../model/api/product'
 import StaticStorage from '../../model/storage/static'
+import moment from 'moment'
 
 export default class ProductForm extends React.Component {
   history = createHashHistory()
   productAPI = new ProductAPI()
+  productSearchTime = 0
 
   constructor(props) {
     super(props)
     this.state = {
+      inited: false,
       loading: true,
       productType: [],
       formData: { ...initData },
+      additionData: { ...additionData },
+      picOpen: false,
+      picUrl: '',
       formStatus: JSON.parse(JSON.stringify(formRules)),
       search: {
         partId: '',
         customCode1: '',
         customCode2: '',
-        customCode3: ''
+        customCode3: '',
+        productId: ''
       },
       partsList: [],
       kindsList: [],
       gradesList: [],
       colorsList: [],
+      productList: [],
+      productSearchLoading: false,
       canSubmit: false
     }
     this.getInitData().then(() => {
       if (!props.createFlag) {
-        this.getProductData().then(() => this.setState({ loading: false }))
+        this.getProductData().then(() => this.setState({ inited: true, loading: false }))
       } else {
-        this.setState({ loading: false })
+        this.setState({ inited: true, loading: false })
       }
     })
   }
@@ -62,23 +73,30 @@ export default class ProductForm extends React.Component {
     ) {
       this.setState(
         {
+          inited: false,
           loading: true,
           formData: { ...initData },
+          additionData: { ...additionData },
+          picOpen: false,
+          picUrl: '',
           formStatus: JSON.parse(JSON.stringify(formRules)),
           search: {
             partId: '',
             customCode1: '',
             customCode2: '',
-            customCode3: ''
+            customCode3: '',
+            productId: ''
           },
+          productList: [],
+          productSearchLoading: false,
           canSubmit: false
         },
         () =>
           this.getInitData().then(() => {
             if (!this.props.createFlag) {
-              this.getProductData().then(() => this.setState({ loading: false }))
+              this.getProductData().then(() => this.setState({ inited: true, loading: false }))
             } else {
-              this.setState({ loading: false })
+              this.setState({ inited: true, loading: false })
             }
           })
       )
@@ -113,8 +131,8 @@ export default class ProductForm extends React.Component {
     })
   }
 
-  getProductData = () => {
-    return new Promise((resolve, reject) => {
+  getProductData = async () => {
+    await new Promise((resolve, reject) => {
       this.productAPI
         .getProductData(this.props.seqNo)
         .then((response) => {
@@ -142,6 +160,15 @@ export default class ProductForm extends React.Component {
           }
         })
     })
+    await new Promise((resolve) => {
+      this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
+        if (response.code === 0) {
+          this.setState({ additionData: response.data }, () => resolve(true))
+        } else {
+          resolve(true)
+        }
+      })
+    })
   }
 
   getFormErrorStatus = (key) => {
@@ -168,6 +195,50 @@ export default class ProductForm extends React.Component {
     this.checkData(formData, type)
   }
 
+  // mapping product search & select
+  onMappingSearch = (value) => {
+    const { search } = this.state
+    search.productId = value
+    this.productSearchTime = moment().valueOf()
+    this.setState({ search }, () => {
+      setTimeout(() => {
+        if (moment().valueOf() - this.productSearchTime >= 1000 && value !== '') {
+          this.setState({ productSearchLoading: true }, () => {
+            this.productAPI
+              .getProductList({
+                pageNum: 1,
+                pageSize: 9999,
+                productId: value,
+                partId: '',
+                customCode1: '',
+                name: ''
+              })
+              .then((response) => {
+                this.setState({ productList: response.data.list, productSearchLoading: false })
+              })
+              .catch(() => {
+                this.setState({ productList: [], productSearchLoading: false })
+              })
+          })
+        } else if (value === '') {
+          this.setState({ productList: [] })
+        }
+      }, 1000)
+    })
+  }
+  onMappingSelect = (value) => {
+    const { search, formData, productList } = this.state
+    const product = productList.find((product) => product.productId === value)
+    if (product) {
+      search.productId = ''
+      formData.mappingProductId = product.productId
+      formData.mappingProductSeqNo = product.seqNo
+      this.setState({ search, productList: [product] }, () =>
+        this.checkData(formData, 'mappingProductId')
+      )
+    }
+  }
+
   // code select
   onCodeSearch = (key, value) => {
     if (!value.includes(' ')) {
@@ -181,7 +252,7 @@ export default class ProductForm extends React.Component {
         }`
       }
       search[key] = value.toUpperCase()
-      this.setState({ formData, search })
+      this.setState({ search }, () => this.checkData(formData, key))
     }
   }
   onCodeSelect = (key, value) => {
@@ -308,6 +379,36 @@ export default class ProductForm extends React.Component {
     })
   }
 
+  openPic = (key) => {
+    const { additionData } = this.state
+    const picUrl = additionData[key]
+    this.setState({ picOpen: true, picUrl })
+  }
+
+  // 上傳照片
+  onPicUpload = (picEnum, file) => {
+    this.setState({ loading: true }, () => {
+      const data = new FormData()
+      data.append('file', file)
+      this.productAPI.uploadProductPic(this.props.seqNo, picEnum, data).then((response) => {
+        console.log(response)
+        if (response.code === 0) {
+          message.success('照片上傳成功')
+          this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
+            if (response.code === 0) {
+              this.setState({ loading: false, additionData: response.data })
+            } else {
+              this.setState({ loading: false })
+            }
+          })
+        } else {
+          message.error('照片上傳失敗')
+        }
+      })
+    })
+    return false
+  }
+
   // 新增
   handleCreate = (back) => {
     this.setState({ loading: true }, () => {
@@ -404,6 +505,14 @@ export default class ProductForm extends React.Component {
     })
   }
 
+  handleCancel = () => {
+    if (this.props.isDrawMode) {
+      this.props.onClose()
+    } else {
+      this.history.push('/Products/List')
+    }
+  }
+
   render() {
     const rowSetting = this.props.isDrawMode
       ? {
@@ -445,6 +554,16 @@ export default class ProductForm extends React.Component {
       md: 12,
       lg: 12
     }
+    const picColSetting = this.props.isDrawMode
+      ? {
+          span: 12
+        }
+      : {
+          xs: 12,
+          sm: 12,
+          md: 6,
+          lg: 6
+        }
     return (
       <>
         {!this.props.isDrawMode && (
@@ -455,336 +574,520 @@ export default class ProductForm extends React.Component {
             <Breadcrumb.Item>{this.props.createFlag ? '新增商品' : '修改商品資料'}</Breadcrumb.Item>
           </Breadcrumb>
         )}
-        <Spin spinning={this.state.loading}>
-          <Card className='form-detail-card'>
-            <Row {...rowSetting}>
-              <Col {...colSetting3}>
-                <FormItem
-                  required={false}
-                  title='商品編號'
-                  content={<Input value={this.state.formData.productId} disabled={true} />}
-                />
-              </Col>
-              <Col {...colSetting3}>
-                <FormItem
-                  required={true}
-                  title='商品種類'
-                  content={
-                    <Select
-                      value={this.state.formData.productType}
-                      onChange={this.onSelectChange.bind(this, 'productType')}
-                      disabled={!this.props.createFlag}
-                      style={{ width: '100%' }}
-                    >
-                      {this.state.productType.map((type) => (
-                        <Select.Option key={type.productType} value={type.productType}>
-                          {type.desc}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  }
-                />
-              </Col>
-              <Col {...colSetting3}>
-                <FormItem
-                  required={true}
-                  title='代碼'
-                  align='flex-start'
-                  content={
-                    <Row gutter={[12]} className='product-code-row'>
-                      <Col {...codeColSetting}>
+        <Spin spinning={this.state.loading} className='product-spinning'>
+          {this.state.inited && (
+            <>
+              <Card className='form-detail-card'>
+                <Row {...rowSetting}>
+                  <Col {...colSetting3}>
+                    <FormItem
+                      required={false}
+                      title='商品編號'
+                      content={<Input value={this.state.formData.productId} disabled={true} />}
+                    />
+                  </Col>
+                  <Col {...colSetting3}>
+                    <FormItem
+                      required={true}
+                      title='商品種類'
+                      content={
                         <Select
-                          placeholder='零件編號'
-                          value={this.state.formData.partId}
-                          searchValue={this.state.search.partId}
-                          showSearch={true}
-                          showArrow={false}
-                          options={this.getPartOptions()}
-                          onSearch={this.onCodeSearch.bind(this, 'partId')}
-                          onSelect={this.onCodeSelect.bind(this, 'partId')}
-                          style={{ width: '100%' }}
-                          notFoundContent={null}
+                          value={this.state.formData.productType}
+                          onChange={this.onSelectChange.bind(this, 'productType')}
                           disabled={!this.props.createFlag}
-                        />
-                      </Col>
-                      <Col {...codeColSetting}>
-                        <AutoComplete
-                          placeholder='車種或自訂代碼1'
-                          value={this.state.formData.customCode1}
-                          options={this.getKindOptions()}
-                          onSearch={this.onCodeSearch.bind(this, 'customCode1')}
-                          onSelect={this.onCodeSelect.bind(this, 'customCode1')}
                           style={{ width: '100%' }}
-                          notFoundContent={null}
-                          disabled={!this.props.createFlag}
-                        />
-                      </Col>
-                      <Col {...codeColSetting}>
-                        <AutoComplete
-                          placeholder='等級或自訂代碼2'
-                          value={this.state.formData.customCode2}
-                          options={this.getGradeOptions()}
-                          onSearch={this.onCodeSearch.bind(this, 'customCode2')}
-                          onSelect={this.onCodeSelect.bind(this, 'customCode2')}
-                          style={{ width: '100%' }}
-                          notFoundContent={null}
-                          disabled={!this.props.createFlag}
-                        />
-                      </Col>
-                      <Col {...codeColSetting}>
-                        <AutoComplete
-                          placeholder='顏色或自訂代碼3'
-                          value={this.state.formData.customCode3}
-                          options={this.getColorOptions()}
-                          onSearch={this.onCodeSearch.bind(this, 'customCode3')}
-                          onSelect={this.onCodeSelect.bind(this, 'customCode3')}
-                          style={{ width: '100%' }}
-                          notFoundContent={null}
-                          disabled={!this.props.createFlag}
-                        />
-                      </Col>
-                    </Row>
-                  }
-                  message='零件編號為必填'
-                  error={this.getFormErrorStatus('partId')}
-                />
-              </Col>
-              <Col {...colSetting2}>
-                <FormItem
-                  required={false}
-                  title='車種'
-                  content={
-                    <Input
-                      onChange={this.onInputChange}
-                      value={this.state.formData.kindShortName}
-                      id='kindShortName'
+                        >
+                          {this.state.productType.map((type) => (
+                            <Select.Option key={type.productType} value={type.productType}>
+                              {type.desc}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      }
                     />
-                  }
-                />
-              </Col>
-              <Col {...colSetting2}>
-                <FormItem
-                  required={false}
-                  title='單位'
-                  content={
-                    <Select
-                      onChange={this.onSelectChange.bind(this, 'unit')}
-                      value={this.state.formData.unit}
-                      options={StaticStorage.unitList.map((unit) => {
-                        return {
-                          label: unit.desc,
-                          value: unit.unit
+                  </Col>
+                  <Col {...colSetting3}>
+                    <FormItem
+                      required={true}
+                      title='代碼'
+                      align='flex-start'
+                      content={
+                        <Row gutter={[12]} className='product-code-row'>
+                          <Col {...codeColSetting}>
+                            <Select
+                              placeholder='零件編號'
+                              value={this.state.formData.partId}
+                              searchValue={this.state.search.partId}
+                              showSearch={true}
+                              showArrow={false}
+                              options={this.getPartOptions()}
+                              onSearch={this.onCodeSearch.bind(this, 'partId')}
+                              onSelect={this.onCodeSelect.bind(this, 'partId')}
+                              style={{ width: '100%' }}
+                              notFoundContent={null}
+                              disabled={!this.props.createFlag}
+                            />
+                          </Col>
+                          <Col {...codeColSetting}>
+                            <AutoComplete
+                              placeholder='車種或自訂代碼1'
+                              value={this.state.formData.customCode1}
+                              options={this.getKindOptions()}
+                              onSearch={this.onCodeSearch.bind(this, 'customCode1')}
+                              onSelect={this.onCodeSelect.bind(this, 'customCode1')}
+                              style={{ width: '100%' }}
+                              notFoundContent={null}
+                              disabled={!this.props.createFlag}
+                            />
+                          </Col>
+                          <Col {...codeColSetting}>
+                            <AutoComplete
+                              placeholder='等級或自訂代碼2'
+                              value={this.state.formData.customCode2}
+                              options={this.getGradeOptions()}
+                              onSearch={this.onCodeSearch.bind(this, 'customCode2')}
+                              onSelect={this.onCodeSelect.bind(this, 'customCode2')}
+                              style={{ width: '100%' }}
+                              notFoundContent={null}
+                              disabled={!this.props.createFlag}
+                            />
+                          </Col>
+                          <Col {...codeColSetting}>
+                            <AutoComplete
+                              placeholder='顏色或自訂代碼3'
+                              value={this.state.formData.customCode3}
+                              options={this.getColorOptions()}
+                              onSearch={this.onCodeSearch.bind(this, 'customCode3')}
+                              onSelect={this.onCodeSelect.bind(this, 'customCode3')}
+                              style={{ width: '100%' }}
+                              notFoundContent={null}
+                              disabled={!this.props.createFlag}
+                            />
+                          </Col>
+                        </Row>
+                      }
+                      message='零件編號為必填'
+                      error={this.getFormErrorStatus('partId')}
+                    />
+                  </Col>
+                  <Col {...colSetting2}>
+                    <FormItem
+                      required={false}
+                      title='車種'
+                      content={
+                        <Input
+                          onChange={this.onInputChange}
+                          value={this.state.formData.kindShortName}
+                          id='kindShortName'
+                        />
+                      }
+                    />
+                  </Col>
+                  <Col {...colSetting2}>
+                    <FormItem
+                      required={false}
+                      title='單位'
+                      content={
+                        <Select
+                          onChange={this.onSelectChange.bind(this, 'unit')}
+                          value={this.state.formData.unit}
+                          options={StaticStorage.unitList.map((unit) => {
+                            return {
+                              label: unit.desc,
+                              value: unit.unit
+                            }
+                          })}
+                          optionFilterProp='children'
+                          style={{ width: '100%' }}
+                        />
+                      }
+                    />
+                  </Col>
+                  <Col {...colSetting3}>
+                    <FormItem
+                      required={true}
+                      title='商品名稱'
+                      content={
+                        <Input
+                          onChange={this.onInputChange}
+                          value={this.state.formData.name}
+                          id='name'
+                        />
+                      }
+                      message='商品名稱為必填'
+                      error={this.getFormErrorStatus('name')}
+                    />
+                  </Col>
+                  {this.state.formData.productType === 'VIRTUAL' ? (
+                    <Col {...colSetting3}>
+                      <FormItem
+                        required={true}
+                        title='對應料號'
+                        content={
+                          <Spin spinning={this.state.productSearchLoading}>
+                            <Select
+                              showSearch={true}
+                              value={this.state.formData.mappingProductId}
+                              searchValue={this.state.search.productId}
+                              onSearch={this.onMappingSearch}
+                              onSelect={this.onMappingSelect}
+                              optionFilterProp='children'
+                              style={{ width: '100%' }}
+                              notFoundContent={null}
+                              suffixIcon={null}
+                            >
+                              {this.state.productList.map((product) => (
+                                <Select.Option key={product.productId} value={product.productId}>
+                                  {product.productId} ({product.name})
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Spin>
                         }
-                      })}
-                      optionFilterProp='children'
-                      style={{ width: '100%' }}
+                        message='對應料號為必選'
+                        error={this.getFormErrorStatus('mappingProductId')}
+                      />
+                    </Col>
+                  ) : (
+                    <>
+                      <Col {...colSetting1}>
+                        <FormItem
+                          required={true}
+                          title='定價1'
+                          content={
+                            <InputNumber
+                              onChange={this.onNumberChange.bind(this, 'price1')}
+                              value={this.state.formData.price1}
+                              min={0}
+                              max={99999999}
+                              step={1}
+                              style={{ display: 'block', width: '100%' }}
+                            />
+                          }
+                        />
+                      </Col>
+                      <Col {...colSetting1}>
+                        <FormItem
+                          required={false}
+                          title='定價2'
+                          content={
+                            <InputNumber
+                              onChange={this.onNumberChange.bind(this, 'price2')}
+                              value={this.state.formData.price2}
+                              min={0}
+                              max={99999999}
+                              step={1}
+                              style={{ display: 'block', width: '100%' }}
+                            />
+                          }
+                        />
+                      </Col>
+                      <Col {...colSetting1}>
+                        <FormItem
+                          required={false}
+                          title='定價3'
+                          content={
+                            <InputNumber
+                              onChange={this.onNumberChange.bind(this, 'price3')}
+                              value={this.state.formData.price3}
+                              min={0}
+                              max={99999999}
+                              step={1}
+                              style={{ display: 'block', width: '100%' }}
+                            />
+                          }
+                        />
+                      </Col>
+                      <Col {...colSetting2}>
+                        <FormItem
+                          required={false}
+                          title='規格'
+                          content={
+                            <Input
+                              onChange={this.onInputChange}
+                              value={this.state.formData.norm}
+                              id='norm'
+                            />
+                          }
+                        />
+                      </Col>
+                    </>
+                  )}
+                  {this.state.formData.productType === 'REAL' && (
+                    <>
+                      <Col {...colSetting2}>
+                        <FormItem
+                          required={false}
+                          title='原廠料號'
+                          content={
+                            <Input
+                              onChange={this.onInputChange}
+                              value={this.state.formData.vendorProductId}
+                              id='vendorProductId'
+                            />
+                          }
+                        />
+                      </Col>
+                      <Col {...colSetting1}>
+                        <FormItem
+                          required={false}
+                          title='安全量'
+                          content={
+                            <InputNumber
+                              onChange={this.onNumberChange.bind(this, 'safetyStock')}
+                              value={this.state.formData.safetyStock}
+                              min={0}
+                              max={999999}
+                              step={1}
+                              style={{ display: 'block', width: '100%' }}
+                            />
+                          }
+                        />
+                      </Col>
+                      <Col {...colSetting1}>
+                        <FormItem
+                          required={false}
+                          title='庫存量'
+                          content={
+                            <InputNumber
+                              onChange={this.onNumberChange.bind(this, 'inventory')}
+                              value={this.state.formData.inventory}
+                              min={0}
+                              max={999999}
+                              step={1}
+                              style={{ display: 'block', width: '100%' }}
+                            />
+                          }
+                        />
+                      </Col>
+                      <Col {...colSetting1}>
+                        <FormItem
+                          required={false}
+                          title='庫存地點'
+                          content={
+                            <Input
+                              onChange={this.onInputChange}
+                              value={this.state.formData.storingPlace}
+                              id='storingPlace'
+                            />
+                          }
+                        />
+                      </Col>
+                    </>
+                  )}
+                </Row>
+              </Card>
+              <Card className='form-detail-card'>
+                <Row {...rowSetting}>
+                  <Col span={24}>
+                    <FormItem
+                      required={false}
+                      align='flex-start'
+                      title='備註'
+                      content={
+                        <Input.TextArea
+                          onChange={this.onInputChange}
+                          value={this.state.formData.note}
+                          id='note'
+                          autoSize={{ minRows: 4, maxRows: 4 }}
+                        />
+                      }
+                      message='長度需在255字內'
+                      error={this.getFormErrorStatus('note')}
                     />
-                  }
-                />
-              </Col>
-              <Col {...colSetting3}>
-                <FormItem
-                  required={true}
-                  title='商品名稱'
-                  content={
-                    <Input
-                      onChange={this.onInputChange}
-                      value={this.state.formData.name}
-                      id='name'
-                    />
-                  }
-                  message='商品名稱為必填'
-                  error={this.getFormErrorStatus('name')}
-                />
-              </Col>
-              <Col {...colSetting1}>
-                <FormItem
-                  required={true}
-                  title='定價1'
-                  content={
-                    <InputNumber
-                      onChange={this.onNumberChange.bind(this, 'price1')}
-                      value={this.state.formData.price1}
-                      min={0}
-                      max={99999999}
-                      step={1}
-                      style={{ display: 'block', width: '100%' }}
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting1}>
-                <FormItem
-                  required={false}
-                  title='定價2'
-                  content={
-                    <InputNumber
-                      onChange={this.onNumberChange.bind(this, 'price2')}
-                      value={this.state.formData.price2}
-                      min={0}
-                      max={99999999}
-                      step={1}
-                      style={{ display: 'block', width: '100%' }}
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting1}>
-                <FormItem
-                  required={false}
-                  title='定價3'
-                  content={
-                    <InputNumber
-                      onChange={this.onNumberChange.bind(this, 'price3')}
-                      value={this.state.formData.price3}
-                      min={0}
-                      max={99999999}
-                      step={1}
-                      style={{ display: 'block', width: '100%' }}
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting2}>
-                <FormItem
-                  required={false}
-                  title='規格'
-                  content={
-                    <Input
-                      onChange={this.onInputChange}
-                      value={this.state.formData.norm}
-                      id='norm'
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting2}>
-                <FormItem
-                  required={false}
-                  title='原廠料號'
-                  content={
-                    <Input
-                      onChange={this.onInputChange}
-                      value={this.state.formData.vendorProductId}
-                      id='vendorProductId'
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting1}>
-                <FormItem
-                  required={false}
-                  title='安全量'
-                  content={
-                    <InputNumber
-                      onChange={this.onNumberChange.bind(this, 'safetyStock')}
-                      value={this.state.formData.safetyStock}
-                      min={0}
-                      max={999999}
-                      step={1}
-                      style={{ display: 'block', width: '100%' }}
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting1}>
-                <FormItem
-                  required={false}
-                  title='庫存量'
-                  content={
-                    <InputNumber
-                      onChange={this.onNumberChange.bind(this, 'inventory')}
-                      value={this.state.formData.inventory}
-                      min={0}
-                      max={999999}
-                      step={1}
-                      style={{ display: 'block', width: '100%' }}
-                    />
-                  }
-                />
-              </Col>
-              <Col {...colSetting1}>
-                <FormItem
-                  required={false}
-                  title='庫存地點'
-                  content={
-                    <Input
-                      onChange={this.onInputChange}
-                      value={this.state.formData.storingPlace}
-                      id='storingPlace'
-                    />
-                  }
-                />
-              </Col>
-            </Row>
-          </Card>
-          <Card className='form-detail-card'>
-            <Row {...rowSetting}>
-              <Col span={24}>
-                <FormItem
-                  required={false}
-                  align='flex-start'
-                  title='備註'
-                  content={
-                    <Input.TextArea
-                      onChange={this.onInputChange}
-                      value={this.state.formData.note}
-                      id='note'
-                      autoSize={{ minRows: 4, maxRows: 4 }}
-                    />
-                  }
-                  message='長度需在255字內'
-                  error={this.getFormErrorStatus('note')}
-                />
-              </Col>
-            </Row>
-          </Card>
-          <div style={{ margin: '20px', textAlign: 'center' }}>
-            <Space>
-              {this.props.createFlag ? (
-                <>
-                  <Button
-                    type='primary'
-                    icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
-                    onClick={this.handleCreate.bind(this, true)}
+                  </Col>
+                </Row>
+              </Card>
+              {this.state.formData.productType === 'REAL' && (
+                <Card className='form-detail-card'>
+                  <Row {...rowSetting}>
+                    <Col span={24}>
+                      <p className='product-real-pictitle'>商品照片</p>
+                    </Col>
+                    <Col {...picColSetting}>
+                      {this.state.additionData.pic1Url ? (
+                        <div className='product-real-pic'>
+                          <img src={this.state.additionData.pic1Url} alt='照片1' />
+                          <div className='product-real-pic-option'>
+                            <Button onClick={this.openPic.bind(this, 'pic1Url')}>
+                              <PhotoViewIcon />
+                            </Button>
+                            <Upload
+                              showUploadList={false}
+                              beforeUpload={this.onPicUpload.bind(this, 'PIC1')}
+                            >
+                              <Button>
+                                <PhotoUploadIcon />
+                              </Button>
+                            </Upload>
+                          </div>
+                        </div>
+                      ) : (
+                        <Upload
+                          className='product-real-upload-wrapper'
+                          showUploadList={false}
+                          beforeUpload={this.onPicUpload.bind(this, 'PIC1')}
+                        >
+                          <Button className='product-real-upload-btn'>
+                            <ListAddIcon />
+                            <span>上傳照片</span>
+                          </Button>
+                        </Upload>
+                      )}
+                    </Col>
+                    <Col {...picColSetting}>
+                      {this.state.additionData.pic2Url ? (
+                        <div className='product-real-pic'>
+                          <img src={this.state.additionData.pic2Url} alt='照片2' />
+                          <div className='product-real-pic-option'>
+                            <Button onClick={this.openPic.bind(this, 'pic2Url')}>
+                              <PhotoViewIcon />
+                            </Button>
+                            <Upload
+                              showUploadList={false}
+                              beforeUpload={this.onPicUpload.bind(this, 'PIC2')}
+                            >
+                              <Button>
+                                <PhotoUploadIcon />
+                              </Button>
+                            </Upload>
+                          </div>
+                        </div>
+                      ) : (
+                        <Upload
+                          className='product-real-upload-wrapper'
+                          showUploadList={false}
+                          beforeUpload={this.onPicUpload.bind(this, 'PIC2')}
+                        >
+                          <Button className='product-real-upload-btn'>
+                            <ListAddIcon />
+                            <span>上傳照片</span>
+                          </Button>
+                        </Upload>
+                      )}
+                    </Col>
+                    <Col {...picColSetting}>
+                      {this.state.additionData.pic3Url ? (
+                        <div className='product-real-pic'>
+                          <img src={this.state.additionData.pic3Url} alt='照片3' />
+                          <div className='product-real-pic-option'>
+                            <Button onClick={this.openPic.bind(this, 'pic3Url')}>
+                              <PhotoViewIcon />
+                            </Button>
+                            <Upload
+                              showUploadList={false}
+                              beforeUpload={this.onPicUpload.bind(this, 'PIC3')}
+                            >
+                              <Button>
+                                <PhotoUploadIcon />
+                              </Button>
+                            </Upload>
+                          </div>
+                        </div>
+                      ) : (
+                        <Upload
+                          className='product-real-upload-wrapper'
+                          showUploadList={false}
+                          beforeUpload={this.onPicUpload.bind(this, 'PIC3')}
+                        >
+                          <Button className='product-real-upload-btn'>
+                            <ListAddIcon />
+                            <span>上傳照片</span>
+                          </Button>
+                        </Upload>
+                      )}
+                    </Col>
+                    <Col {...picColSetting}>
+                      {this.state.additionData.pic4Url ? (
+                        <div className='product-real-pic'>
+                          <img src={this.state.additionData.pic4Url} alt='照片4' />
+                          <div className='product-real-pic-option'>
+                            <Button onClick={this.openPic.bind(this, 'pic4Url')}>
+                              <PhotoViewIcon />
+                            </Button>
+                            <Upload
+                              showUploadList={false}
+                              beforeUpload={this.onPicUpload.bind(this, 'PIC4')}
+                            >
+                              <Button>
+                                <PhotoUploadIcon />
+                              </Button>
+                            </Upload>
+                          </div>
+                        </div>
+                      ) : (
+                        <Upload
+                          className='product-real-upload-wrapper'
+                          showUploadList={false}
+                          beforeUpload={this.onPicUpload.bind(this, 'PIC4')}
+                        >
+                          <Button className='product-real-upload-btn'>
+                            <ListAddIcon />
+                            <span>上傳照片</span>
+                          </Button>
+                        </Upload>
+                      )}
+                    </Col>
+                  </Row>
+                  <Modal
+                    className='product-real-pic-modal'
+                    visible={this.state.picOpen}
+                    title={null}
+                    footer={null}
+                    onCancel={() => this.setState({ picOpen: false })}
                   >
-                    儲存
-                  </Button>
-                  <Button
-                    type='primary'
-                    icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
-                    onClick={this.handleCreate.bind(this, false)}
-                  >
-                    儲存並繼續新增
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    type='primary'
-                    icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
-                    onClick={this.handleSubmit.bind(this, false)}
-                  >
-                    儲存
-                  </Button>
-                  <Button
-                    type='primary'
-                    icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
-                    onClick={this.handleSubmit.bind(this, true)}
-                  >
-                    儲存並返回列表
-                  </Button>
-                </>
+                    <img src={this.state.picUrl} alt='照片放大' />
+                  </Modal>
+                </Card>
               )}
-              <Button danger icon={<CloseOutlined />} onClick={this.handleCancel}>
-                取消
-              </Button>
-            </Space>
-          </div>
+              <div style={{ margin: '20px', textAlign: 'center' }}>
+                <Space>
+                  {this.props.createFlag ? (
+                    <>
+                      <Button
+                        type='primary'
+                        icon={<CheckOutlined />}
+                        disabled={!this.state.canSubmit}
+                        onClick={this.handleCreate.bind(this, true)}
+                      >
+                        儲存
+                      </Button>
+                      <Button
+                        type='primary'
+                        icon={<CheckOutlined />}
+                        disabled={!this.state.canSubmit}
+                        onClick={this.handleCreate.bind(this, false)}
+                      >
+                        儲存並繼續新增
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        type='primary'
+                        icon={<CheckOutlined />}
+                        disabled={!this.state.canSubmit}
+                        onClick={this.handleSubmit.bind(this, false)}
+                      >
+                        儲存
+                      </Button>
+                      <Button
+                        type='primary'
+                        icon={<CheckOutlined />}
+                        disabled={!this.state.canSubmit}
+                        onClick={this.handleSubmit.bind(this, true)}
+                      >
+                        儲存並返回列表
+                      </Button>
+                    </>
+                  )}
+                  <Button danger icon={<CloseOutlined />} onClick={this.handleCancel}>
+                    取消
+                  </Button>
+                </Space>
+              </div>
+            </>
+          )}
         </Spin>
       </>
     )

@@ -56,6 +56,28 @@ export const restInstance = (method, requestUrl, data) => {
   })
 }
 
+export const restUploadInstance = (method, requestUrl, data) => {
+  const url = baseUrl + requestUrl
+  const config = {
+    url,
+    method,
+    timeout: 60000,
+    headers: {
+      'content-type': 'multipart/form-data',
+      Authorization: 'Basic ' + getAuth()
+    },
+    data
+  }
+  return new Promise((resolve, reject) => {
+    axios(config)
+      .then((response) => resolve(response))
+      .catch((error) => {
+        reject(error)
+        console.log(error.response)
+      })
+  })
+}
+
 export const testRestInstance = (method, requestUrl, data) => {
   const url = testBaseUrl + requestUrl
   const config = {

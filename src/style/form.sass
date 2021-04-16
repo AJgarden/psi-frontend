@@ -6,7 +6,138 @@
     padding: 12px 24px
   + .form-detail-card
     margin-top: 16px
+.product-spinning
+  min-height: 400px
 .product-code-row
   .ant-col:nth-child(1),
   .ant-col:nth-child(2)
     margin-bottom: 6px
+.product-real-pictitle
+  font-size: 0.875rem
+  margin: 0
+.product-real-pic
+  position: relative
+  border: 1px solid #e1e1e1
+  border-radius: 4px
+  padding: 4px
+  &::before
+    content: ''
+    display: block
+    width: 100%
+    height: 0
+    background: #f7f7f7
+    padding-bottom: 100%
+  img
+    position: absolute
+    max-width: calc(100% - 10px)
+    max-height: calc(100% - 10px)
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+  .product-real-pic-option
+    display: flex
+    align-items: center
+    justify-content: center
+    position: absolute
+    width: calc(100% - 10px)
+    height: calc(100% - 10px)
+    background: rgba(#000000, 0.2)
+    top: 5px
+    left: 5px
+    opacity: 0
+    transform: scale(0)
+    transition: opacity 0.3s, transform 0s 0.3s
+    .ant-btn
+      display: block
+      width: 24px
+      height: 24px
+      border: none
+      background: transparent
+      border-radius: 0
+      margin: 0 5px
+      padding: 2px
+      .anticon,
+      .anticon svg
+        display: block
+      .anticon svg
+        fill: #ffffff
+        width: 20px
+        height: 20px
+    > span
+      display: block
+      .ant-upload
+        display: block
+  &:hover
+    .product-real-pic-option
+      opacity: 1
+      transform: scale(1)
+      transition: opacity 0.3s, transform 0s
+.product-real-upload-wrapper
+  display: block
+  border: 1px solid #e1e1e1
+  border-radius: 4px
+  padding: 4px
+  .ant-upload
+    display: block
+  .product-real-upload-btn
+    display: block
+    width: 100%
+    position: relative
+    border: none
+    background: #f7f7f7
+    border-radius: 0
+    height: 0
+    padding: 0
+    padding-bottom: 100%
+    &:hover
+      background: #f1f1f1
+    &::after
+      display: none
+    > span
+      display: block
+      position: absolute
+      margin: 5px 0 0
+      top: 50%
+      left: 50%
+      transform: translateX(-50%)
+      &.anticon
+        margin-top: -36px
+        svg
+          display: block
+          fill: #cccccc
+.product-real-pic-modal
+  .ant-modal-body
+    padding: 10px
+    .ant-empty
+      padding: 40px 0
+    img
+      display: block
+      width: 100%
+    .slick-arrow
+      z-index: 10
+      width: 30px
+      height: 30px
+      background: rgba(#000000, 0.2)
+      padding: 3px
+      margin-top: -15px
+      &.slick-prev
+        left: 0
+      &.slick-next
+        right: 0
+      svg
+        display: block
+        width: 24px
+        height: 24px
+        fill: #ffffff
+    .product-real-pic-carousel-item
+      position: relative
+      padding-bottom: 100%
+      img
+        position: absolute
+        width: auto
+        max-width: 100%
+        max-height: 100%
+        top: 50%
+        left: 50%
+        transform: translate(-50%, -50%)
+

@@ -9,6 +9,9 @@ export const initData = {
   customCode2: '',
   customCode3: '',
   kindShortName: '',
+  name: '',
+  mappingProductId: '',
+  mappingProductSeqNo: '',
   unit: StatisStorage.unitList.length > 0 ? StatisStorage.unitList[0].unit : '',
   price1: 0,
   price2: 0,
@@ -21,5 +24,20 @@ export const initData = {
   note: ''
 }
 
-export const formRules = [
-]
+export const additionData = {
+  width: null,
+  height: null,
+  weight: null,
+  length: null,
+  pic1GoogleBlobId: '',
+  pic1Url: '',
+  pic2GoogleBlobId: '',
+  pic2Url: '',
+  pic3GoogleBlobId: '',
+  pic3Url: '',
+  pic4GoogleBlobId: '',
+  pic4Url: '',
+  productSeqNo: null
+}
+
+export const formRules = []

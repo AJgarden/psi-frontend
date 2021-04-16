@@ -1,6 +1,55 @@
 import React from 'react'
 import Icon from '@ant-design/icons'
 
+const CarouselNextSvg = () => (
+  <svg
+    height='36px'
+    viewBox='0 0 24 24'
+    width='36px'
+    fill='#000000'
+  >
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' />
+  </svg>
+)
+export const CarouselNextIcon = (props) => <Icon component={CarouselNextSvg} {...props} />
+const CarouselPrevSvg = () => (
+  <svg
+    height='36px'
+    viewBox='0 0 24 24'
+    width='36px'
+    fill='#000000'
+  >
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' />
+  </svg>
+)
+export const CarouselPrevIcon = (props) => <Icon component={CarouselPrevSvg} {...props} />
+const PhotoUploadSvg = () => (
+  <svg
+    enableBackground='new 0 0 24 24'
+    height='36px'
+    viewBox='0 0 24 24'
+    width='36px'
+    fill='#000000'
+  >
+    <g>
+      <rect fill='none' height='24' width='24' />
+    </g>
+    <g>
+      <path d='M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M7,9l1.41,1.41L11,7.83V16h2V7.83l2.59,2.58L17,9l-5-5L7,9z' />
+    </g>
+  </svg>
+)
+export const PhotoUploadIcon = (props) => <Icon component={PhotoUploadSvg} {...props} />
+const PhotoViewSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z' />
+  </svg>
+)
+export const PhotoViewIcon = (props) => <Icon component={PhotoViewSvg} {...props} />
+
 const ListOpenSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
