@@ -163,7 +163,23 @@ export default class ProductForm extends React.Component {
     await new Promise((resolve) => {
       this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
         if (response.code === 0) {
-          this.setState({ additionData: response.data }, () => resolve(true))
+          const additionData = response.data
+          if (response.data.productSeqNo !== 0) {
+            this.productAPI
+              .getProductData(response.data.productSeqNo)
+              .then((response) => {
+                if (response.code === 0) {
+                  this.setState({ additionData, productList: [response.data] }, () =>
+                    resolve(true)
+                  )
+                } else {
+                  this.setState({ additionData }, () => resolve(true))
+                }
+              })
+              .catch(() => this.setState({ additionData }, () => resolve(true)))
+          } else {
+            this.setState({ additionData }, () => resolve(true))
+          }
         } else {
           resolve(true)
         }
