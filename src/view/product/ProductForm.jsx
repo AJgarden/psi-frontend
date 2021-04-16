@@ -160,31 +160,37 @@ export default class ProductForm extends React.Component {
           }
         })
     })
-    await new Promise((resolve) => {
-      this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
-        if (response.code === 0) {
-          const additionData = response.data
-          if (response.data.productSeqNo !== 0) {
-            this.productAPI
-              .getProductData(response.data.productSeqNo)
-              .then((response) => {
-                if (response.code === 0) {
-                  this.setState({ additionData, productList: [response.data] }, () =>
-                    resolve(true)
-                  )
-                } else {
-                  this.setState({ additionData }, () => resolve(true))
-                }
-              })
-              .catch(() => this.setState({ additionData }, () => resolve(true)))
-          } else {
-            this.setState({ additionData }, () => resolve(true))
-          }
-        } else {
-          resolve(true)
-        }
+    if (this.state.formData.productType === 'REAL') {
+      await new Promise((resolve) => {
+        this.productAPI
+          .getProductAdditionData(this.props.seqNo)
+          .then((response) => {
+            if (response.code === 0) {
+              this.setState({ additionData: response.data }, () => resolve(true))
+            } else {
+              resolve(true)
+            }
+          })
+          .catch(() => resolve(true))
       })
-    })
+    }
+    if (
+      this.state.formData.productType === 'VIRTUAL' &&
+      this.state.formData.mappingProductSeqNo !== 0
+    ) {
+      await new Promise((resolve) => {
+        this.productAPI
+          .getProductData(this.state.formData.mappingProductSeqNo)
+          .then((response) => {
+            if (response.code === 0) {
+              this.setState({ productList: [response.data] }, () => resolve(true))
+            } else {
+              resolve(true)
+            }
+          })
+          .catch(() => resolve(true))
+      })
+    }
   }
 
   getFormErrorStatus = (key) => {
