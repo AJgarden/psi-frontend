@@ -24,6 +24,7 @@ import ColourDetail from './colour/ColourDetail'
 import Component from './component/Component'
 import ComponentDetail from './component/ComponentDetail'
 import Product from './product/Product'
+import ProductQuickEdit from './product/ProductQuickEdit'
 import ProductDetail from './product/ProductDetail'
 import Purchase from './purchase/Purchase'
 import PurchaseDetail from './purchase/PurchaseDetail'
@@ -213,6 +214,7 @@ export default class LayoutPage extends React.Component {
                     path='/Products/Detail/:seqNo'
                     render={(props) => <ProductDetail {...props} createFlag={false} />}
                   />
+                  <Route exact path='/Products/QuickEdit' component={ProductQuickEdit} />
                   <Route exact path='/Products/List' component={Product} />
                   {/* Purchase */}
                   <Route

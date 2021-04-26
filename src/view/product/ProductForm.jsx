@@ -9,7 +9,6 @@ import {
   Select,
   Input,
   InputNumber,
-  AutoComplete,
   Upload,
   Space,
   Button,
@@ -53,6 +52,7 @@ export default class ProductForm extends React.Component {
       gradesList: [],
       colorsList: [],
       productList: [],
+      productSelect: {},
       productSearchLoading: false,
       canSubmit: false
     }
@@ -95,6 +95,7 @@ export default class ProductForm extends React.Component {
             productId: ''
           },
           productList: [],
+          productSelect: {},
           productSearchLoading: false,
           canSubmit: false
         },
@@ -197,10 +198,12 @@ export default class ProductForm extends React.Component {
     ) {
       await new Promise((resolve) => {
         this.productAPI
-          .getProductData(this.state.formData.mappingProductSeqNo)
+          .searchProductMapping(true, this.state.formData.mappingProductId)
           .then((response) => {
             if (response.code === 0) {
-              this.setState({ productList: [response.data] }, () => resolve(true))
+              this.setState({ productList: response.data, productSelect: response.data[0] }, () =>
+                resolve(true)
+              )
             } else {
               resolve(true)
             }
@@ -235,8 +238,32 @@ export default class ProductForm extends React.Component {
   }
 
   // mapping product search & select
+  getMappingProductDisplay = (product) => {
+    let display = product.desc1
+    if (product.desc2 || product.desc3 || product.desc4 || product.desc5) {
+      let additionDisplay = ''
+      additionDisplay += product.desc2 ? product.desc2 : ''
+      additionDisplay += product.desc3
+        ? additionDisplay !== ''
+          ? `, ${product.desc3}`
+          : product.desc3
+        : ''
+      additionDisplay += product.desc4
+        ? additionDisplay !== ''
+          ? `, ${product.desc4}`
+          : product.desc4
+        : ''
+      additionDisplay += product.desc5
+        ? additionDisplay !== ''
+          ? `, ${product.desc5}`
+          : product.desc5
+        : ''
+      display += ` [${additionDisplay}]`
+    }
+    return display
+  }
   onMappingSearch = (value) => {
-    const { search } = this.state
+    const { search, formData } = this.state
     search.productId = value
     this.productSearchTime = moment().valueOf()
     this.setState({ search }, () => {
@@ -244,59 +271,77 @@ export default class ProductForm extends React.Component {
         if (moment().valueOf() - this.productSearchTime >= 1000 && value !== '') {
           this.setState({ productSearchLoading: true }, () => {
             this.productAPI
-              .getProductList({
-                pageNum: 1,
-                pageSize: 9999,
-                productId: value,
-                partId: '',
-                customCode1: '',
-                name: ''
-              })
+              .searchProductMapping(true, value)
               .then((response) => {
-                this.setState({ productList: response.data.list, productSearchLoading: false })
+                this.setState({ productList: response.data, productSearchLoading: false })
               })
               .catch(() => {
                 this.setState({ productList: [], productSearchLoading: false })
               })
           })
         } else if (value === '') {
-          this.setState({ productList: [] })
+          if (formData.mappingProductId !== '') {
+            this.setState({ productList: [this.state.productSelect] })
+          } else {
+            this.setState({ productList: [] })
+          }
         }
       }, 1000)
     })
   }
   onMappingSelect = (value) => {
     const { search, formData, productList } = this.state
-    const product = productList.find((product) => product.productId === value)
+    const product = productList.find((product) => product.data === value)
     if (product) {
-      search.productId = ''
-      formData.mappingProductId = product.productId
-      formData.mappingProductSeqNo = product.seqNo
-      this.setState({ search, productList: [product] }, () =>
-        this.checkData(formData, 'mappingProductId')
-      )
+      if (product.finished) {
+        search.productId = ''
+        formData.mappingProductId = product.data
+        formData.mappingProductSeqNo = product.productSeqNo
+        this.setState({ search, productList: [product], productSelect: product }, () =>
+          this.checkData(formData, 'mappingProductSeqNo')
+        )
+      } else {
+        search.productId = value
+        formData.mappingProductId = product.data
+        formData.mappingProductSeqNo = null
+        this.setState({ search, productList: [product], productSelect: product }, () => {
+          // this.onMappingSearch(value)
+          this.checkData(formData, 'mappingProductSeqNo')
+        })
+      }
     }
   }
 
   // code select
   onCodeSearch = (key, value) => {
-    console.log('search', value)
     if (!value.includes(' ')) {
       const { formData, search } = this.state
       if (key !== 'partId') {
         formData[key] = value.toUpperCase()
-        formData.productId = `${formData.partId ? formData.partId : ''}${
-          formData.customCode1 ? `-${formData.customCode1}` : ''
-        }${formData.customCode2 ? `-${formData.customCode2}` : ''}${
-          formData.customCode3 ? `-${formData.customCode3}` : ''
-        }`
+        let productId = ''
+        productId += formData.partId ? formData.partId : ''
+        productId += formData.customCode1
+          ? productId !== ''
+            ? `-${formData.customCode1}`
+            : formData.customCode1
+          : ''
+        productId += formData.customCode2
+          ? productId !== ''
+            ? `-${formData.customCode2}`
+            : formData.customCode2
+          : ''
+        productId += formData.customCode3
+          ? productId !== ''
+            ? `-${formData.customCode3}`
+            : formData.customCode3
+          : ''
+        formData.productId = productId
       }
       search[key] = value.toUpperCase()
       this.setState({ search }, () => this.checkData(formData, key))
     }
   }
   onCodeSelect = (key, value) => {
-    console.log(key, value)
     const { formData, search, kindsList } = this.state
     if (key === 'partId') {
       search.partId = ''
@@ -308,11 +353,49 @@ export default class ProductForm extends React.Component {
       const kind = kindsList.find((kind) => kind.kindId.toLowerCase() === value.toLowerCase())
       if (kind) formData.kindShortName = kind.shortName
     }
-    formData.productId = `${formData.partId ? formData.partId : ''}${
-      formData.customCode1 ? `-${formData.customCode1}` : ''
-    }${formData.customCode2 ? `-${formData.customCode2}` : ''}${
-      formData.customCode3 ? `-${formData.customCode3}` : ''
-    }`
+    let productId = ''
+    productId += formData.partId ? formData.partId : ''
+    productId += formData.customCode1
+      ? productId !== ''
+        ? `-${formData.customCode1}`
+        : formData.customCode1
+      : ''
+    productId += formData.customCode2
+      ? productId !== ''
+        ? `-${formData.customCode2}`
+        : formData.customCode2
+      : ''
+    productId += formData.customCode3
+      ? productId !== ''
+        ? `-${formData.customCode3}`
+        : formData.customCode3
+      : ''
+    formData.productId = productId
+    this.setState({ search }, () => this.checkData(formData, key))
+  }
+  onCodeClear = (key) => {
+    const { formData, search } = this.state
+    formData[key] = ''
+    search[key] = ''
+    if (key === 'customCode1') formData.kindShortName = ''
+    let productId = ''
+    productId += formData.partId ? formData.partId : ''
+    productId += formData.customCode1
+      ? productId !== ''
+        ? `-${formData.customCode1}`
+        : formData.customCode1
+      : ''
+    productId += formData.customCode2
+      ? productId !== ''
+        ? `-${formData.customCode2}`
+        : formData.customCode2
+      : ''
+    productId += formData.customCode3
+      ? productId !== ''
+        ? `-${formData.customCode3}`
+        : formData.customCode3
+      : ''
+    formData.productId = productId
     this.setState({ search }, () => this.checkData(formData, key))
   }
   // get code options
@@ -341,7 +424,6 @@ export default class ProductForm extends React.Component {
     if (search.customCode1 && !kinds.find((kind) => kind.kindId === search.customCode1)) {
       kinds.unshift({ kindId: search.customCode1, name: '' })
     }
-    console.log(kinds)
     return kinds.map((kind) => {
       return {
         label: kind.name !== '' ? `${kind.kindId} - ${kind.name}` : kind.kindId,
@@ -433,7 +515,6 @@ export default class ProductForm extends React.Component {
       const data = new FormData()
       data.append('file', file)
       this.productAPI.uploadProductPic(this.props.seqNo, picEnum, data).then((response) => {
-        console.log(response)
         if (response.code === 0) {
           message.success('照片上傳成功')
           this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
@@ -636,7 +717,7 @@ export default class ProductForm extends React.Component {
                         <Select
                           value={this.state.formData.productType}
                           onChange={this.onSelectChange.bind(this, 'productType')}
-                          disabled={!this.props.createFlag}
+                          // disabled={!this.props.createFlag}
                           style={{ width: '100%' }}
                         >
                           {this.state.productType.map((type) => (
@@ -681,9 +762,11 @@ export default class ProductForm extends React.Component {
                               }
                               showSearch={true}
                               showArrow={false}
+                              allowClear={true}
                               options={this.getKindOptions()}
                               onSearch={this.onCodeSearch.bind(this, 'customCode1')}
                               onSelect={this.onCodeSelect.bind(this, 'customCode1')}
+                              onClear={this.onCodeClear.bind(this, 'customCode1')}
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
@@ -700,9 +783,11 @@ export default class ProductForm extends React.Component {
                               }
                               showSearch={true}
                               showArrow={false}
+                              allowClear={true}
                               options={this.getGradeOptions()}
                               onSearch={this.onCodeSearch.bind(this, 'customCode2')}
                               onSelect={this.onCodeSelect.bind(this, 'customCode2')}
+                              onClear={this.onCodeClear.bind(this, 'customCode2')}
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
@@ -719,9 +804,11 @@ export default class ProductForm extends React.Component {
                               }
                               showSearch={true}
                               showArrow={false}
+                              allowClear={true}
                               options={this.getColorOptions()}
                               onSearch={this.onCodeSearch.bind(this, 'customCode3')}
                               onSelect={this.onCodeSelect.bind(this, 'customCode3')}
+                              onClear={this.onCodeClear.bind(this, 'customCode3')}
                               style={{ width: '100%' }}
                               notFoundContent={null}
                               disabled={!this.props.createFlag}
@@ -802,8 +889,8 @@ export default class ProductForm extends React.Component {
                               className='product-search'
                             >
                               {this.state.productList.map((product) => (
-                                <Select.Option key={product.productId} value={product.productId}>
-                                  {product.productId} ({product.name})
+                                <Select.Option key={product.data} value={product.data}>
+                                  {this.getMappingProductDisplay(product)}
                                 </Select.Option>
                               ))}
                             </Select>

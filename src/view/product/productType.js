@@ -11,7 +11,7 @@ export const initData = {
   kindShortName: '',
   name: '',
   mappingProductId: '',
-  mappingProductSeqNo: '',
+  mappingProductSeqNo: null,
   unit: StatisStorage.unitList.length > 0 ? StatisStorage.unitList[0].unit : '',
   price1: 0,
   price2: 0,

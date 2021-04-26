@@ -31,6 +31,12 @@ export default class ProductAPI {
     )
   }
 
+  searchProductMapping = (realProduct, queryString) => {
+    return restInstance('get', '/products/smartQuery', { realProduct, queryString }).then(
+      (response) => response.data
+    )
+  }
+
   getPartsList = () => {
     const data = {
       pageNum: 1,

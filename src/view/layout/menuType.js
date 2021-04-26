@@ -160,11 +160,18 @@ export const menuType = [
         accessRoles: ['ROLE_PRODUCT']
       },
       {
-        key: 'ProductsImport',
-        routes: ['Products', 'Import'],
-        title: '匯入',
-        accessRoles: ['ROLE_PRODUCT_IMPORT']
+        key: 'ProductsQuickEdit',
+        routes: ['Products', 'QuickEdit'],
+        title: '快速編修',
+        accessRoles: ['ROLE_PRODUCT_UPDATE']
       }
+      // },
+      // {
+      //   key: 'ProductsImport',
+      //   routes: ['Products', 'Import'],
+      //   title: '匯入',
+      //   accessRoles: ['ROLE_PRODUCT_IMPORT']
+      // }
     ]
   },
   {

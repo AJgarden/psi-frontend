@@ -120,15 +120,6 @@ export default class Purchase extends React.Component {
                 <ListEditIcon />
               </Button>
             </Tooltip>
-            <Tooltip title='刪除'>
-              <Button
-                className='list-table-option-delete'
-                size='small'
-                onClick={_this.handleDelete.bind(_this, purchaseId)}
-              >
-                <ListDeleteIcon />
-              </Button>
-            </Tooltip>
           </Space>
         )
       },
@@ -184,9 +175,10 @@ export default class Purchase extends React.Component {
     this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
-  onDetailOpen = (detailPurchaseId) =>
-    this.setState({ detailPurchaseId, detailVisible: true })
-  onDetailClose = () => this.setState({ detailVisible: false })
+  onDetailOpen = (purchaseId) => this.history.push(`/Purchase/Detail/${purchaseId}`)
+  // onDetailOpen = (detailPurchaseId) =>
+  //   this.setState({ detailPurchaseId, detailVisible: true })
+  // onDetailClose = () => this.setState({ detailVisible: false })
 
   render() {
     return (
@@ -251,7 +243,7 @@ export default class Purchase extends React.Component {
             this.onPageChange
           )}
         />
-        <PageDrawer
+        {/* <PageDrawer
           width={480}
           placement='right'
           closeIcon={<UtilCloseIcon />}
@@ -266,7 +258,7 @@ export default class Purchase extends React.Component {
             purchaseId={this.state.detailPurchaseId}
             onClose={this.onDetailClose}
           />
-        </PageDrawer>
+        </PageDrawer> */}
       </>
     )
   }

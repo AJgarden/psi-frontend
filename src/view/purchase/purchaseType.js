@@ -4,8 +4,10 @@ export const initData = {
   purchaseId: 0,
   accountDate: moment().startOf('day'),
   vendorId: '',
-  note: ''
+  note: '',
+  purchaseDetails: []
 }
 
-export const formRules = [
-]
+export const formRules = []
+
+export const recordRules = []

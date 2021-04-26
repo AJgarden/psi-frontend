@@ -83,6 +83,22 @@ export default class Product extends React.Component {
     const { pagination } = this.state
     return [
       {
+        dataIndex: 'productType',
+        title: '',
+        width: 6,
+        fixed: 'left',
+        className: 'product-table-type',
+        render: (data) => {
+          return data === 'REAL' ? (
+            <span className='product-table-type-real' />
+          ) : data === 'VIRTUAL' ? (
+            <span className='product-table-type-virtual' />
+          ) : (
+            <span className='product-table-type-others' />
+          )
+        }
+      },
+      {
         dataIndex: 'seqNo',
         title: '執行',
         width: 50,

@@ -144,3 +144,96 @@
         left: 50%
         transform: translate(-50%, -50%)
 
+.purchase-detail-card
+  .ant-card-body
+    padding: 0
+.purchase-detail-table
+  .ant-table
+    &.ant-table-bordered
+      > .ant-table-container
+        border-color: #a8dadc
+  .ant-table-thead
+    > tr
+      > th
+        font-size: 0.875rem
+        border-right: 1px solid rgba(#ffffff, 0.5)
+        border-bottom: none
+        background: #a8dadc
+  .ant-table-tbody
+    > tr
+      > td
+        font-size: 0.875rem
+        .list-table-option
+          display: flex
+          .ant-space-item
+            margin-right: 4px !important
+          .ant-btn
+            display: block
+            border: none
+            padding: 3px
+            &.list-table-option-edit
+              background: #f4a261
+              &::after
+                --antd-wave-shadow-color: #f4a261
+            &.list-table-option-delete
+              background: #e63946
+              &::after
+                --antd-wave-shadow-color: #e63946
+            .anticon,
+            .anticon svg
+              display: block
+              width: 18px
+              height: 18px
+.purchase-price-row
+  display: flex
+  align-items: center
+  .purchase-price-input
+    width: calc(100% - 32px)
+    margin-right: 4px
+  .purchase-price-view
+    width: 24px
+    .ant-btn
+      display: block
+      width: 28px
+      height: 28px
+      border: 1px solid #dddddd
+      background: #f9f9f9
+      border-radius: 100%
+      padding: 3px
+      .anticon,
+      .anticon svg
+        display: block
+        width: 20px
+        height: 20px
+        fill: #999999
+      &:hover
+        border-color: #cccccc
+        background: #f1f1f1
+.purchase-history-price
+  &.ant-popover-placement-top
+    > .ant-popover-content
+      > .ant-popover-arrow
+        border-right-color: #2a9d8f
+        border-bottom-color: #2a9d8f
+  &.ant-popover-placement-bottom
+    > .ant-popover-content
+      > .ant-popover-arrow
+        border-top-color: #2a9d8f
+        border-left-color: #2a9d8f
+  .ant-popover-title
+    color: #ffffff
+    background: #2a9d8f
+  .ant-popover-inner-content
+    padding: 0
+.purchase-history-list
+  width: 400px
+  .ant-table-small
+    .ant-table-thead
+      > tr
+        > th
+          padding: 4px 8px
+    .ant-table-tbody
+      > tr
+        > td
+          padding: 4px 8px
+
