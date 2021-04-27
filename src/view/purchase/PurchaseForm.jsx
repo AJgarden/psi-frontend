@@ -122,6 +122,7 @@ export default class PurchaseForm extends React.Component {
             })
             this.setState(
               {
+                loading: false,
                 formData: {
                   ...response.data.purchaseMaster,
                   accountDate: moment(
