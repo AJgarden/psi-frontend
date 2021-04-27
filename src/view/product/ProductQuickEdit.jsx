@@ -505,7 +505,7 @@ export default class ProductQuickEdit extends React.Component {
               ? 'product-others'
               : ''
           }
-          scroll={{ x: 2400 }}
+          scroll={{ x: 2406 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>

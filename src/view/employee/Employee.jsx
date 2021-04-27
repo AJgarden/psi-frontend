@@ -70,7 +70,8 @@ export default class Customer extends React.Component {
       {
         dataIndex: 'employeeId',
         title: '執行',
-        width: 50,
+        width: 70,
+        fixed: 'left',
         render: (employeeId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -96,13 +97,16 @@ export default class Customer extends React.Component {
       },
       {
         title: '序',
-        width: 30,
+        width: 80,
         align: 'center',
+        fixed: 'left',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '員工編號',
-        dataIndex: 'employeeId'
+        dataIndex: 'employeeId',
+        fixed: 'left',
+        width: 120
       },
       {
         title: '姓名',
@@ -110,11 +114,13 @@ export default class Customer extends React.Component {
       },
       {
         title: '手機號碼',
-        dataIndex: 'cellphone'
+        dataIndex: 'cellphone',
+        width: 120
       },
       {
         title: '市內電話',
-        dataIndex: 'phone'
+        dataIndex: 'phone',
+        width: 120
       }
     ]
   }
@@ -187,6 +193,7 @@ export default class Customer extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
+          scroll={{ x: 630 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>

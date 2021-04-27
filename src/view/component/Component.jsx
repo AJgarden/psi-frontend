@@ -65,7 +65,8 @@ export default class Component extends React.Component {
       {
         dataIndex: 'partId',
         title: '執行',
-        width: 50,
+        width: 70,
+        fixed: 'left',
         render: (partId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -91,13 +92,16 @@ export default class Component extends React.Component {
       },
       {
         title: '序',
-        width: 30,
+        width: 80,
         align: 'center',
+        fixed: 'left',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '零件代號',
-        dataIndex: 'partId'
+        dataIndex: 'partId',
+        fixed: 'left',
+        width: 120
       },
       {
         title: '零件名稱',
@@ -176,6 +180,7 @@ export default class Component extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
+          scroll={{ x: 750 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>

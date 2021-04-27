@@ -63,7 +63,8 @@ export default class Vehicle extends React.Component {
       {
         dataIndex: 'kindId',
         title: '執行',
-        width: 50,
+        width: 70,
+        fixed: 'left',
         render: (kindId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -89,17 +90,21 @@ export default class Vehicle extends React.Component {
       },
       {
         title: '序',
-        width: 30,
+        width: 80,
         align: 'center',
+        fixed: 'left',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '車種代號',
-        dataIndex: 'kindId'
+        dataIndex: 'kindId',
+        fixed: 'left',
+        width: 120
       },
       {
         title: '車種簡稱',
-        dataIndex: 'shortName'
+        dataIndex: 'shortName',
+        width: 140
       },
       {
         title: '車種名稱',
@@ -107,7 +112,8 @@ export default class Vehicle extends React.Component {
       },
       {
         title: '車廠',
-        dataIndex: 'factory'
+        dataIndex: 'factory',
+        width: 120
       }
     ]
   }
@@ -177,6 +183,7 @@ export default class Vehicle extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
+          scroll={{ x: 830 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>

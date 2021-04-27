@@ -70,7 +70,8 @@ export default class Customer extends React.Component {
       {
         dataIndex: 'customerId',
         title: '執行',
-        width: 50,
+        width: 70,
+        fixed: 'left',
         render: (customerId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -96,37 +97,46 @@ export default class Customer extends React.Component {
       },
       {
         title: '序',
-        width: 30,
+        width: 80,
         align: 'center',
+        fixed: 'left',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '客戶代號',
-        dataIndex: 'customerId'
+        dataIndex: 'customerId',
+        fixed: 'left',
+        width: 120
       },
       {
         title: '客戶簡稱',
-        dataIndex: 'shortName'
+        dataIndex: 'shortName',
+        width: 240
       },
       {
         title: '聯絡人',
-        dataIndex: 'contactPerson'
+        dataIndex: 'contactPerson',
+        width: 120
       },
       {
         title: '地址',
-        dataIndex: 'address'
+        dataIndex: 'address',
+        width: 340
       },
       {
         title: '電話1',
-        dataIndex: 'phone1'
+        dataIndex: 'phone1',
+        width: 120
       },
       {
         title: '傳真號碼',
-        dataIndex: 'faxNumber'
+        dataIndex: 'faxNumber',
+        width: 120
       },
       {
         title: '行動電話',
-        dataIndex: 'cellphone'
+        dataIndex: 'cellphone',
+        width: 120
       }
     ]
   }
@@ -199,6 +209,7 @@ export default class Customer extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
+          scroll={{ x: 1330 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>

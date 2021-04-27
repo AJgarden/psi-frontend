@@ -63,7 +63,8 @@ export default class Colour extends React.Component {
       {
         dataIndex: 'colorId',
         title: '執行',
-        width: 50,
+        width: 70,
+        fixed: 'left',
         render: (colorId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -89,13 +90,16 @@ export default class Colour extends React.Component {
       },
       {
         title: '序',
-        width: 30,
+        width: 80,
         align: 'center',
+        fixed: 'left',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '顏色代號',
-        dataIndex: 'colorId'
+        dataIndex: 'colorId',
+        fixed: 'left',
+        width: 120
       },
       {
         title: '顏色名稱',
@@ -169,6 +173,7 @@ export default class Colour extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
+          scroll={{ x: 750 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
       </>

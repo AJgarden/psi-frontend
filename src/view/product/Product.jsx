@@ -101,7 +101,7 @@ export default class Product extends React.Component {
       {
         dataIndex: 'seqNo',
         title: '執行',
-        width: 50,
+        width: 70,
         render: (seqNo) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -127,25 +127,29 @@ export default class Product extends React.Component {
       },
       {
         title: '序',
-        width: 30,
+        width: 80,
         align: 'center',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '商品編號',
-        dataIndex: 'productId'
+        dataIndex: 'productId',
+        width: 120
       },
       {
         title: '車種名稱',
-        dataIndex: 'kindShortName'
+        dataIndex: 'kindShortName',
+        width: 140
       },
       {
         title: '商品名稱',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        width: 300
       },
       {
         title: '單位',
         dataIndex: 'unit',
+        width: 60,
         render: (data) => {
           const unit = StaticStorage.unitList.find((unit) => unit.unit === data)
           return unit ? unit.desc : data
@@ -153,11 +157,13 @@ export default class Product extends React.Component {
       },
       {
         title: '規格',
-        dataIndex: 'norm'
+        dataIndex: 'norm',
+        width: 180
       },
       {
         title: '額外資訊',
         dataIndex: 'productType',
+        width: 300,
         render: (data, row) => {
           return data === 'REAL' ? (
             <div className='list-table-addition'>
@@ -179,43 +185,6 @@ export default class Product extends React.Component {
           ) : null
         }
       }
-      // {
-      //   title: '原廠料號',
-      //   dataIndex: 'vendorProductId'
-      // },
-      // {
-      //   title: '定價1',
-      //   dataIndex: 'price1',
-      //   align: 'right',
-      //   render: (data) => {
-      //     return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-      //   }
-      // },
-      // {
-      //   title: '定價2',
-      //   dataIndex: 'price2',
-      //   align: 'right',
-      //   render: (data) => {
-      //     return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-      //   }
-      // },
-      // {
-      //   title: '定價3',
-      //   dataIndex: 'price3',
-      //   align: 'right',
-      //   render: (data) => {
-      //     return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-      //   }
-      // },
-      // {
-      //   title: '安全量',
-      //   align: 'right',
-      //   dataIndex: 'safetyStock'
-      // },
-      // {
-      //   title: '庫存地點',
-      //   dataIndex: 'storingPlace'
-      // }
     ]
   }
 
@@ -338,6 +307,7 @@ export default class Product extends React.Component {
               ? 'product-others'
               : ''
           }
+          scroll={{ x: 1256 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
         <PageDrawer
