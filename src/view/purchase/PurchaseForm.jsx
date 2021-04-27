@@ -727,8 +727,10 @@ export default class PurchaseForm extends React.Component {
   // 新增
   handleCreate = (back) => {
     this.setState({ loading: true }, () => {
+      const { formData } = this.state
+      formData.purchaseDetails = formData.purchaseDetails.filter((record) => record.productSeqNo !== null)
       this.purchaseAPI
-        .addPurchaseData(this.state.formData)
+        .addPurchaseData(formData)
         .then((response) => {
           if (response.code === 0) {
             message.success('成功新增資料')
@@ -774,6 +776,8 @@ export default class PurchaseForm extends React.Component {
   // 修改
   handleSubmit = (back) => {
     this.setState({ loading: true }, () => {
+      const { formData } = this.state
+      formData.purchaseDetails = formData.purchaseDetails.filter((record) => record.productSeqNo !== null)
       this.purchaseAPI
         .updatePurchaseData(this.state.formData)
         .then((response) => {
