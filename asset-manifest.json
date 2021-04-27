@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/psi-frontend/static/css/main.078cb4bf.chunk.css",
-    "main.js": "/psi-frontend/static/js/main.5256a93a.chunk.js",
-    "main.js.map": "/psi-frontend/static/js/main.5256a93a.chunk.js.map",
+    "main.css": "/psi-frontend/static/css/main.182d336d.chunk.css",
+    "main.js": "/psi-frontend/static/js/main.5d667da6.chunk.js",
+    "main.js.map": "/psi-frontend/static/js/main.5d667da6.chunk.js.map",
     "runtime-main.js": "/psi-frontend/static/js/runtime-main.66d333f6.js",
     "runtime-main.js.map": "/psi-frontend/static/js/runtime-main.66d333f6.js.map",
     "static/css/2.98e7ac70.chunk.css": "/psi-frontend/static/css/2.98e7ac70.chunk.css",
@@ -12,14 +12,14 @@
     "static/js/3.bcbd7c93.chunk.js.map": "/psi-frontend/static/js/3.bcbd7c93.chunk.js.map",
     "index.html": "/psi-frontend/index.html",
     "static/css/2.98e7ac70.chunk.css.map": "/psi-frontend/static/css/2.98e7ac70.chunk.css.map",
-    "static/css/main.078cb4bf.chunk.css.map": "/psi-frontend/static/css/main.078cb4bf.chunk.css.map",
+    "static/css/main.182d336d.chunk.css.map": "/psi-frontend/static/css/main.182d336d.chunk.css.map",
     "static/js/2.9e264f4b.chunk.js.LICENSE.txt": "/psi-frontend/static/js/2.9e264f4b.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.66d333f6.js",
     "static/css/2.98e7ac70.chunk.css",
     "static/js/2.9e264f4b.chunk.js",
-    "static/css/main.078cb4bf.chunk.css",
-    "static/js/main.5256a93a.chunk.js"
+    "static/css/main.182d336d.chunk.css",
+    "static/js/main.5d667da6.chunk.js"
   ]
 }
