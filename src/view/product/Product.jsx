@@ -28,6 +28,7 @@ export default class Product extends React.Component {
       loading: true,
       search: {
         productId: '',
+        partId: '',
         customCode1: '',
         name: ''
       },
@@ -53,9 +54,10 @@ export default class Product extends React.Component {
     const requestData = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      productId: `%${search.productId}%`,
-      name: `%${search.name}%`,
-      customCode1: `%${search.customCode1}%`
+      productId: search.productId,
+      partId: search.partId,
+      name: search.name,
+      customCode1: search.customCode1
     }
     this.productAPI
       .getProductList(requestData)
@@ -74,6 +76,7 @@ export default class Product extends React.Component {
   }
   handleSearch = () => {
     const { pagination } = this.state
+    pagination.total = 0
     pagination.current = 1
     this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
@@ -267,6 +270,12 @@ export default class Product extends React.Component {
                   placeholder='商品編號'
                   allowClear={true}
                   onChange={this.onInputChange.bind(this, 'productId')}
+                  style={{ width: 100 }}
+                />
+                <Input
+                  placeholder='零件編號'
+                  allowClear={true}
+                  onChange={this.onInputChange.bind(this, 'partId')}
                   style={{ width: 100 }}
                 />
                 <Input

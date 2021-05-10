@@ -47,6 +47,12 @@ export default class ProductForm extends React.Component {
         customCode3: '',
         productId: ''
       },
+      codeSelect: {
+        part: null,
+        kind: null,
+        grade: null,
+        color: null
+      },
       partsList: [],
       kindsList: [],
       gradesList: [],
@@ -341,8 +347,9 @@ export default class ProductForm extends React.Component {
       this.setState({ search }, () => this.checkData(formData, key))
     }
   }
-  onCodeSelect = (key, value) => {
-    const { formData, search, kindsList } = this.state
+  onCodeSelect = (key, value, option) => {
+    console.log(option)
+    const { formData, search, codeSelect, kindsList } = this.state
     if (key === 'partId') {
       search.partId = ''
     } else {
@@ -353,119 +360,181 @@ export default class ProductForm extends React.Component {
       const kind = kindsList.find((kind) => kind.kindId.toLowerCase() === value.toLowerCase())
       if (kind) formData.kindShortName = kind.shortName
     }
-    let productId = ''
-    productId += formData.partId ? formData.partId : ''
-    productId += formData.customCode1
-      ? productId !== ''
-        ? `-${formData.customCode1}`
-        : formData.customCode1
-      : ''
-    productId += formData.customCode2
-      ? productId !== ''
-        ? `-${formData.customCode2}`
-        : formData.customCode2
-      : ''
-    productId += formData.customCode3
-      ? productId !== ''
-        ? `-${formData.customCode3}`
-        : formData.customCode3
-      : ''
-    formData.productId = productId
-    this.setState({ search }, () => this.checkData(formData, key))
+    if (key === 'partId') codeSelect.part = option
+    else if (key === 'customCode1') codeSelect.kind = option
+    else if (key === 'customCode2') codeSelect.grade = option
+    else if (key === 'customCode3') codeSelect.color = option
+    formData.productId = this.generateProductIdName().productId
+    formData.name = this.generateProductIdName().productName
+    this.setState({ search, codeSelect }, () => this.checkData(formData, key))
   }
   onCodeClear = (key) => {
-    const { formData, search } = this.state
+    const { formData, search, codeSelect } = this.state
     formData[key] = ''
     search[key] = ''
     if (key === 'customCode1') formData.kindShortName = ''
-    let productId = ''
-    productId += formData.partId ? formData.partId : ''
-    productId += formData.customCode1
-      ? productId !== ''
-        ? `-${formData.customCode1}`
-        : formData.customCode1
-      : ''
-    productId += formData.customCode2
-      ? productId !== ''
-        ? `-${formData.customCode2}`
-        : formData.customCode2
-      : ''
-    productId += formData.customCode3
-      ? productId !== ''
-        ? `-${formData.customCode3}`
-        : formData.customCode3
-      : ''
-    formData.productId = productId
+    if (key === 'partId') codeSelect.part = null
+    else if (key === 'customCode1') codeSelect.kind = null
+    else if (key === 'customCode2') codeSelect.grade = null
+    else if (key === 'customCode3') codeSelect.color = null
+    formData.productId = this.generateProductIdName().productId
+    formData.name = this.generateProductIdName().productName
     this.setState({ search }, () => this.checkData(formData, key))
+  }
+  generateProductIdName = () => {
+    const { codeSelect } = this.state
+    let productId = ''
+    let productName = ''
+    if (codeSelect.part) {
+      productId += codeSelect.part.value
+      productName += codeSelect.part.name
+    }
+    if (codeSelect.kind) {
+      productId += productId !== '' ? `-${codeSelect.kind.value}` : codeSelect.kind.value
+      productName +=
+        codeSelect.kind.name !== ''
+          ? productName !== ''
+            ? `-${codeSelect.kind.name}`
+            : codeSelect.kind.name
+          : ''
+    }
+    if (codeSelect.grade) {
+      productId += productId !== '' ? `-${codeSelect.grade.value}` : codeSelect.grade.value
+      productName +=
+        codeSelect.grade.name !== ''
+          ? productName !== ''
+            ? `-${codeSelect.grade.name}`
+            : codeSelect.grade.name
+          : ''
+    }
+    if (codeSelect.color) {
+      productId += productId !== '' ? `-${codeSelect.color.value}` : codeSelect.color.value
+      productName +=
+        codeSelect.color.name !== ''
+          ? productName !== ''
+            ? `-${codeSelect.color.name}`
+            : codeSelect.color.name
+          : ''
+    }
+    return { productId, productName }
   }
   // get code options
   getPartOptions = () => {
     const { formData, search, partsList } = this.state
-    return partsList
-      .filter(
-        (part) =>
-          formData.partId === part.partId ||
-          (search.partId && part.partId.toLowerCase().includes(search.partId.toLowerCase()))
-      )
-      .map((part) => {
+    if (search.partId === '') {
+      // const parts = partsList.slice(0, 100)
+      return partsList.map((part) => {
         return {
           label: `${part.partId} - ${part.name}`,
-          value: part.partId
+          value: part.partId,
+          name: part.name
         }
       })
+    } else {
+      return partsList
+        .filter(
+          (part) =>
+            formData.partId === part.partId ||
+            (search.partId && part.partId.toLowerCase().startsWith(search.partId.toLowerCase()))
+        )
+        .map((part) => {
+          return {
+            label: `${part.partId} - ${part.name}`,
+            value: part.partId,
+            name: part.name
+          }
+        })
+    }
   }
   getKindOptions = () => {
     const { formData, search, kindsList } = this.state
-    const kinds = kindsList.filter(
-      (kind) =>
-        formData.customCode1 === kind.kindId ||
-        (search.customCode1 && kind.kindId.toLowerCase().includes(search.customCode1.toLowerCase()))
-    )
-    if (search.customCode1 && !kinds.find((kind) => kind.kindId === search.customCode1)) {
-      kinds.unshift({ kindId: search.customCode1, name: '' })
-    }
-    return kinds.map((kind) => {
-      return {
-        label: kind.name !== '' ? `${kind.kindId} - ${kind.name}` : kind.kindId,
-        value: kind.kindId
+    if (search.customCode1 === '') {
+      // const kinds = kindsList.slice(0, 100)
+      return kindsList.map((kind) => {
+        return {
+          label: `${kind.kindId} - ${kind.name}`,
+          value: kind.kindId,
+          name: kind.name
+        }
+      })
+    } else {
+      const kinds = kindsList.filter(
+        (kind) =>
+          formData.customCode1 === kind.kindId ||
+          (search.customCode1 &&
+            kind.kindId.toLowerCase().startsWith(search.customCode1.toLowerCase()))
+      )
+      if (search.customCode1 && !kinds.find((kind) => kind.kindId === search.customCode1)) {
+        kinds.unshift({ kindId: search.customCode1, name: '' })
       }
-    })
+      return kinds.map((kind) => {
+        return {
+          label: kind.name !== '' ? `${kind.kindId} - ${kind.name}` : kind.kindId,
+          value: kind.kindId,
+          name: kind.name
+        }
+      })
+    }
   }
   getGradeOptions = () => {
     const { formData, search, gradesList } = this.state
-    const grades = gradesList.filter(
-      (grade) =>
-        formData.customCode2 === grade.gradeId ||
-        (search.customCode2 &&
-          grade.gradeId.toLowerCase().includes(search.customCode2.toLowerCase()))
-    )
-    if (search.customCode2 && !grades.find((grade) => grade.gradeId === search.customCode2)) {
-      grades.unshift({ gradeId: search.customCode2, name: '' })
-    }
-    return grades.map((grade) => {
-      return {
-        label: grade.name !== '' ? `${grade.gradeId} - ${grade.name}` : grade.gradeId,
-        value: grade.gradeId
+    if (search.customCode2 === '') {
+      // const grades = gradesList.slice(0, 100)
+      return gradesList.map((grade) => {
+        return {
+          label: `${grade.gradeId} - ${grade.name}`,
+          value: grade.gradeId,
+          name: grade.name
+        }
+      })
+    } else {
+      const grades = gradesList.filter(
+        (grade) =>
+          formData.customCode2 === grade.gradeId ||
+          (search.customCode2 &&
+            grade.gradeId.toLowerCase().startsWith(search.customCode2.toLowerCase()))
+      )
+      if (search.customCode2 && !grades.find((grade) => grade.gradeId === search.customCode2)) {
+        grades.unshift({ gradeId: search.customCode2, name: '' })
       }
-    })
+      return grades.map((grade) => {
+        return {
+          label: grade.name !== '' ? `${grade.gradeId} - ${grade.name}` : grade.gradeId,
+          value: grade.gradeId,
+          name: grade.name
+        }
+      })
+    }
   }
   getColorOptions = () => {
     const { formData, search, colorsList } = this.state
-    const colors = colorsList.filter(
-      (color) =>
-        formData.customCode3 === color.colorId ||
-        (search.customCode3 &&
-          color.colorId.toLowerCase().includes(search.customCode3.toLowerCase()))
-    )
-    if (search.customCode3 && !colors.find((color) => color.colorId === search.customCode3)) {
-      colors.unshift({ colorId: search.customCode3, name: '' })
-    }
-    return colors.map((color) => {
-      return {
-        label: color.name !== '' ? `${color.colorId} - ${color.name}` : color.colorId,
-        value: color.colorId
+    if (search.customCode3 === '') {
+      // const colors = colorsList.slice(0, 100)
+      return colorsList.map((color) => {
+        return {
+          label: `${color.colorId} - ${color.name}`,
+          value: color.colorId,
+          name: color.name
+        }
+      })
+    } else {
+      const colors = colorsList.filter(
+        (color) =>
+          formData.customCode3 === color.colorId ||
+          (search.customCode3 &&
+            color.colorId.toLowerCase().includes(search.customCode3.toLowerCase()))
+      )
+      if (search.customCode3 && !colors.find((color) => color.colorId === search.customCode3)) {
+        colors.unshift({ colorId: search.customCode3, name: '' })
       }
-    })
+      return colors.map((color) => {
+        return {
+          label: color.name !== '' ? `${color.colorId} - ${color.name}` : color.colorId,
+          value: color.colorId,
+          name: color.name
+        }
+      })
+    }
   }
 
   // field validator
