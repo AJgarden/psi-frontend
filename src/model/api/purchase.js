@@ -20,23 +20,23 @@ export default class PurchaseAPI {
   }
 
   searchProductMapping = (realProduct, queryString) => {
-    return restInstance('get', '/v1/products/smartQuery', { realProduct, queryString }).then(
+    return restInstance('get', '/products/smartQuery', { realProduct, queryString }).then(
       (response) => response.data
     )
   }
 
   getProductData = (seqNo) => {
-    return restInstance('get', `/v1/products/${seqNo}`).then((response) => response.data)
+    return restInstance('get', `/products/${seqNo}`).then((response) => response.data)
   }
 
   getProductHistoryPrice = (productSeqNo) => {
-    return restInstance('get', '/v1/products/historyPurchasePrice', { productSeqNo }).then(
+    return restInstance('get', '/products/historyPurchasePrice', { productSeqNo }).then(
       (response) => response.data
     )
   }
 
   getVendorsList = () => {
-    return restInstance('get', '/v1/vendor', {
+    return restInstance('get', '/vendor', {
       pageNum: 1,
       pageSize: 9999,
       queryByEnum: 'VENDOR_ID',
@@ -45,7 +45,7 @@ export default class PurchaseAPI {
   }
 
   getColorsList = () => {
-    return restInstance('get', '/v1/colors', {
+    return restInstance('get', '/colors', {
       pageNum: 1,
       pageSize: 9999,
       colorId: ''

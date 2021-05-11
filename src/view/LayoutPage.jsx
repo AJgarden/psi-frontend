@@ -47,7 +47,7 @@ export default class LayoutPage extends React.Component {
       siderCollapsed: false
     }
     if (cookies.find((cookie) => cookie.includes('MOTOBUY_AUTH'))) {
-      testRestInstance('get', '/v1/auth')
+      testRestInstance('get', '/auth')
         .then((response) => {
           if (response.data.code === 0) {
             this.getGlobalData().then(() => {

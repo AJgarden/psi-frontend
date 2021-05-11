@@ -37,7 +37,7 @@ export const Login = (props) => {
     if (keepLogin) {
       document.cookie = `MOTOBUY_KEEP_LOGIN=${keepLogin}; path=/; max-age=86400`
     }
-    restInstanceWithoutAuth('post', '/v1/author/login', loginData)
+    restInstanceWithoutAuth('post', '/author/login', loginData)
       .then((response) => {
         const data = response.data
         if (data.code === 0) {
