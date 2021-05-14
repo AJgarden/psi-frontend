@@ -42,7 +42,8 @@ export default class Sale extends React.Component {
             moment().endOf('month').startOf('day').format('YYYY-MM-DD')
           ],
           id: undefined,
-          keyword: ''
+          keyword: '',
+          confirm: 'ALL'
         }
     this.state = {
       loading: true,
