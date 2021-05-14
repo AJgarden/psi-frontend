@@ -1,23 +1,41 @@
 import React from 'react'
 import { createHashHistory } from 'history'
-import { Button, Col, Input, Select, DatePicker, Row, Space, Table, Tooltip, Modal } from 'antd'
+import {
+  Button,
+  Col,
+  Input,
+  Select,
+  DatePicker,
+  Checkbox,
+  Row,
+  Space,
+  Table,
+  Tooltip,
+  Modal
+} from 'antd'
 import moment from 'moment'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
-import { ListAddIcon, ListSearchIcon, ListEditIcon, UtilCloseIcon } from '../icon/Icon'
+import {
+  ListAddIcon,
+  ListSearchIcon,
+  ListEditIcon,
+  ListTickIcon,
+  UtilCloseIcon
+} from '../icon/Icon'
 import { PageDrawer } from '../../component/PageDrawer'
 import { getPaginationSetting } from '../../component/paginationSetting'
-import PurchaseAPI from '../../model/api/purchase'
+import SaleAPI from '../../model/api/sale'
 import StaticStorage from '../../model/storage/static'
 
-export default class Purchase extends React.Component {
+export default class Sale extends React.Component {
   history = createHashHistory()
-  purchaseAPI = new PurchaseAPI()
+  saleAPI = new SaleAPI()
   staticStorage = new StaticStorage()
 
   constructor(props) {
     super(props)
-    const search = StaticStorage.purchaseSearch.isSearch
-      ? JSON.parse(JSON.stringify(StaticStorage.purchaseSearch))
+    const search = StaticStorage.saleSearch.isSearch
+      ? JSON.parse(JSON.stringify(StaticStorage.saleSearch))
       : {
           date: [
             moment().startOf('month').startOf('day').format('YYYY-MM-DD'),
@@ -39,7 +57,7 @@ export default class Purchase extends React.Component {
       detailPurchaseId: 0,
       detailVisible: false
     }
-    this.staticStorage.setPurchaseSearch({})
+    this.staticStorage.setSaleSearch({})
     this.getList()
   }
 
@@ -47,7 +65,8 @@ export default class Purchase extends React.Component {
     const { search, pagination } = this.state
     const requestData = {
       pageNum: pagination.current,
-      pageSize: pagination.pageSize
+      pageSize: pagination.pageSize,
+      confirmQueryEnum: search.confirm
     }
     if (search.id) {
       requestData.queryBy = search.id
@@ -57,8 +76,8 @@ export default class Purchase extends React.Component {
       requestData.beginDate = search.date[0]
       requestData.endDate = search.date[1]
     }
-    this.purchaseAPI
-      .getPurchaseList(requestData)
+    this.saleAPI
+      .getSaleList(requestData)
       .then((response) => {
         pagination.total = response.data.total
         this.setState({ loading: false, list: response.data.list, pagination })
@@ -72,15 +91,20 @@ export default class Purchase extends React.Component {
     search.date = date.map((str) => moment(str).format('YYYY-MM-DD'))
     this.setState({ search, loading: true, list: [] }, () => this.getList())
   }
-  onSelectChange = (value) => {
+  onSelectChange = (key, value) => {
     const { search } = this.state
-    search.id = value
-    if (!value) search.keyword = ''
+    search[key] = value
+    if (key === 'id' && !value) search.keyword = ''
     this.setState({ search })
   }
   onInputChange = (e) => {
     const { search } = this.state
     search.keyword = e.target.value
+    this.setState({ search })
+  }
+  onCheckChange = (e) => {
+    const { search } = this.state
+    search.unConfirm = e.target.checked
     this.setState({ search })
   }
   handleSearch = () => {
@@ -94,17 +118,17 @@ export default class Purchase extends React.Component {
     const { pagination } = this.state
     return [
       {
-        dataIndex: 'purchaseId',
+        dataIndex: 'salesId',
         title: '執行',
-        width: 50,
         fixed: 'left',
-        render: (purchaseId) => (
+        width: 50,
+        render: (salesId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
               <Button
                 className='list-table-option-edit'
                 size='small'
-                onClick={_this.onDetailOpen.bind(_this, purchaseId)}
+                onClick={_this.onDetailOpen.bind(_this, salesId)}
               >
                 <ListEditIcon />
               </Button>
@@ -120,8 +144,8 @@ export default class Purchase extends React.Component {
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
-        title: '進貨編號',
-        dataIndex: 'purchaseId',
+        title: '銷貨編號',
+        dataIndex: 'salesId',
         fixed: 'left',
         width: 140
       },
@@ -131,22 +155,42 @@ export default class Purchase extends React.Component {
         width: 140
       },
       {
-        title: '廠商代號',
-        dataIndex: 'vendorId',
+        title: '客戶代號',
+        dataIndex: 'customerId',
         width: 140
       },
       {
-        title: '廠商名稱',
-        dataIndex: 'vendorName'
+        title: '客戶名稱',
+        dataIndex: 'customerName'
       },
       {
         title: '總金額',
         dataIndex: 'totalAmount',
+        width: 140,
         fixed: 'right',
         align: 'right',
-        width: 140,
         render: (data) => {
           return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+        }
+      },
+      {
+        title: '已收款',
+        dataIndex: 'pay',
+        fixed: 'right',
+        align: 'center',
+        width: 60,
+        render: (record) => {
+          return record && <ListTickIcon className='list-table-tick' />
+        }
+      },
+      {
+        title: '已回單',
+        dataIndex: 'confirm',
+        fixed: 'right',
+        align: 'center',
+        width: 60,
+        render: (record) => {
+          return record && <ListTickIcon className='list-table-tick' />
         }
       }
     ]
@@ -171,12 +215,12 @@ export default class Purchase extends React.Component {
     this.setState({ loading: true, list: [], pagination }, () => this.getList())
   }
 
-  onDetailOpen = (purchaseId) => {
-    this.staticStorage.setPurchaseSearch({
+  onDetailOpen = (salesId) => {
+    this.staticStorage.setSaleSearch({
       ...this.state.search,
       isSearch: true
     })
-    this.history.push(`/Purchase/Detail/${purchaseId}`)
+    this.history.push(`/Sale/Detail/${salesId}`)
   }
   // onDetailOpen = (detailPurchaseId) =>
   //   this.setState({ detailPurchaseId, detailVisible: true })
@@ -193,11 +237,11 @@ export default class Purchase extends React.Component {
                   type='primary'
                   icon={<ListAddIcon />}
                   onClick={() => {
-                    this.staticStorage.setPurchaseSearch({
+                    this.staticStorage.setSaleSearch({
                       ...this.state.search,
                       isSearch: true
                     })
-                    this.history.push('/Purchase/Add')
+                    this.history.push('/Sale/Add')
                   }}
                   className='list-header-add'
                 >
@@ -215,13 +259,22 @@ export default class Purchase extends React.Component {
             <Col>
               <Space>
                 <Select
+                  placeholder='回單狀態'
+                  value={this.state.search.confirm}
+                  onChange={this.onSelectChange.bind(this, 'confirm')}
+                >
+                  <Select.Option value='ALL'>全部</Select.Option>
+                  <Select.Option value='Y'>已回單</Select.Option>
+                  <Select.Option value='N'>未回單</Select.Option>
+                </Select>
+                <Select
                   placeholder='搜尋欄位'
                   value={this.state.search.id}
                   allowClear={true}
-                  onChange={this.onSelectChange}
+                  onChange={this.onSelectChange.bind(this, 'id')}
                 >
-                  <Select.Option value='PURCHASE_ID'>進貨單號</Select.Option>
-                  <Select.Option value='VENDOR_ID'>廠商代號</Select.Option>
+                  <Select.Option value='SALES_ID'>銷貨單號</Select.Option>
+                  <Select.Option value='CUSTOMER_ID'>顧客代號</Select.Option>
                   <Select.Option value='NOTE'>備註</Select.Option>
                 </Select>
                 <Input placeholder='搜尋內容' allowClear={true} onChange={this.onInputChange} />
@@ -244,7 +297,7 @@ export default class Purchase extends React.Component {
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
-          scroll={{ x: 990 }}
+          scroll={{ x: 1110 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
         {/* <PageDrawer

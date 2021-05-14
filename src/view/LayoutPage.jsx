@@ -28,6 +28,8 @@ import ProductQuickEdit from './product/ProductQuickEdit'
 import ProductDetail from './product/ProductDetail'
 import Purchase from './purchase/Purchase'
 import PurchaseDetail from './purchase/PurchaseDetail'
+import Sale from './sale/Sale'
+import SaleDetail from './sale/SaleDetail'
 import StaticStorage from '../model/storage/static'
 import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
@@ -228,6 +230,18 @@ export default class LayoutPage extends React.Component {
                     render={(props) => <PurchaseDetail {...props} createFlag={false} />}
                   />
                   <Route exact path='/Purchase/List' component={Purchase} />
+                  {/* Sale */}
+                  <Route
+                    exact
+                    path='/Sale/Add'
+                    render={(props) => <SaleDetail {...props} createFlag={true} />}
+                  />
+                  <Route
+                    exact
+                    path='/Sale/Detail/:salesId'
+                    render={(props) => <SaleDetail {...props} createFlag={false} />}
+                  />
+                  <Route exact path='/Sale/List' component={Sale} />
                   <Route path='/' component={Dashboard} />
                 </Switch>
               </Layout.Content>

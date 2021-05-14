@@ -11,7 +11,7 @@ export const LayoutHeader = (props) => {
   return (
     <>
       <div className='layout-header-left'>
-        <Input.Search placeholder='全域搜尋' enterButton />
+        {/* <Input.Search placeholder='全域搜尋' enterButton /> */}
       </div>
       <div className='layout-header-right'>
         <Button>

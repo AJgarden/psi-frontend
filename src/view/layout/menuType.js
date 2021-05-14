@@ -5,7 +5,8 @@ import {
   SiderMenuBasicIcon,
   SiderMenuWidgetIcon,
   SiderMenuProductIcon,
-  SiderMenuPurchaseIcon
+  SiderMenuPurchaseIcon,
+  SiderMenuSaleIcon
 } from '../icon/Icon'
 
 export const routes = [
@@ -54,12 +55,20 @@ export const routes = [
     title: '列表 - 商品管理'
   },
   {
+    path: '/Products/QuickEdit',
+    title: '快速編修 - 商品管理'
+  },
+  {
     path: '/Products',
     title: '商品管理'
   },
   {
-    path: '/Purchase',
+    path: '/Purchase/List',
     title: '列表 - 進貨單'
+  },
+  {
+    path: '/Purchase/Add',
+    title: '新增 - 進貨單'
   },
   {
     path: '/Purchase',
@@ -192,6 +201,27 @@ export const menuType = [
         routes: ['Purchase', 'Add'],
         title: '新增',
         accessRoles: ['ROLE_PRODUCT_ADD']
+      }
+    ]
+  },
+  {
+    key: 'Sale',
+    routes: ['Sale'],
+    icon: <SiderMenuSaleIcon />,
+    title: '銷貨',
+    accessRoles: ['ROLE_SALES_MENU'],
+    children: [
+      {
+        key: 'SaleList',
+        routes: ['Sale', 'List'],
+        title: '列表',
+        accessRoles: ['ROLE_SALES_LIST']
+      },
+      {
+        key: 'SaleAdd',
+        routes: ['Sale', 'Add'],
+        title: '新增',
+        accessRoles: ['ROLE_SALES_ADD']
       }
     ]
   }

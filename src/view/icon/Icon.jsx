@@ -2,24 +2,14 @@ import React from 'react'
 import Icon from '@ant-design/icons'
 
 const CarouselNextSvg = () => (
-  <svg
-    height='36px'
-    viewBox='0 0 24 24'
-    width='36px'
-    fill='#000000'
-  >
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' />
   </svg>
 )
 export const CarouselNextIcon = (props) => <Icon component={CarouselNextSvg} {...props} />
 const CarouselPrevSvg = () => (
-  <svg
-    height='36px'
-    viewBox='0 0 24 24'
-    width='36px'
-    fill='#000000'
-  >
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' />
   </svg>
@@ -50,6 +40,13 @@ const PhotoViewSvg = () => (
 )
 export const PhotoViewIcon = (props) => <Icon component={PhotoViewSvg} {...props} />
 
+const ListTickSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' />
+  </svg>
+)
+export const ListTickIcon = (props) => <Icon component={ListTickSvg} {...props} />
 const ListOpenSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />
@@ -132,6 +129,21 @@ const HeaderAccountSvg = () => (
 )
 export const HeaderAccountIcon = (props) => <Icon component={HeaderAccountSvg} {...props} />
 
+const SiderMenuSaleSvg = () => (
+  <svg
+    enableBackground='new 0 0 20 20'
+    height='36px'
+    viewBox='0 0 20 20'
+    width='36px'
+    fill='#000000'
+  >
+    <g>
+      <rect fill='none' height='20' width='20' />
+      <path d='M14,3H6C5.45,3,5,3.45,5,4v1c0,0.55,0.45,1,1,1h8c0.55,0,1-0.45,1-1V4C15,3.45,14.55,3,14,3z M14,5H6V4h8V5z M16,17H4 c-0.55,0-1-0.45-1-1l0,0l0-1h14v1l0,0C17,16.55,16.55,17,16,17z M14.26,7.61C14.1,7.24,13.74,7,13.34,7H6.66 C6.26,7,5.9,7.24,5.74,7.61L3,14h14L14.26,7.61z M7.75,13h-0.5c-0.28,0-0.5-0.22-0.5-0.5c0-0.28,0.22-0.5,0.5-0.5h0.5 c0.28,0,0.5,0.22,0.5,0.5C8.25,12.78,8.03,13,7.75,13z M7.75,11h-0.5c-0.28,0-0.5-0.22-0.5-0.5S6.97,10,7.25,10h0.5 c0.28,0,0.5,0.22,0.5,0.5S8.03,11,7.75,11z M7.75,9h-0.5c-0.28,0-0.5-0.22-0.5-0.5c0-0.28,0.22-0.5,0.5-0.5h0.5 c0.28,0,0.5,0.22,0.5,0.5C8.25,8.78,8.03,9,7.75,9z M10.25,13h-0.5c-0.28,0-0.5-0.22-0.5-0.5S9.47,12,9.75,12h0.5 c0.28,0,0.5,0.22,0.5,0.5S10.53,13,10.25,13z M10.25,11h-0.5c-0.28,0-0.5-0.22-0.5-0.5c0-0.28,0.22-0.5,0.5-0.5h0.5 c0.28,0,0.5,0.22,0.5,0.5C10.75,10.78,10.53,11,10.25,11z M10.25,9h-0.5c-0.28,0-0.5-0.22-0.5-0.5S9.47,8,9.75,8h0.5 c0.28,0,0.5,0.22,0.5,0.5S10.53,9,10.25,9z M12.75,13h-0.5c-0.28,0-0.5-0.22-0.5-0.5s0.22-0.5,0.5-0.5h0.5c0.28,0,0.5,0.22,0.5,0.5 S13.03,13,12.75,13z M12.75,11h-0.5c-0.28,0-0.5-0.22-0.5-0.5c0-0.28,0.22-0.5,0.5-0.5h0.5c0.28,0,0.5,0.22,0.5,0.5 C13.25,10.78,13.03,11,12.75,11z M12.75,9h-0.5c-0.28,0-0.5-0.22-0.5-0.5S11.97,8,12.25,8h0.5c0.28,0,0.5,0.22,0.5,0.5 S13.03,9,12.75,9z' />
+    </g>
+  </svg>
+)
+export const SiderMenuSaleIcon = (props) => <Icon component={SiderMenuSaleSvg} {...props} />
 const SiderMenuPurchaseSvg = () => (
   <svg
     enableBackground='new 0 0 24 24'

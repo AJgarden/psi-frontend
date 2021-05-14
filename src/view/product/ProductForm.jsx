@@ -35,7 +35,7 @@ export default class ProductForm extends React.Component {
       inited: false,
       loading: true,
       productType: [],
-      formData: { ...initData },
+      formData: JSON.parse(JSON.stringify(initData)),
       additionData: { ...additionData },
       picOpen: false,
       picUrl: '',
@@ -88,7 +88,7 @@ export default class ProductForm extends React.Component {
         {
           inited: false,
           loading: true,
-          formData: { ...initData },
+          formData: JSON.parse(JSON.stringify(initData)),
           additionData: { ...additionData },
           picOpen: false,
           picUrl: '',
@@ -580,24 +580,28 @@ export default class ProductForm extends React.Component {
 
   // 上傳照片
   onPicUpload = (picEnum, file) => {
-    this.setState({ loading: true }, () => {
-      const data = new FormData()
-      data.append('file', file)
-      this.productAPI.uploadProductPic(this.props.seqNo, picEnum, data).then((response) => {
-        if (response.code === 0) {
-          message.success('照片上傳成功')
-          this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
-            if (response.code === 0) {
-              this.setState({ loading: false, additionData: response.data })
-            } else {
-              this.setState({ loading: false })
-            }
-          })
-        } else {
-          message.error('照片上傳失敗')
-        }
+    if (file.size > 10485760) {
+      message.error('照片必須小於10MB')
+    } else {
+      this.setState({ loading: true }, () => {
+        const data = new FormData()
+        data.append('file', file)
+        this.productAPI.uploadProductPic(this.props.seqNo, picEnum, data).then((response) => {
+          if (response.code === 0) {
+            message.success('照片上傳成功')
+            this.productAPI.getProductAdditionData(this.props.seqNo).then((response) => {
+              if (response.code === 0) {
+                this.setState({ loading: false, additionData: response.data })
+              } else {
+                this.setState({ loading: false })
+              }
+            })
+          } else {
+            message.error('照片上傳失敗')
+          }
+        })
       })
-    })
+    }
     return false
   }
 
@@ -622,7 +626,7 @@ export default class ProductForm extends React.Component {
               if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
               this.setState({
                 loading: false,
-                formData: { ...initData },
+                formData: JSON.parse(JSON.stringify(initData)),
                 formStatus: JSON.parse(JSON.stringify(formRules)),
                 search: {
                   partId: '',
@@ -1134,6 +1138,7 @@ export default class ProductForm extends React.Component {
                               <PhotoViewIcon />
                             </Button>
                             <Upload
+                              accept='image/*'
                               showUploadList={false}
                               beforeUpload={this.onPicUpload.bind(this, 'PIC1')}
                             >
@@ -1146,6 +1151,7 @@ export default class ProductForm extends React.Component {
                       ) : (
                         <Upload
                           className='product-real-upload-wrapper'
+                          accept='image/*'
                           showUploadList={false}
                           beforeUpload={this.onPicUpload.bind(this, 'PIC1')}
                         >
@@ -1165,6 +1171,7 @@ export default class ProductForm extends React.Component {
                               <PhotoViewIcon />
                             </Button>
                             <Upload
+                              accept='image/*'
                               showUploadList={false}
                               beforeUpload={this.onPicUpload.bind(this, 'PIC2')}
                             >
@@ -1177,6 +1184,7 @@ export default class ProductForm extends React.Component {
                       ) : (
                         <Upload
                           className='product-real-upload-wrapper'
+                          accept='image/*'
                           showUploadList={false}
                           beforeUpload={this.onPicUpload.bind(this, 'PIC2')}
                         >
@@ -1196,6 +1204,7 @@ export default class ProductForm extends React.Component {
                               <PhotoViewIcon />
                             </Button>
                             <Upload
+                              accept='image/*'
                               showUploadList={false}
                               beforeUpload={this.onPicUpload.bind(this, 'PIC3')}
                             >
@@ -1208,6 +1217,7 @@ export default class ProductForm extends React.Component {
                       ) : (
                         <Upload
                           className='product-real-upload-wrapper'
+                          accept='image/*'
                           showUploadList={false}
                           beforeUpload={this.onPicUpload.bind(this, 'PIC3')}
                         >
@@ -1227,6 +1237,7 @@ export default class ProductForm extends React.Component {
                               <PhotoViewIcon />
                             </Button>
                             <Upload
+                              accept='image/*'
                               showUploadList={false}
                               beforeUpload={this.onPicUpload.bind(this, 'PIC4')}
                             >
@@ -1239,6 +1250,7 @@ export default class ProductForm extends React.Component {
                       ) : (
                         <Upload
                           className='product-real-upload-wrapper'
+                          accept='image/*'
                           showUploadList={false}
                           beforeUpload={this.onPicUpload.bind(this, 'PIC4')}
                         >

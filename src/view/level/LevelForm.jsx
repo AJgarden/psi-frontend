@@ -16,7 +16,7 @@ export default class LevelForm extends React.Component {
     super(props)
     this.state = {
       loading: !props.createFlag,
-      formData: { ...initData },
+      formData: JSON.parse(JSON.stringify(initData)),
       formStatus: JSON.parse(JSON.stringify(formRules)),
       validId: false,
       canSubmit: false
@@ -30,7 +30,7 @@ export default class LevelForm extends React.Component {
     if (!prevProps.createFlag && this.props.createFlag) {
       this.setState({
         loading: false,
-        formData: { ...initData },
+        formData: JSON.parse(JSON.stringify(initData)),
         formStatus: JSON.parse(JSON.stringify(formRules)),
         validId: false,
         canSubmit: false
@@ -39,7 +39,7 @@ export default class LevelForm extends React.Component {
       this.setState(
         {
           loading: true,
-          formData: { ...initData },
+          formData: JSON.parse(JSON.stringify(initData)),
           formStatus: JSON.parse(JSON.stringify(formRules)),
           validId: true,
           canSubmit: false
@@ -150,7 +150,7 @@ export default class LevelForm extends React.Component {
               layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
               this.setState({
                 loading: false,
-                formData: { ...initData },
+                formData: JSON.parse(JSON.stringify(initData)),
                 formStatus: JSON.parse(JSON.stringify(formRules)),
                 canSubmit: false
               })

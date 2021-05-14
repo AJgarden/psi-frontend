@@ -1,9 +1,11 @@
 export const initData = {
-  purchaseId: 0,
+  salesId: 0,
   accountDate: null,
-  vendorId: '',
+  customerId: '',
   note: '',
-  purchaseDetails: []
+  confirm: false,
+  pay: false,
+  salesDetails: []
 }
 
 export const formRules = []
