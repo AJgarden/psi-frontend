@@ -31,7 +31,7 @@ export default class Purchase extends React.Component {
       search,
       list: [],
       pagination: {
-        current: 1,
+        current: StaticStorage.purchaseSearch.isSearch ? StaticStorage.purchaseSearch.currentPage : 1,
         total: 0,
         pageSize: 10,
         position: ['bottomLeft']
@@ -73,10 +73,15 @@ export default class Purchase extends React.Component {
     this.setState({ search, loading: true, list: [] }, () => this.getList())
   }
   onSelectChange = (value) => {
-    const { search } = this.state
+    const { search, pagination } = this.state
     search.id = value
-    if (!value) search.keyword = ''
-    this.setState({ search })
+    if (!value) {
+      search.keyword = ''
+      pagination.current = 1
+      this.setState({ loading: true, list: [], search, pagination }, () => this.getList())
+    } else {
+      this.setState({ search })
+    }
   }
   onInputChange = (e) => {
     const { search } = this.state
@@ -174,6 +179,7 @@ export default class Purchase extends React.Component {
   onDetailOpen = (purchaseId) => {
     this.staticStorage.setPurchaseSearch({
       ...this.state.search,
+      currentPage: this.state.pagination.current,
       isSearch: true
     })
     this.history.push(`/Purchase/Detail/${purchaseId}`)
@@ -219,12 +225,18 @@ export default class Purchase extends React.Component {
                   value={this.state.search.id}
                   allowClear={true}
                   onChange={this.onSelectChange}
+                  style={{ width: 100 }}
                 >
                   <Select.Option value='PURCHASE_ID'>進貨單號</Select.Option>
                   <Select.Option value='VENDOR_ID'>廠商代號</Select.Option>
                   <Select.Option value='NOTE'>備註</Select.Option>
                 </Select>
-                <Input placeholder='搜尋內容' allowClear={true} onChange={this.onInputChange} />
+                <Input
+                  value={this.state.search.keyword}
+                  placeholder='搜尋內容'
+                  allowClear={true}
+                  onChange={this.onInputChange}
+                />
                 <Button
                   type='primary'
                   icon={<ListSearchIcon />}

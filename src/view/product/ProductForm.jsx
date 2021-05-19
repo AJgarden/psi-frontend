@@ -1137,16 +1137,17 @@ export default class ProductForm extends React.Component {
                             <Button onClick={this.openPic.bind(this, 'pic1Url')}>
                               <PhotoViewIcon />
                             </Button>
-                            <Upload
-                              accept='image/*'
-                              showUploadList={false}
-                              beforeUpload={this.onPicUpload.bind(this, 'PIC1')}
-                            >
-                              <Button>
-                                <PhotoUploadIcon />
-                              </Button>
-                            </Upload>
                           </div>
+                          <Upload
+                            className='product-real-pic-reupload'
+                            accept='image/*'
+                            showUploadList={false}
+                            beforeUpload={this.onPicUpload.bind(this, 'PIC1')}
+                          >
+                            <Button size='small'>
+                              <PhotoUploadIcon />
+                            </Button>
+                          </Upload>
                         </div>
                       ) : (
                         <Upload
@@ -1170,16 +1171,17 @@ export default class ProductForm extends React.Component {
                             <Button onClick={this.openPic.bind(this, 'pic2Url')}>
                               <PhotoViewIcon />
                             </Button>
-                            <Upload
-                              accept='image/*'
-                              showUploadList={false}
-                              beforeUpload={this.onPicUpload.bind(this, 'PIC2')}
-                            >
-                              <Button>
-                                <PhotoUploadIcon />
-                              </Button>
-                            </Upload>
                           </div>
+                          <Upload
+                            className='product-real-pic-reupload'
+                            accept='image/*'
+                            showUploadList={false}
+                            beforeUpload={this.onPicUpload.bind(this, 'PIC2')}
+                          >
+                            <Button size='small'>
+                              <PhotoUploadIcon />
+                            </Button>
+                          </Upload>
                         </div>
                       ) : (
                         <Upload
@@ -1203,16 +1205,17 @@ export default class ProductForm extends React.Component {
                             <Button onClick={this.openPic.bind(this, 'pic3Url')}>
                               <PhotoViewIcon />
                             </Button>
-                            <Upload
-                              accept='image/*'
-                              showUploadList={false}
-                              beforeUpload={this.onPicUpload.bind(this, 'PIC3')}
-                            >
-                              <Button>
-                                <PhotoUploadIcon />
-                              </Button>
-                            </Upload>
                           </div>
+                          <Upload
+                            className='product-real-pic-reupload'
+                            accept='image/*'
+                            showUploadList={false}
+                            beforeUpload={this.onPicUpload.bind(this, 'PIC3')}
+                          >
+                            <Button size='small'>
+                              <PhotoUploadIcon />
+                            </Button>
+                          </Upload>
                         </div>
                       ) : (
                         <Upload
@@ -1236,16 +1239,17 @@ export default class ProductForm extends React.Component {
                             <Button onClick={this.openPic.bind(this, 'pic4Url')}>
                               <PhotoViewIcon />
                             </Button>
-                            <Upload
-                              accept='image/*'
-                              showUploadList={false}
-                              beforeUpload={this.onPicUpload.bind(this, 'PIC4')}
-                            >
-                              <Button>
-                                <PhotoUploadIcon />
-                              </Button>
-                            </Upload>
                           </div>
+                          <Upload
+                            className='product-real-pic-reupload'
+                            accept='image/*'
+                            showUploadList={false}
+                            beforeUpload={this.onPicUpload.bind(this, 'PIC4')}
+                          >
+                            <Button size='small'>
+                              <PhotoUploadIcon />
+                            </Button>
+                          </Upload>
                         </div>
                       ) : (
                         <Upload

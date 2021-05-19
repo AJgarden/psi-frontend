@@ -6,12 +6,13 @@ import {
   Input,
   Select,
   DatePicker,
-  Checkbox,
+  Switch,
   Row,
   Space,
   Table,
   Tooltip,
-  Modal
+  Modal,
+  message
 } from 'antd'
 import moment from 'moment'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
@@ -50,7 +51,7 @@ export default class Sale extends React.Component {
       search,
       list: [],
       pagination: {
-        current: 1,
+        current: StaticStorage.saleSearch.isSearch ? StaticStorage.saleSearch.currentPage : 1,
         total: 0,
         pageSize: 10,
         position: ['bottomLeft']
@@ -93,10 +94,15 @@ export default class Sale extends React.Component {
     this.setState({ search, loading: true, list: [] }, () => this.getList())
   }
   onSelectChange = (key, value) => {
-    const { search } = this.state
+    const { search, pagination } = this.state
     search[key] = value
-    if (key === 'id' && !value) search.keyword = ''
-    this.setState({ search })
+    if (key === 'id' && !value) {
+      search.keyword = ''
+      pagination.current = 1
+      this.setState({ loading: true, list: [], search, pagination }, () => this.getList())
+    } else {
+      this.setState({ search })
+    }
   }
   onInputChange = (e) => {
     const { search } = this.state
@@ -136,6 +142,21 @@ export default class Sale extends React.Component {
             </Tooltip>
           </Space>
         )
+      },
+      {
+        title: '已回單',
+        dataIndex: 'confirm',
+        fixed: 'left',
+        align: 'center',
+        width: 60,
+        render: (record, row) => {
+          return (
+            <Switch
+              defaultChecked={record}
+              onChange={_this.onConfirmChange.bind(_this, row.salesId, !record)}
+            />
+          )
+        }
       },
       {
         title: '序',
@@ -183,18 +204,20 @@ export default class Sale extends React.Component {
         render: (record) => {
           return record && <ListTickIcon className='list-table-tick' />
         }
-      },
-      {
-        title: '已回單',
-        dataIndex: 'confirm',
-        fixed: 'right',
-        align: 'center',
-        width: 60,
-        render: (record) => {
-          return record && <ListTickIcon className='list-table-tick' />
-        }
       }
     ]
+  }
+
+  onConfirmChange = (salesId, status) => {
+    this.setState({ loading: true }, () => {
+      this.saleAPI
+        .saveSaleConfirmFlag(salesId, status)
+        .then(() => this.getList())
+        .catch(() => {
+          message.error('修改回單狀態失敗')
+          this.setState({ loading: false })
+        })
+    })
   }
 
   handleDelete = (seqNo) => {
@@ -219,6 +242,7 @@ export default class Sale extends React.Component {
   onDetailOpen = (salesId) => {
     this.staticStorage.setSaleSearch({
       ...this.state.search,
+      currentPage: this.state.pagination.current,
       isSearch: true
     })
     this.history.push(`/Sale/Detail/${salesId}`)
@@ -273,12 +297,18 @@ export default class Sale extends React.Component {
                   value={this.state.search.id}
                   allowClear={true}
                   onChange={this.onSelectChange.bind(this, 'id')}
+                  style={{ width: 100 }}
                 >
                   <Select.Option value='SALES_ID'>銷貨單號</Select.Option>
                   <Select.Option value='CUSTOMER_ID'>顧客代號</Select.Option>
                   <Select.Option value='NOTE'>備註</Select.Option>
                 </Select>
-                <Input placeholder='搜尋內容' allowClear={true} onChange={this.onInputChange} />
+                <Input
+                  value={this.state.search.keyword}
+                  placeholder='搜尋內容'
+                  allowClear={true}
+                  onChange={this.onInputChange}
+                />
                 <Button
                   type='primary'
                   icon={<ListSearchIcon />}

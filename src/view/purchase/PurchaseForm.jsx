@@ -282,10 +282,12 @@ export default class PurchaseForm extends React.Component {
               <Select
                 showSearch={true}
                 showArrow={false}
+                allowClear={true}
                 value={line.value}
                 searchValue={line.search}
                 onSearch={_this.onMappingSearch.bind(_this, row.detailNo)}
                 onSelect={_this.onMappingSelect.bind(_this, row.detailNo)}
+                onClear={_this.onMappingClear.bind(_this, row.detailNo)}
                 optionFilterProp='children'
                 style={{ width: '100%' }}
                 notFoundContent={null}
@@ -686,6 +688,33 @@ export default class PurchaseForm extends React.Component {
         this.setState({ formData, mappingSearch })
       }
     }
+  }
+  onMappingClear = (detailNo) => {
+    const { formData, mappingSearch } = this.state
+    const row = formData.purchaseDetails.find((row) => row.detailNo === detailNo)
+    mappingSearch[detailNo] = {
+      loading: false,
+      value: '',
+      seqNo: null,
+      search: '',
+      searchTime: 0,
+      list: [],
+      select: {},
+      historyLoading: true,
+      historyList: []
+    }
+    row.productId = ''
+    row.productSeqNo = null
+    row.productName = ''
+    row.kindShortName = ''
+    row.norm = ''
+    row.quantity = 1
+    row.price = 0
+    row.amount = 0
+    row.remark = ''
+    row.color = ''
+    row.vendorProductId = ''
+    this.setState({ formData, mappingSearch })
   }
 
   // field validator

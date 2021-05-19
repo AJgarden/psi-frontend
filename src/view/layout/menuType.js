@@ -75,6 +75,18 @@ export const routes = [
     title: '進貨單'
   },
   {
+    path: '/Sale/List',
+    title: '列表 - 銷貨單'
+  },
+  {
+    path: '/Sale/Add',
+    title: '新增 - 銷貨單'
+  },
+  {
+    path: '/Sale',
+    title: '銷貨單'
+  },
+  {
     path: '/',
     title: '首頁'
   }
