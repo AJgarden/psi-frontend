@@ -572,6 +572,12 @@ export default class ProductForm extends React.Component {
     })
   }
 
+  onAdditionNumberChange = (type, value) => {
+    const { additionData } = this.state
+    additionData[type] = value
+    this.setState({ additionData })
+  }
+
   openPic = (key) => {
     const { additionData } = this.state
     const picUrl = additionData[key]
@@ -612,31 +618,45 @@ export default class ProductForm extends React.Component {
         .addProductData(this.state.formData)
         .then((response) => {
           if (response.code === 0) {
-            message.success('成功新增資料')
-            if (back) {
-              if (this.props.isDrawMode) {
-                this.props.onClose()
-              } else {
-                this.history.push('/Products/List')
-              }
-            } else {
-              const drawerContent = document.querySelector('.ant-drawer-body')
-              const layoutContent = document.getElementById('layout-content-wrapper')
-              if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
-              if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
-              this.setState({
-                loading: false,
-                formData: JSON.parse(JSON.stringify(initData)),
-                formStatus: JSON.parse(JSON.stringify(formRules)),
-                search: {
-                  partId: '',
-                  customCode1: '',
-                  customCode2: '',
-                  customCode3: ''
-                },
-                canSubmit: false
+            const { additionData } = this.state
+            this.productAPI
+              .updateProductAdditionData(response.data.seqNo, {
+                length: additionData.length,
+                width: additionData.width,
+                height: additionData.height,
+                weight: additionData.weight
               })
-            }
+              .then((response) => {
+                if (response.code === 0) {
+                  message.success('成功新增資料')
+                  if (back) {
+                    if (this.props.isDrawMode) {
+                      this.props.onClose()
+                    } else {
+                      this.history.push('/Products/List')
+                    }
+                  } else {
+                    const drawerContent = document.querySelector('.ant-drawer-body')
+                    const layoutContent = document.getElementById('layout-content-wrapper')
+                    if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
+                    if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
+                    this.setState({
+                      loading: false,
+                      formData: JSON.parse(JSON.stringify(initData)),
+                      formStatus: JSON.parse(JSON.stringify(formRules)),
+                      search: {
+                        partId: '',
+                        customCode1: '',
+                        customCode2: '',
+                        customCode3: ''
+                      },
+                      canSubmit: false
+                    })
+                  }
+                } else {
+                  message.error(response.message)
+                }
+              })
           } else {
             Modal.error({
               title: response.message,
@@ -662,20 +682,34 @@ export default class ProductForm extends React.Component {
         .updateProductData(this.state.formData)
         .then((response) => {
           if (response.code === 0) {
-            message.success('成功更新資料')
-            if (back) {
-              if (this.props.isDrawMode) {
-                this.props.onClose()
-              } else {
-                this.history.push('/Products/List')
-              }
-            } else {
-              const drawerContent = document.querySelector('.ant-drawer-body')
-              const layoutContent = document.getElementById('layout-content-wrapper')
-              if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
-              if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
-              this.getProductData()
-            }
+            const { additionData } = this.state
+            this.productAPI
+              .updateProductAdditionData(this.state.formData.seqNo, {
+                length: additionData.length,
+                width: additionData.width,
+                height: additionData.height,
+                weight: additionData.weight
+              })
+              .then((response) => {
+                if (response.code === 0) {
+                  message.success('成功更新資料')
+                  if (back) {
+                    if (this.props.isDrawMode) {
+                      this.props.onClose()
+                    } else {
+                      this.history.push('/Products/List')
+                    }
+                  } else {
+                    const drawerContent = document.querySelector('.ant-drawer-body')
+                    const layoutContent = document.getElementById('layout-content-wrapper')
+                    if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
+                    if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
+                    this.getProductData()
+                  }
+                } else {
+                  message.error(response.message)
+                }
+              })
           } else {
             Modal.error({
               title: response.message,
@@ -1126,6 +1160,70 @@ export default class ProductForm extends React.Component {
               {this.state.formData.productType === 'REAL' && (
                 <Card className='form-detail-card'>
                   <Row {...rowSetting}>
+                    <Col {...colSetting2}>
+                      <FormItem
+                        required={false}
+                        title='長(cm)'
+                        content={
+                          <InputNumber
+                            onChange={this.onAdditionNumberChange.bind(this, 'length')}
+                            value={this.state.additionData.length}
+                            min={0}
+                            max={999999}
+                            step={1}
+                            style={{ display: 'block', width: '100%' }}
+                          />
+                        }
+                      />
+                    </Col>
+                    <Col {...colSetting2}>
+                      <FormItem
+                        required={false}
+                        title='寬(cm)'
+                        content={
+                          <InputNumber
+                            onChange={this.onAdditionNumberChange.bind(this, 'width')}
+                            value={this.state.additionData.width}
+                            min={0}
+                            max={999999}
+                            step={1}
+                            style={{ display: 'block', width: '100%' }}
+                          />
+                        }
+                      />
+                    </Col>
+                    <Col {...colSetting2}>
+                      <FormItem
+                        required={false}
+                        title='高(cm)'
+                        content={
+                          <InputNumber
+                            onChange={this.onAdditionNumberChange.bind(this, 'height')}
+                            value={this.state.additionData.height}
+                            min={0}
+                            max={999999}
+                            step={1}
+                            style={{ display: 'block', width: '100%' }}
+                          />
+                        }
+                      />
+                    </Col>
+                    <Col {...colSetting2}>
+                      <FormItem
+                        required={false}
+                        title='重量(g)'
+                        content={
+                          <InputNumber
+                            onChange={this.onAdditionNumberChange.bind(this, 'weight')}
+                            value={this.state.additionData.weight}
+                            min={0}
+                            max={999999}
+                            step={1}
+                            style={{ display: 'block', width: '100%' }}
+                          />
+                        }
+                      />
+                    </Col>
                     <Col span={24}>
                       <p className='product-real-pictitle'>商品照片</p>
                     </Col>

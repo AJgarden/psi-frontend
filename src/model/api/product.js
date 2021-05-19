@@ -25,6 +25,10 @@ export default class ProductAPI {
     return restInstance('get', `/products/additional/${seqNo}`).then((response) => response.data)
   }
 
+  updateProductAdditionData = (seqNo, data) => {
+    return restInstance('patch', `/products/additional/${seqNo}`, data).then((response) => response.data)
+  }
+
   uploadProductPic = (seqNo, picEnum, data) => {
     return restUploadInstance('patch', `/products/additional/${seqNo}/${picEnum}`, data).then(
       (response) => response.data
