@@ -2,49 +2,63 @@ import { restInstance } from '../runner/rest'
 
 export default class SaleAPI {
   getSaleList = (data) => {
-    return restInstance('get', '/sales', data).then((response) => response.data)
+    return restInstance('get', '/v1/sales', data).then((response) => response.data)
   }
 
   getSaleData = (salesId) => {
-    return restInstance('get', `/sales/${salesId}`).then((response) => response.data)
+    return restInstance('get', `/v1/sales/${salesId}`).then((response) => response.data)
   }
 
   addSaleData = (data) => {
-    return restInstance('post', '/sales', data).then((response) => response.data)
+    return restInstance('post', '/v1/sales', data).then((response) => response.data)
   }
 
   updateSaleData = (data) => {
-    return restInstance('patch', `/sales/${data.salesId}`, data).then(
+    return restInstance('patch', `/v1/sales/${data.salesId}`, data).then(
+      (response) => response.data
+    )
+  }
+
+  getDetailData = (productSeqNo, customerId) => {
+    return restInstance('get', `/v1/sales/salesProductItem/${productSeqNo}/${customerId}`).then(
       (response) => response.data
     )
   }
 
   saveSaleConfirmFlag = (salesId, status) => {
-    return restInstance('patch', `/sales/${salesId}/confirmstatus/${status}`).then((response) => response.data)
+    return restInstance('patch', `/v1/sales/${salesId}/confirmstatus/${status}`).then(
+      (response) => response.data
+    )
   }
 
   saveSalePayFlag = (salesId, status) => {
-    return restInstance('patch', `/sales/${salesId}/paystatus/${status}`).then((response) => response.data)
+    return restInstance('patch', `/v1/sales/${salesId}/paystatus/${status}`).then(
+      (response) => response.data
+    )
   }
 
   searchProductMapping = (realProduct, queryString) => {
-    return restInstance('get', '/products/smartQuery', { realProduct, queryString }).then(
+    return restInstance('get', '/v1/products/smartQuery', { realProduct, queryString }).then(
       (response) => response.data
     )
   }
 
   getProductData = (seqNo) => {
-    return restInstance('get', `/products/${seqNo}`).then((response) => response.data)
+    return restInstance('get', `/v1/products/${seqNo}`).then((response) => response.data)
   }
 
-  getProductHistoryPrice = (productSeqNo) => {
-    return restInstance('get', '/products/historyPurchasePrice', { productSeqNo }).then(
+  getProductInventory = (seqNo) => {
+    return restInstance('get', `/v1/products/${seqNo}/inventory`).then((response) => response.data)
+  }
+
+  getProductHistoryPrice = (productSeqNo, customerId) => {
+    return restInstance('get', `/v1/sales/historyPrice/${productSeqNo}/${customerId}`).then(
       (response) => response.data
     )
   }
 
   getCustomerList = () => {
-    return restInstance('get', '/customers', {
+    return restInstance('get', '/v1/customers', {
       pageNum: 1,
       pageSize: 99999,
       queryByEnum: 'CUSTOMER_ID',
@@ -53,7 +67,7 @@ export default class SaleAPI {
   }
 
   getColorsList = () => {
-    return restInstance('get', '/colors', {
+    return restInstance('get', '/v1/colors', {
       pageNum: 1,
       pageSize: 9999,
       colorId: ''

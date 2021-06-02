@@ -33,7 +33,7 @@ export default class Colour extends React.Component {
     const requestData = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      colorId: `%${search.keyword}%`
+      colorId: search.keyword
     }
     this.colourAPI
       .getColourList(requestData)

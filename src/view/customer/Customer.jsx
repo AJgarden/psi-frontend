@@ -35,7 +35,7 @@ export default class Customer extends React.Component {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
       queryByEnum: search.id,
-      queryKeyWord: `%${search.keyword}%`
+      queryKeyWord: search.keyword
     }
     this.customerAPI
       .getCustomerList(requestData)

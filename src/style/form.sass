@@ -182,6 +182,11 @@
     > tr
       > td
         font-size: 0.875rem
+        .ant-btn
+          > span
+            max-width: 100%
+            overflow: hidden
+            text-overflow: ellipsis
         .list-table-option
           display: flex
           .ant-space-item
@@ -216,6 +221,8 @@
   .purchase-price-input
     width: calc(100% - 32px)
     margin-right: 4px
+    &.full
+      width: 100%
   .purchase-price-view
     width: 24px
     .ant-btn
@@ -235,6 +242,7 @@
       &:hover
         border-color: #cccccc
         background: #f1f1f1
+  
 .purchase-history-price
   &.ant-popover-placement-top
     > .ant-popover-content
@@ -253,6 +261,23 @@
     background: #2a9d8f
   .ant-popover-inner-content
     padding: 0
+  .ant-tabs
+    .ant-tabs-nav
+      margin-bottom: 0
+      padding: 10px
+      .ant-tabs-ink-bar
+        display: none
+      .ant-tabs-tab
+        border: 1px solid #2a9d8f
+        padding: 4px 8px
+        .ant-tabs-tab-btn
+          color: #222222
+        &+ .ant-tabs-tab
+          margin-left: 10px
+        &.ant-tabs-tab-active
+          background: #2a9d8f
+          .ant-tabs-tab-btn
+            color: #ffffff
 .purchase-history-list
   width: 400px
   .ant-table-small
@@ -264,4 +289,68 @@
       > tr
         > td
           padding: 4px 8px
+
+.purchase-product-modal
+  width: 1000px !important
+  .purchase-product-modal-result
+    margin-top: 20px
+    .ant-btn-sm
+      display: block
+      border: none
+      padding: 3px
+      .anticon,
+      .anticon svg
+        display: block
+        width: 18px
+        height: 18px
+        fill: #ffffff
+      &.purchase-product-modal-next
+        background: #168aad
+      &.purchase-product-modal-select
+        background: #2a9d8f
+
+.view-product-modal
+  width: 1000px !important
+  .view-product-table
+    width: 100%
+    table-layout: fixed
+    &+ .view-product-table
+      margin-top: 20px
+    th, td
+      width: 20%
+      border-right: 1px solid #ffffff
+      padding: 4px 8px
+      vertical-align: top
+    th
+      color: #ffffff
+      background: #2a9d8f
+    td
+      height: 38.5px
+      border-bottom: 1px solid #ffffff
+      background: #f7f7f7
+      padding: 8px
+    &.addition
+      th, td
+        width: 25%
+      td
+        > div
+          position: relative
+          padding-bottom: 100%
+          .ant-empty
+            position: absolute
+            width: 100%
+            margin: 0
+            top: 50%
+            transform: translateY(-50%)
+          > img
+            display: block
+            position: absolute
+            max-width: 100%
+            max-height: 100%
+            margin: 0
+            top: 50%
+            left: 50%
+            transform: translate(-50%, -50%)
+
+      
 

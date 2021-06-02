@@ -34,8 +34,8 @@ export default class Component extends React.Component {
     const requestData = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      partId: `%${search.partId}%`,
-      name: `%${search.name}%`
+      partId: search.partId,
+      name: search.name
     }
     this.componentAPI
       .getComponentList(requestData)

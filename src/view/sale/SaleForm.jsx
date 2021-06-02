@@ -11,6 +11,8 @@ import {
   Input,
   Switch,
   Popover,
+  Tooltip,
+  Tabs,
   Table,
   Space,
   Button,
@@ -22,9 +24,11 @@ import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-de
 import { ListDeleteIcon, ListSearchIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
+import moment from 'moment'
+import SelectProductModal from '../utils/SelectProductModal'
+import ViewProductModal from '../utils/ViewProductModal'
 import { initData, formRules } from './saleType'
 import SaleAPI from '../../model/api/sale'
-import moment from 'moment'
 
 export default class SaleForm extends React.Component {
   history = createHashHistory()
@@ -46,7 +50,9 @@ export default class SaleForm extends React.Component {
       mappingSearch: {},
       customerList: [],
       colorList: [],
-      canSubmit: false
+      canSubmit: false,
+      viewProduct: false,
+      viewSeqNo: null
     }
     this.getInitData().then(() => {
       if (!props.createFlag) {
@@ -76,7 +82,9 @@ export default class SaleForm extends React.Component {
           },
           detailLoading: false,
           mappingSearch: {},
-          canSubmit: false
+          canSubmit: false,
+          viewProduct: false,
+          viewSeqNo: null
         },
         () =>
           this.getInitData().then(() => {
@@ -109,6 +117,33 @@ export default class SaleForm extends React.Component {
         .getSaleData(this.props.salesId)
         .then((response) => {
           if (response.code === 0) {
+            // this.getDetailData(
+            //   response.data.salesDetails,
+            //   response.data.salesMaster.customerId
+            // ).then((object) => {
+            //   console.log(object)
+            //   this.setState(
+            //     {
+            //       loading: false,
+            //       formData: {
+            //         ...response.data.salesMaster,
+            //         accountDate: moment(response.data.salesMaster.accountDate, 'YYYY-MM-DD')
+            //           .startOf('day')
+            //           .valueOf(),
+            //         salesDetails: object.salesDetails
+            //       },
+            //       recordStatus: object.recordStatus,
+            //       mappingSearch: object.mappingSearch
+            //     },
+            //     () => {
+            //       this.getMappingProducts(object.mappingSearch).then((mappingSearch) =>
+            //         this.setState({ mappingSearch }, () =>
+            //           this.checkCanSubmit().then(() => resolve(true))
+            //         )
+            //       )
+            //     }
+            //   )
+            // })
             const recordStatus = {}
             const mappingSearch = {}
             response.data.salesDetails.forEach((record) => {
@@ -121,7 +156,7 @@ export default class SaleForm extends React.Component {
                 list: [],
                 select: {},
                 historyLoading: true,
-                historyList: []
+                historyData: {}
               }
               recordStatus[record.detailNo] = JSON.parse(JSON.stringify(recordStatus))
             })
@@ -139,11 +174,11 @@ export default class SaleForm extends React.Component {
                 mappingSearch
               },
               () => {
-                this.getMappingProducts(mappingSearch).then((mappingSearch) =>
-                  this.setState({ mappingSearch }, () =>
-                    this.checkCanSubmit().then(() => resolve(true))
-                  )
-                )
+                this.getProductInventory().then((salesDetails) => {
+                  const { formData } = this.state
+                  formData.salesDetails = salesDetails
+                  this.setState({ formData }, () => this.checkCanSubmit().then(() => resolve(true)))
+                })
               }
             )
           } else {
@@ -167,19 +202,66 @@ export default class SaleForm extends React.Component {
         })
     })
   }
-  getMappingProducts = async (mappingSearch) => {
-    const seqNos = Object.keys(mappingSearch)
-    for (const seqNo of seqNos) {
+  getProductInventory = async () => {
+    const {
+      formData: { salesDetails }
+    } = this.state
+    for (const item of salesDetails) {
       await new Promise((resolve) => {
-        this.saleAPI.searchProductMapping(true, mappingSearch[seqNo].value).then((response) => {
-          mappingSearch[seqNo].list = response.data
-          mappingSearch[seqNo].select = response.data[0]
+        this.saleAPI.getProductInventory(item.productSeqNo).then((response) => {
+          if (response.code === 0) {
+            item.inventory = response.data
+          } else {
+            item.inventory = '-'
+          }
           resolve(true)
         })
       })
     }
-    return Promise.resolve(mappingSearch)
+    return Promise.resolve(salesDetails)
   }
+  // getDetailData = async (details, customerId) => {
+  //   const recordStatus = {}
+  //   const mappingSearch = {}
+  //   const salesDetails = []
+  //   for (const detail of details) {
+  //     await new Promise((resolve) => {
+  //       this.saleAPI.getDetailData(detail.productSeqNo, customerId).then((response) => {
+  //         salesDetails.push({
+  //           ...response.data,
+  //           detailNo: detail.detailNo
+  //         })
+  //         mappingSearch[detail.detailNo] = {
+  //           loading: false,
+  //           value: response.productId,
+  //           seqNo: response.productSeqNo,
+  //           search: '',
+  //           searchTime: 0,
+  //           list: [],
+  //           select: {},
+  //           historyLoading: true,
+  //           historyList: []
+  //         }
+  //         recordStatus[detail.detailNo] = JSON.parse(JSON.stringify(recordStatus))
+  //         resolve(true)
+  //       })
+  //     })
+  //   }
+  //   return { salesDetails, recordStatus, mappingSearch }
+  // }
+  // getMappingProducts = async (mappingSearch) => {
+  //   const seqNos = Object.keys(mappingSearch)
+  //   for (const seqNo of seqNos) {
+  //     await new Promise((resolve) => {
+  //       this.saleAPI.searchProductMapping(true, mappingSearch[seqNo].value).then((response) => {
+  //         mappingSearch[seqNo].list = response.data
+  //         mappingSearch[seqNo].select = response.data[0]
+  //         resolve(true)
+  //       })
+  //     })
+  //   }
+  //   return Promise.resolve(mappingSearch)
+  // }
 
   getFormErrorStatus = (key) => {
     const { formStatus } = this.state
@@ -277,36 +359,64 @@ export default class SaleForm extends React.Component {
       {
         dataIndex: 'productId',
         title: '商品代號',
-        width: 400,
+        width: 200,
         fixed: 'left',
         render: (data, row) => {
           const { mappingSearch } = this.state
           const line = mappingSearch[row.detailNo]
-          // return data
           return (
-            <Spin spinning={line.loading}>
-              <Select
-                showSearch={true}
-                showArrow={false}
-                allowClear={true}
+            <div className='purchase-price-row'>
+              <div className={`purchase-price-input ${line.value === '' || row.productType === 'OTHERS' ? 'full' : ''}`}>
+                <Button
+                  onClick={_this.onSwitchProductModal.bind(_this, row.detailNo)}
+                  type={line.value === '' ? 'primary' : 'default'}
+                  style={{ width: '100%' }}
+                >
+                  {line.value === '' ? '選取商品' : line.value}
+                </Button>
+              </div>
+              {(line.value !== '' && row.productType !== 'OTHERS') && (
+                <div className='purchase-price-view'>
+                  <Tooltip title='商品資訊'>
+                    <Button onClick={() => this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}>
+                      <ListSearchIcon />
+                    </Button>
+                  </Tooltip>
+                </div>
+              )}
+              <SelectProductModal
+                detailNo={row.detailNo}
+                visible={line.visible}
                 value={line.value}
-                searchValue={line.search}
-                onSearch={_this.onMappingSearch.bind(_this, row.detailNo)}
-                onSelect={_this.onMappingSelect.bind(_this, row.detailNo)}
-                onClear={_this.onMappingClear.bind(_this, row.detailNo)}
-                optionFilterProp='children'
-                style={{ width: '100%' }}
-                notFoundContent={null}
-                className='product-search'
-              >
-                {line.list.map((product) => (
-                  <Select.Option key={product.data} value={product.data}>
-                    {_this.getMappingProductDisplay(product)}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Spin>
+                onSelect={_this.onMappingSelect}
+                onClose={_this.onSwitchProductModal.bind(_this, row.detailNo)}
+              />
+            </div>
           )
+          // return (
+          //   <Spin spinning={line.loading}>
+          //     <Select
+          //       showSearch={true}
+          //       showArrow={false}
+          //       allowClear={true}
+          //       value={line.value}
+          //       searchValue={line.search}
+          //       onSearch={_this.onMappingSearch.bind(_this, row.detailNo)}
+          //       onSelect={_this.onMappingSelect.bind(_this, row.detailNo)}
+          //       onClear={_this.onMappingClear.bind(_this, row.detailNo)}
+          //       optionFilterProp='children'
+          //       style={{ width: '100%' }}
+          //       notFoundContent={null}
+          //       className='product-search'
+          //     >
+          //       {line.list.map((product) => (
+          //         <Select.Option key={product.data} value={product.data}>
+          //           {_this.getMappingProductDisplay(product)}
+          //         </Select.Option>
+          //       ))}
+          //     </Select>
+          //   </Spin>
+          // )
         }
       },
       {
@@ -353,6 +463,11 @@ export default class SaleForm extends React.Component {
         }
       },
       {
+        dataIndex: 'inventory',
+        title: '庫存',
+        width: 80
+      },
+      {
         dataIndex: 'price',
         title: '售價',
         width: 140,
@@ -369,18 +484,24 @@ export default class SaleForm extends React.Component {
                   style={{ width: '100%' }}
                 />
               </div>
-              {/* <div className='purchase-price-view'>
-                <Popover
-                  title='歷史進價'
-                  content={_this.displayHistoryPrice(row.detailNo)}
-                  overlayClassName='purchase-history-price'
-                  onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
-                >
-                  <Button>
+              <div className='purchase-price-view'>
+                {row.productSeqNo && _this.state.formData.customerId ? (
+                  <Popover
+                    title='商品歷史價格'
+                    content={_this.displayHistoryPrice(row.detailNo)}
+                    overlayClassName='purchase-history-price'
+                    onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
+                  >
+                    <Button>
+                      <ListSearchIcon />
+                    </Button>
+                  </Popover>
+                ) : (
+                  <Button disabled={true}>
                     <ListSearchIcon />
                   </Button>
-                </Popover>
-              </div> */}
+                )}
+              </div>
             </div>
           )
         }
@@ -453,6 +574,12 @@ export default class SaleForm extends React.Component {
     ]
   }
 
+  onSwitchProductModal = (detailNo) => {
+    const { mappingSearch } = this.state
+    mappingSearch[detailNo].visible = !mappingSearch[detailNo].visible
+    this.setState({ mappingSearch })
+  }
+
   getDetailTotal = () => {
     const {
       formData: { salesDetails }
@@ -500,6 +627,7 @@ export default class SaleForm extends React.Component {
       kindShortName: '',
       norm: '',
       quantity: 1,
+      inventory: 0,
       price: 0,
       amount: 0,
       remark: '',
@@ -511,12 +639,13 @@ export default class SaleForm extends React.Component {
       loading: false,
       value: '',
       seqNo: null,
-      search: '',
-      searchTime: 0,
-      list: [],
+      visible: false,
+      // search: '',
+      // searchTime: 0,
+      // list: [],
       select: {},
       historyLoading: true,
-      historyList: []
+      historyData: {}
     }
     this.setState({ formData, recordStatus, mappingSearch })
   }
@@ -529,65 +658,133 @@ export default class SaleForm extends React.Component {
     this.setState({ formData, recordStatus, mappingSearch })
   }
 
-  // onVisibleChange = (detailNo, visible) => {
-  //   const { mappingSearch } = this.state
-  //   const row = mappingSearch[detailNo]
-  //   if (visible && row.seqNo && row.historyLoading) {
-  //     this.purchaseAPI
-  //       .getProductHistoryPrice(row.seqNo)
-  //       .then((response) => {
-  //         mappingSearch[detailNo].historyLoading = false
-  //         mappingSearch[detailNo].historyList = response.data.map((price, index) => {
-  //           return {
-  //             ...price,
-  //             index
-  //           }
-  //         })
-  //         this.setState({ mappingSearch })
-  //       })
-  //       .catch(() => {
-  //         mappingSearch[detailNo].historyLoading = false
-  //         this.setState({ mappingSearch })
-  //       })
-  //   }
-  // }
-  // displayHistoryPrice = (detailNo) => {
-  //   const { mappingSearch } = this.state
-  //   const row = mappingSearch[detailNo]
-  //   return (
-  //     <Table
-  //       className='purchase-history-list'
-  //       rowKey='index'
-  //       size='small'
-  //       columns={this.getHistoryColumns()}
-  //       dataSource={row.historyList}
-  //       scroll={{ y: 240 }}
-  //       loading={row.historyLoading}
-  //       pagination={false}
-  //     />
-  //   )
-  // }
-  // getHistoryColumns = () => [
-  //   {
-  //     dataIndex: 'accountDate',
-  //     title: '日期',
-  //     width: 100
-  //   },
-  //   {
-  //     dataIndex: 'vendorName',
-  //     title: '廠商名稱',
-  //     width: 180
-  //   },
-  //   {
-  //     dataIndex: 'amount',
-  //     title: '進價',
-  //     width: 100,
-  //     render: (data, row) => {
-  //       const price = data / row.quantity
-  //       return `$ ${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  //     }
-  //   }
-  // ]
+  onVisibleChange = (detailNo, visible) => {
+    const { formData, mappingSearch } = this.state
+    const row = mappingSearch[detailNo]
+    if (visible && row.seqNo && row.historyLoading) {
+      this.saleAPI
+        .getProductHistoryPrice(row.seqNo, formData.customerId)
+        .then((response) => {
+          mappingSearch[detailNo].historyLoading = false
+          mappingSearch[detailNo].historyData = {
+            ...response.data,
+            historyPurchasePrices: response.data.historyPurchasePrices.map((record, index) => {
+              return {
+                ...record,
+                index
+              }
+            }),
+            historySalesPrices: response.data.historySalesPrices.map((record, index) => {
+              return {
+                ...record,
+                index
+              }
+            })
+          }
+          this.setState({ mappingSearch })
+        })
+        .catch(() => {
+          mappingSearch[detailNo].historyLoading = false
+          mappingSearch[detailNo].historyData = {}
+          this.setState({ mappingSearch })
+        })
+    }
+  }
+  displayHistoryPrice = (detailNo) => {
+    const { mappingSearch } = this.state
+    const row = mappingSearch[detailNo]
+    return (
+      <Spin spinning={row.historyLoading}>
+        <div style={{ minHeight: 200 }}>
+          {Object.keys(row.historyData).length > 0 && (
+            <>
+              <Tabs defaultActiveKey='purchase'>
+                <Tabs.TabPane key='purchase' tab='歷史進價'>
+                  <div style={{ height: 271 }}>
+                    <Table
+                      className='purchase-history-list'
+                      rowKey='index'
+                      size='small'
+                      columns={this.getHistoryPurchaseColumns()}
+                      dataSource={row.historyData.historyPurchasePrices}
+                      scroll={{ y: 240 }}
+                      pagination={false}
+                    />
+                  </div>
+                </Tabs.TabPane>
+                <Tabs.TabPane key='sale' tab='歷史售價'>
+                  <div style={{ height: 271 }}>
+                    <Table
+                      className='purchase-history-list'
+                      rowKey='index'
+                      size='small'
+                      columns={this.getHistorySaleColumns()}
+                      dataSource={row.historyData.historySalesPrices}
+                      scroll={{ y: 240 }}
+                      pagination={false}
+                    />
+                  </div>
+                </Tabs.TabPane>
+              </Tabs>
+            </>
+          )}
+        </div>
+      </Spin>
+    )
+    // return (
+    //   <Table
+    //     className='purchase-history-list'
+    //     rowKey='index'
+    //     size='small'
+    //     columns={this.getHistoryColumns()}
+    //     dataSource={row.historyList}
+    //     scroll={{ y: 240 }}
+    //     loading={row.historyLoading}
+    //     pagination={false}
+    //   />
+    // )
+  }
+  getHistoryPurchaseColumns = () => [
+    {
+      dataIndex: 'accountDate',
+      title: '日期',
+      width: 100
+    },
+    {
+      dataIndex: 'vendorName',
+      title: '廠商名稱',
+      width: 180
+    },
+    {
+      dataIndex: 'amount',
+      title: '進價',
+      width: 100,
+      render: (data, row) => {
+        const price = data / row.quantity
+        return `$ ${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      }
+    }
+  ]
+  getHistorySaleColumns = () => [
+    {
+      dataIndex: 'accountDate',
+      title: '日期',
+      width: 100
+    },
+    {
+      dataIndex: 'salesId',
+      title: '銷售單號',
+      width: 180
+    },
+    {
+      dataIndex: 'price',
+      title: '售價',
+      width: 100,
+      render: (data) => {
+        return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      }
+    }
+  ]
 
   // mapping product search & select
   getMappingProductDisplay = (product) => {
@@ -614,113 +811,117 @@ export default class SaleForm extends React.Component {
     }
     return display
   }
-  onMappingSearch = (detailNo, value) => {
-    const { mappingSearch } = this.state
-    mappingSearch[detailNo].search = value
-    mappingSearch[detailNo].searchTime = moment().valueOf()
-    this.setState({ mappingSearch }, () => {
-      setTimeout(() => {
-        if (moment().valueOf() - mappingSearch[detailNo].searchTime >= 1000 && value !== '') {
-          mappingSearch[detailNo].loading = true
-          this.setState({ mappingSearch }, () => {
-            this.saleAPI
-              .searchProductMapping(true, value)
-              .then((response) => {
-                mappingSearch[detailNo].loading = false
-                mappingSearch[detailNo].list = response.data
-                this.setState({ mappingSearch })
-              })
-              .catch(() => {
-                mappingSearch[detailNo].loading = false
-                this.setState({ mappingSearch })
-              })
-          })
-        } else if (value === '') {
-          if (mappingSearch[detailNo].value !== '') {
-            mappingSearch[detailNo].list = [mappingSearch[detailNo].select]
-          } else {
-            mappingSearch[detailNo].list = []
-          }
-          this.setState({ mappingSearch })
-        }
-      }, 1000)
-    })
-  }
-  onMappingSelect = (detailNo, value) => {
+  // onMappingSearch = (detailNo, value) => {
+  //   const { mappingSearch } = this.state
+  //   mappingSearch[detailNo].search = value
+  //   mappingSearch[detailNo].searchTime = moment().valueOf()
+  //   this.setState({ mappingSearch }, () => {
+  //     setTimeout(() => {
+  //       if (moment().valueOf() - mappingSearch[detailNo].searchTime >= 1000 && value !== '') {
+  //         mappingSearch[detailNo].loading = true
+  //         this.setState({ mappingSearch }, () => {
+  //           this.saleAPI
+  //             .searchProductMapping(true, value)
+  //             .then((response) => {
+  //               mappingSearch[detailNo].loading = false
+  //               mappingSearch[detailNo].list = response.data
+  //               this.setState({ mappingSearch })
+  //             })
+  //             .catch(() => {
+  //               mappingSearch[detailNo].loading = false
+  //               this.setState({ mappingSearch })
+  //             })
+  //         })
+  //       } else if (value === '') {
+  //         if (mappingSearch[detailNo].value !== '') {
+  //           mappingSearch[detailNo].list = [mappingSearch[detailNo].select]
+  //         } else {
+  //           mappingSearch[detailNo].list = []
+  //         }
+  //         this.setState({ mappingSearch })
+  //       }
+  //     }, 1000)
+  //   })
+  // }
+  onMappingSelect = (detailNo, product) => {
     const { formData, mappingSearch } = this.state
-    const product = mappingSearch[detailNo].list.find((product) => product.data === value)
-    if (product) {
-      const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
-      if (product.finished) {
-        mappingSearch[detailNo].search = ''
-        mappingSearch[detailNo].value = product.data
-        mappingSearch[detailNo].seqNo = product.productSeqNo
-        mappingSearch[detailNo].list = [product]
-        mappingSearch[detailNo].select = product
-        this.setState({ mappingSearch, detailLoading: true }, () => {
-          this.saleAPI.getProductData(product.productSeqNo).then((response) => {
-            row.productId = product.data
-            row.productSeqNo = product.productSeqNo
-            row.productName = response.data.name
-            row.kindShortName = response.data.kindShortName
-            row.norm = response.data.norm
-            row.quantity = 1
-            row.price = 0
-            row.amount = 0
-            row.color = ''
-            row.unit = response.data.unit
-            row.vendorProductId = response.data.vendorProductId
-            this.setState({ formData, detailLoading: false })
-          })
-        })
-      } else {
-        mappingSearch[detailNo].search = value
-        mappingSearch[detailNo].value = product.data
-        mappingSearch[detailNo].seqNo = product.productSeqNo
-        mappingSearch[detailNo].list = [product]
-        mappingSearch[detailNo].select = product
-        row.productId = product.data
-        row.productSeqNo = null
-        row.productName = ''
-        row.kindShortName = ''
-        row.norm = ''
-        row.quantity = 1
-        row.price = 0
-        row.amount = 0
-        row.color = ''
-        row.unit = ''
-        row.vendorProductId = ''
-        this.setState({ formData, mappingSearch })
-      }
-    }
-  }
-  onMappingClear = (detailNo) => {
-    const { formData, mappingSearch } = this.state
+    // const product = mappingSearch[detailNo].list.find((product) => product.data === value)
+    // if (product) {
     const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
-    mappingSearch[detailNo] = {
-      loading: false,
-      value: '',
-      seqNo: null,
-      search: '',
-      searchTime: 0,
-      list: [],
-      select: {},
-      historyLoading: true,
-      historyList: []
-    }
-    row.productId = ''
-    row.productSeqNo = null
-    row.productName = ''
-    row.kindShortName = ''
-    row.norm = ''
-    row.quantity = 1
-    row.price = 0
-    row.amount = 0
-    row.remark = ''
-    row.color = ''
-    row.vendorProductId = ''
-    this.setState({ formData, mappingSearch })
+    // if (product.finished) {
+    // mappingSearch[detailNo].search = ''
+    mappingSearch[detailNo].value = product.data
+    mappingSearch[detailNo].seqNo = product.productSeqNo
+    mappingSearch[detailNo].visible = false
+    // mappingSearch[detailNo].list = [product]
+    mappingSearch[detailNo].select = product
+    this.setState({ mappingSearch, detailLoading: true }, () => {
+      this.saleAPI.getProductInventory(product.productSeqNo).then((response) => {
+        row.inventory = response.data
+        this.saleAPI.getProductData(product.productSeqNo).then((response) => {
+          row.productId = product.data
+          row.productSeqNo = product.productSeqNo
+          row.productName = response.data.name
+          row.kindShortName = response.data.kindShortName
+          row.norm = response.data.norm
+          row.quantity = 1
+          row.price = 0
+          row.amount = 0
+          row.color = ''
+          row.unit = response.data.unit
+          row.vendorProductId = response.data.vendorProductId
+          this.setState({ formData, detailLoading: false })
+        })
+      })
+    })
+    //   } else {
+    //     mappingSearch[detailNo].search = value
+    //     mappingSearch[detailNo].value = product.data
+    //     mappingSearch[detailNo].seqNo = product.productSeqNo
+    //     mappingSearch[detailNo].list = [product]
+    //     mappingSearch[detailNo].select = product
+    //     row.productId = product.data
+    //     row.productSeqNo = null
+    //     row.productName = ''
+    //     row.kindShortName = ''
+    //     row.norm = ''
+    //     row.quantity = 1
+    //     row.price = 0
+    //     row.amount = 0
+    //     row.color = ''
+    //     row.unit = ''
+    //     row.vendorProductId = ''
+    //     this.setState({ formData, mappingSearch })
+    //   }
+    // }
   }
+  // onMappingClear = (detailNo) => {
+  //   const { formData, mappingSearch } = this.state
+  //   const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
+  //   mappingSearch[detailNo] = {
+  //     loading: false,
+  //     value: '',
+  //     seqNo: null,
+  //     search: '',
+  //     searchTime: 0,
+  //     list: [],
+  //     select: {},
+  //     historyLoading: true,
+  //     historyList: []
+  //   }
+  //   row.productId = ''
+  //   row.productSeqNo = null
+  //   row.productName = ''
+  //   row.kindShortName = ''
+  //   row.norm = ''
+  //   row.quantity = 1
+  //   row.price = 0
+  //   row.amount = 0
+  //   row.remark = ''
+  //   row.color = ''
+  //   row.vendorProductId = ''
+  //   this.setState({ formData, mappingSearch })
+  // }
 
   // field validator
   checkData = (formData, fieldKey) => {
@@ -1087,6 +1288,11 @@ export default class SaleForm extends React.Component {
               scroll={{ x: 1900 }}
               loading={this.state.detailLoading}
               pagination={false}
+            />
+            <ViewProductModal
+              visible={this.state.viewProduct}
+              seqNo={this.state.viewSeqNo}
+              onClose={() => this.setState({ viewProduct: false, viewSeqNo: null })}
             />
           </Card>
           <div style={{ margin: '20px', textAlign: 'center' }}>

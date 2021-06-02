@@ -1,6 +1,21 @@
 import React from 'react'
 import Icon from '@ant-design/icons'
 
+const ProductSelectSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' />
+  </svg>
+)
+export const ProductSelectIcon = (props) => <Icon component={ProductSelectSvg} {...props} />
+const ProductNextSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' />
+  </svg>
+)
+export const ProductNextIcon = (props) => <Icon component={ProductNextSvg} {...props} />
+
 const CarouselNextSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />

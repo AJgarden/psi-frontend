@@ -33,7 +33,7 @@ export default class Level extends React.Component {
     const requestData = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      gradeId: `%${search.keyword}%`
+      gradeId: search.keyword
     }
     this.levelAPI
       .getLevelList(requestData)

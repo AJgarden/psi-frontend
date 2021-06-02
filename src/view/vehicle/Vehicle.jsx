@@ -33,7 +33,7 @@ export default class Vehicle extends React.Component {
     const requestData = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
-      kindIdLike: `%${search.keyword}%`
+      kindIdLike: search.keyword
     }
     this.vehicleAPI
       .getVehicleList(requestData)
