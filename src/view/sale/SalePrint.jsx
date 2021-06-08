@@ -64,7 +64,7 @@ export default class SalePrint extends React.Component {
         <div className='data-footer'>
           <table style={{ width: '100%', tableLayout: 'fixed' }}>
             <colgroup>
-              <col width='19' />
+              <col width='16' />
               <col width='34' />
               <col width='102' />
               <col width='106' />
@@ -120,7 +120,7 @@ export default class SalePrint extends React.Component {
             <div className='table-right'>送貨</div>
             <table className='table-table'>
               <colgroup>
-                <col width='19' />
+                <col width='16' />
                 <col width='34' />
                 <col width='102' />
                 <col width='106' />
@@ -263,7 +263,7 @@ export default class SalePrint extends React.Component {
           <div className='data-table'>
             <table>
               <colgroup>
-                <col width='19' />
+                <col width='16' />
                 <col width='34' />
                 <col width='102' />
                 <col width='106' />

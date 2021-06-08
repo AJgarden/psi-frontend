@@ -7,7 +7,8 @@
 .print-area {
   position: relative;
   font-size: 14px;
-  width: 816px;
+  color: #000;
+  width: 820px;
   height: 352px;
   background: #ffffff;
   box-shadow: 0 4px 10px rgba(173, 173, 173, 0.2);
@@ -18,11 +19,12 @@
 }
 .print-backward {
   font-family: '標楷體', sans-serif;
-  padding: 13px 19px;
+  padding: 16px 15px 8px;
 }
 .print-backward .header {
   display: flex;
   align-items: flex-start;
+  line-height: 24px;
 }
 .print-backward .header .header-left {
   width: 548px;
@@ -34,19 +36,19 @@
   position: relative;
   line-height: 18px;
   margin: 0 -8px;
-  padding-right: 34px;
+  padding-right: 40px;
 }
 .print-backward .table .table-right {
   position: absolute;
-  width: 30px;
+  width: 32px;
   height: 129px;
   line-height: 28px;
   font-size: 16px;
   border: 1px solid #000;
   text-align: center;
-  right: 5px;
+  right: 9px;
   bottom: 10px;
-  padding-top: 4px;
+  padding: 4px;
 }
 .print-backward .table .table-right::before {
   content: '';
@@ -65,14 +67,14 @@
   border-collapse: collapse;
 }
 .print-backward .table .table-table th {
-  height: 25px;
+  height: 24px;
   text-align: center;
   vertical-align: middle;
   border: 1px solid #000;
   background: #f7f7f7;
 }
 .print-backward .table .table-table td {
-  height: 25px;
+  height: 24px;
   text-align: center;
   vertical-align: middle;
   border: 1px solid #000;
@@ -93,11 +95,12 @@
   font-family: '細明體', serif;
   top: 0;
   left: 0;
-  padding: 13px 19px;
+  padding: 16px 15px 8px;
 }
 .print-forward .data-header {
   display: flex;
   align-items: flex-start;
+  line-height: 24px;
 }
 .print-forward .data-header .data-header-left {
   width: 548px;
@@ -108,18 +111,18 @@
   padding-left: 52px;
 }
 .print-forward .data-table {
-  height: 227px;
+  height: 220px;
   line-height: 18px;
   margin: 0 -8px;
-  padding-top: 26px;
-  padding-right: 34px;
+  padding-top: 27px;
+  padding-right: 40px;
 }
 .print-forward .data-table table {
   width: 100%;
   table-layout: fixed;
 }
 .print-forward .data-table table td {
-  height: 25px;
+  height: 24px;
   padding: 0 4px;
 }
 .print-forward .data-table table td div {
@@ -133,7 +136,7 @@
 }
 .print-forward .data-footer {
   margin: 0 -8px;
-  padding-right: 34px;
+  padding-right: 44px;
 }
 
 @media print {
