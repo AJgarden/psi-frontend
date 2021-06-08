@@ -4,6 +4,14 @@
   padding: 40px;
 }
 
+.print-btn {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.print-btn .ant-btn + .ant-btn {
+  margin-left: 10px;
+}
+
 .print-area {
   position: relative;
   font-size: 14px;
@@ -40,13 +48,13 @@
 }
 .print-backward .table .table-right {
   position: absolute;
-  width: 32px;
+  width: 34px;
   height: 129px;
   line-height: 28px;
-  font-size: 16px;
+  font-size: 18px;
   border: 1px solid #000;
   text-align: center;
-  right: 9px;
+  right: 7px;
   bottom: 10px;
   padding: 4px;
 }
@@ -153,6 +161,7 @@
     margin-top: 0;
     page-break-before: always;
   }
+  .print-btn,
   .print-backward {
     display: none;
   }
