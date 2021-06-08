@@ -7,7 +7,3 @@ export const initData = {
   pay: false,
   salesDetails: []
 }
-
-export const formRules = []
-
-export const recordRules = []

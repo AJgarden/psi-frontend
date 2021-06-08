@@ -20,14 +20,14 @@ import {
   message,
   InputNumber
 } from 'antd'
-import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
-import { ListDeleteIcon, ListSearchIcon } from '../icon/Icon'
+import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined, PrinterOutlined } from '@ant-design/icons'
+import { ListDeleteIcon, ListSearchIcon, ProductExpandIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
 import moment from 'moment'
 import SelectProductModal from '../utils/SelectProductModal'
 import ViewProductModal from '../utils/ViewProductModal'
-import { initData, formRules } from './saleType'
+import { initData } from './saleType'
 import SaleAPI from '../../model/api/sale'
 
 export default class SaleForm extends React.Component {
@@ -41,8 +41,6 @@ export default class SaleForm extends React.Component {
     this.state = {
       loading: true,
       formData,
-      formStatus: JSON.parse(JSON.stringify(formRules)),
-      recordStatus: {},
       search: {
         vendorId: ''
       },
@@ -50,7 +48,6 @@ export default class SaleForm extends React.Component {
       mappingSearch: {},
       customerList: [],
       colorList: [],
-      canSubmit: false,
       viewProduct: false,
       viewSeqNo: null
     }
@@ -75,14 +72,11 @@ export default class SaleForm extends React.Component {
         {
           loading: true,
           formData,
-          formStatus: JSON.parse(JSON.stringify(formRules)),
-          recordStatus: {},
           search: {
             vendorId: ''
           },
           detailLoading: false,
           mappingSearch: {},
-          canSubmit: false,
           viewProduct: false,
           viewSeqNo: null
         },
@@ -117,40 +111,13 @@ export default class SaleForm extends React.Component {
         .getSaleData(this.props.salesId)
         .then((response) => {
           if (response.code === 0) {
-            // this.getDetailData(
-            //   response.data.salesDetails,
-            //   response.data.salesMaster.customerId
-            // ).then((object) => {
-            //   console.log(object)
-            //   this.setState(
-            //     {
-            //       loading: false,
-            //       formData: {
-            //         ...response.data.salesMaster,
-            //         accountDate: moment(response.data.salesMaster.accountDate, 'YYYY-MM-DD')
-            //           .startOf('day')
-            //           .valueOf(),
-            //         salesDetails: object.salesDetails
-            //       },
-            //       recordStatus: object.recordStatus,
-            //       mappingSearch: object.mappingSearch
-            //     },
-            //     () => {
-            //       this.getMappingProducts(object.mappingSearch).then((mappingSearch) =>
-            //         this.setState({ mappingSearch }, () =>
-            //           this.checkCanSubmit().then(() => resolve(true))
-            //         )
-            //       )
-            //     }
-            //   )
-            // })
-            const recordStatus = {}
             const mappingSearch = {}
             response.data.salesDetails.forEach((record) => {
               mappingSearch[record.detailNo] = {
                 loading: false,
                 value: record.productId,
                 seqNo: record.productSeqNo,
+                isVirtual: record.productType === 'VIRTUAL',
                 search: '',
                 searchTime: 0,
                 list: [],
@@ -158,27 +125,28 @@ export default class SaleForm extends React.Component {
                 historyLoading: true,
                 historyData: {}
               }
-              recordStatus[record.detailNo] = JSON.parse(JSON.stringify(recordStatus))
             })
             this.setState(
               {
                 loading: false,
                 formData: {
                   ...response.data.salesMaster,
+                  confirm: response.data.salesMaster.confirm || false,
+                  pay: response.data.salesMaster.pay || false,
                   accountDate: moment(response.data.salesMaster.accountDate, 'YYYY-MM-DD')
                     .startOf('day')
                     .valueOf(),
                   salesDetails: response.data.salesDetails
                 },
-                recordStatus,
                 mappingSearch
               },
               () => {
-                this.getProductInventory().then((salesDetails) => {
-                  const { formData } = this.state
-                  formData.salesDetails = salesDetails
-                  this.setState({ formData }, () => this.checkCanSubmit().then(() => resolve(true)))
-                })
+                resolve(true)
+                // this.getProductInventory().then((salesDetails) => {
+                //   const { formData } = this.state
+                //   formData.salesDetails = salesDetails
+                //   this.setState({ formData }, () => this.checkCanSubmit().then(() => resolve(true)))
+                // })
               }
             )
           } else {
@@ -220,81 +188,34 @@ export default class SaleForm extends React.Component {
     }
     return Promise.resolve(salesDetails)
   }
-  // getDetailData = async (details, customerId) => {
-  //   const recordStatus = {}
-  //   const mappingSearch = {}
-  //   const salesDetails = []
-  //   for (const detail of details) {
-  //     await new Promise((resolve) => {
-  //       this.saleAPI.getDetailData(detail.productSeqNo, customerId).then((response) => {
-  //         salesDetails.push({
-  //           ...response.data,
-  //           detailNo: detail.detailNo
-  //         })
-  //         mappingSearch[detail.detailNo] = {
-  //           loading: false,
-  //           value: response.productId,
-  //           seqNo: response.productSeqNo,
-  //           search: '',
-  //           searchTime: 0,
-  //           list: [],
-  //           select: {},
-  //           historyLoading: true,
-  //           historyList: []
-  //         }
-  //         recordStatus[detail.detailNo] = JSON.parse(JSON.stringify(recordStatus))
-  //         resolve(true)
-  //       })
-  //     })
-  //   }
-  //   return { salesDetails, recordStatus, mappingSearch }
-  // }
-  // getMappingProducts = async (mappingSearch) => {
-  //   const seqNos = Object.keys(mappingSearch)
-  //   for (const seqNo of seqNos) {
-  //     await new Promise((resolve) => {
-  //       this.saleAPI.searchProductMapping(true, mappingSearch[seqNo].value).then((response) => {
-  //         mappingSearch[seqNo].list = response.data
-  //         mappingSearch[seqNo].select = response.data[0]
-  //         resolve(true)
-  //       })
-  //     })
-  //   }
-  //   return Promise.resolve(mappingSearch)
-  // }
-
-  getFormErrorStatus = (key) => {
-    const { formStatus } = this.state
-    const field = formStatus.find((field) => field.key === key)
-    return field ? field.error : false
-  }
 
   onInputChange = (event) => {
     const type = event.target.getAttribute('id')
     const text = event.target.value
     const { formData } = this.state
     formData[type] = text
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
   onSelectChange = (type, value) => {
     const { formData } = this.state
     formData[type] = value
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
   onNumberChange = (type, value) => {
     const { formData } = this.state
     formData[type] = value
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
   onDateChange = (type, date) => {
     const { formData } = this.state
     formData[type] = date
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
   onSwitchChange = (type, checked) => {
+    console.log(checked)
     const { formData } = this.state
     formData[type] = checked
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
 
   // code select
@@ -315,7 +236,7 @@ export default class SaleForm extends React.Component {
       )
       if (vendor) formData.vendorName = vendor.name
     }
-    this.setState({ search }, () => this.checkData(formData, key))
+    this.setState({ search, formData })
   }
   // get code options
   getCustomerOptions = () => {
@@ -366,25 +287,32 @@ export default class SaleForm extends React.Component {
           const line = mappingSearch[row.detailNo]
           return (
             <div className='purchase-price-row'>
-              <div className={`purchase-price-input ${line.value === '' || row.productType === 'OTHERS' ? 'full' : ''}`}>
+              <div
+                className={`purchase-price-input ${
+                  line.value === '' || row.productType === 'OTHERS' ? 'full' : ''
+                }`}
+              >
                 <Button
                   onClick={_this.onSwitchProductModal.bind(_this, row.detailNo)}
                   type={line.value === '' ? 'primary' : 'default'}
                   style={{ width: '100%' }}
                 >
-                  {line.value === '' ? '選取商品' : line.value}
+                  {line.value === '' ? '選取商品' : line.isVirtual ? `*${line.value}` : line.value}
                 </Button>
               </div>
-              {(line.value !== '' && row.productType !== 'OTHERS') && (
+              {line.value !== '' && row.productType !== 'OTHERS' && (
                 <div className='purchase-price-view'>
                   <Tooltip title='商品資訊'>
-                    <Button onClick={() => this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}>
+                    <Button
+                      onClick={() => this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}
+                    >
                       <ListSearchIcon />
                     </Button>
                   </Tooltip>
                 </div>
               )}
               <SelectProductModal
+                type='sale'
                 detailNo={row.detailNo}
                 visible={line.visible}
                 value={line.value}
@@ -393,54 +321,6 @@ export default class SaleForm extends React.Component {
               />
             </div>
           )
-          // return (
-          //   <Spin spinning={line.loading}>
-          //     <Select
-          //       showSearch={true}
-          //       showArrow={false}
-          //       allowClear={true}
-          //       value={line.value}
-          //       searchValue={line.search}
-          //       onSearch={_this.onMappingSearch.bind(_this, row.detailNo)}
-          //       onSelect={_this.onMappingSelect.bind(_this, row.detailNo)}
-          //       onClear={_this.onMappingClear.bind(_this, row.detailNo)}
-          //       optionFilterProp='children'
-          //       style={{ width: '100%' }}
-          //       notFoundContent={null}
-          //       className='product-search'
-          //     >
-          //       {line.list.map((product) => (
-          //         <Select.Option key={product.data} value={product.data}>
-          //           {_this.getMappingProductDisplay(product)}
-          //         </Select.Option>
-          //       ))}
-          //     </Select>
-          //   </Spin>
-          // )
-        }
-      },
-      {
-        dataIndex: 'productName',
-        title: '商品名稱',
-        width: 240,
-        render: (data, row) => {
-          return row.productSeqNo && data
-        }
-      },
-      {
-        dataIndex: 'kindShortName',
-        title: '車種簡稱',
-        width: 160,
-        render: (data, row) => {
-          return row.productSeqNo && data
-        }
-      },
-      {
-        dataIndex: 'norm',
-        title: '規格',
-        width: 120,
-        render: (data, row) => {
-          return row.productSeqNo && data
         }
       },
       {
@@ -462,47 +342,49 @@ export default class SaleForm extends React.Component {
           )
         }
       },
-      {
-        dataIndex: 'inventory',
-        title: '庫存',
-        width: 80
-      },
+      // {
+      //   dataIndex: 'inventory',
+      //   title: '庫存',
+      //   width: 80
+      // },
       {
         dataIndex: 'price',
         title: '售價',
         width: 140,
         render: (data, row) => {
           return (
-            <div className='purchase-price-row'>
-              <div className='purchase-price-input'>
-                <InputNumber
-                  value={data}
-                  min={0}
-                  max={99999999}
-                  step={1}
-                  onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'price')}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div className='purchase-price-view'>
-                {row.productSeqNo && _this.state.formData.customerId ? (
-                  <Popover
-                    title='商品歷史價格'
-                    content={_this.displayHistoryPrice(row.detailNo)}
-                    overlayClassName='purchase-history-price'
-                    onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
-                  >
-                    <Button>
+            row.productSeqNo && (
+              <div className='purchase-price-row'>
+                <div className='purchase-price-input'>
+                  <InputNumber
+                    value={data}
+                    min={0}
+                    max={99999999}
+                    step={1}
+                    onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'price')}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div className='purchase-price-view'>
+                  {row.productSeqNo && _this.state.formData.customerId ? (
+                    <Popover
+                      title='商品歷史價格'
+                      content={_this.displayHistoryPrice(row.detailNo)}
+                      overlayClassName='purchase-history-price'
+                      onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
+                    >
+                      <Button>
+                        <ListSearchIcon />
+                      </Button>
+                    </Popover>
+                  ) : (
+                    <Button disabled={true}>
                       <ListSearchIcon />
                     </Button>
-                  </Popover>
-                ) : (
-                  <Button disabled={true}>
-                    <ListSearchIcon />
-                  </Button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            )
           )
         }
       },
@@ -510,23 +392,8 @@ export default class SaleForm extends React.Component {
         dataIndex: 'amount',
         title: '金額',
         width: 140,
-        render: (data) => {
-          return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-        }
-      },
-      {
-        dataIndex: 'remark',
-        title: '備註',
-        width: 300,
         render: (data, row) => {
-          return (
-            row.productSeqNo && (
-              <Input
-                value={data}
-                onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'remark')}
-              />
-            )
-          )
+          return row.productSeqNo && `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
         }
       },
       {
@@ -559,7 +426,6 @@ export default class SaleForm extends React.Component {
       {
         dataIndex: 'vendorProductId',
         title: '原廠料號',
-        width: 200,
         render: (data, row) => {
           return (
             row.productSeqNo && (
@@ -572,6 +438,43 @@ export default class SaleForm extends React.Component {
         }
       }
     ]
+  }
+
+  renderProductDetail = (record) => {
+    return (
+      <Row gutter={0}>
+        <Col span={8}>
+          <div className='product-detail-table-expand-group'>
+            <div className='product-detail-table-expand-group-title'>商品名稱</div>
+            <div className='product-detail-table-expand-group-content'>{record.productName}</div>
+          </div>
+        </Col>
+        <Col span={8}>
+          <div className='product-detail-table-expand-group'>
+            <div className='product-detail-table-expand-group-title'>車種簡稱</div>
+            <div className='product-detail-table-expand-group-content'>{record.kindShortName}</div>
+          </div>
+        </Col>
+        <Col span={8}>
+          <div className='product-detail-table-expand-group'>
+            <div className='product-detail-table-expand-group-title'>規格</div>
+            <div className='product-detail-table-expand-group-content'>{record.norm}</div>
+          </div>
+        </Col>
+        <Col span={24}>
+          <div className='product-detail-table-expand-group'>
+            <div className='product-detail-table-expand-group-title'>備註</div>
+            <div className='product-detail-table-expand-group-content'>
+              <Input.TextArea
+                value={record.remark}
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                onChange={this.onDetailInputChange.bind(this, record.detailNo, 'remark')}
+              />
+            </div>
+          </div>
+        </Col>
+      </Row>
+    )
   }
 
   onSwitchProductModal = (detailNo) => {
@@ -595,7 +498,7 @@ export default class SaleForm extends React.Component {
     const record = formData.salesDetails.find((record) => record.detailNo === detailNo)
     if (record) {
       record[key] = event.target.value
-      this.setState({ formData }, () => this.checkRecordData(detailNo, record, key))
+      this.setState({ formData })
     }
   }
   onDetailSelectChange = (detailNo, key, value) => {
@@ -603,7 +506,7 @@ export default class SaleForm extends React.Component {
     const record = formData.salesDetails.find((record) => record.detailNo === detailNo)
     if (record) {
       record[key] = value
-      this.setState({ formData }, () => this.checkRecordData(detailNo, record, key))
+      this.setState({ formData })
     }
   }
   onDetailNumberChange = (detailNo, key, value) => {
@@ -612,12 +515,12 @@ export default class SaleForm extends React.Component {
     if (record) {
       record[key] = value
       record.amount = record.quantity * record.price
-      this.setState({ formData }, () => this.checkRecordData(detailNo, record, key))
+      this.setState({ formData })
     }
   }
 
   onProductAdd = () => {
-    const { formData, recordStatus, mappingSearch } = this.state
+    const { formData, mappingSearch } = this.state
     const detailNo = formData.salesDetails.length + 1
     formData.salesDetails.push({
       detailNo,
@@ -634,28 +537,24 @@ export default class SaleForm extends React.Component {
       color: '',
       vendorProductId: ''
     })
-    recordStatus[detailNo] = JSON.parse(JSON.stringify(recordStatus))
     mappingSearch[detailNo] = {
       loading: false,
       value: '',
       seqNo: null,
+      isVirtual: false,
       visible: false,
-      // search: '',
-      // searchTime: 0,
-      // list: [],
       select: {},
       historyLoading: true,
       historyData: {}
     }
-    this.setState({ formData, recordStatus, mappingSearch })
+    this.setState({ formData, mappingSearch })
   }
   onProductDelete = (detailNo) => {
-    const { formData, recordStatus, mappingSearch } = this.state
+    const { formData, mappingSearch } = this.state
     const index = formData.salesDetails.findIndex((record) => record.detailNo === detailNo)
     formData.salesDetails.splice(index, 1)
-    delete recordStatus[detailNo]
     delete mappingSearch[detailNo]
-    this.setState({ formData, recordStatus, mappingSearch })
+    this.setState({ formData, mappingSearch })
   }
 
   onVisibleChange = (detailNo, visible) => {
@@ -731,18 +630,6 @@ export default class SaleForm extends React.Component {
         </div>
       </Spin>
     )
-    // return (
-    //   <Table
-    //     className='purchase-history-list'
-    //     rowKey='index'
-    //     size='small'
-    //     columns={this.getHistoryColumns()}
-    //     dataSource={row.historyList}
-    //     scroll={{ y: 240 }}
-    //     loading={row.historyLoading}
-    //     pagination={false}
-    //   />
-    // )
   }
   getHistoryPurchaseColumns = () => [
     {
@@ -811,168 +698,32 @@ export default class SaleForm extends React.Component {
     }
     return display
   }
-  // onMappingSearch = (detailNo, value) => {
-  //   const { mappingSearch } = this.state
-  //   mappingSearch[detailNo].search = value
-  //   mappingSearch[detailNo].searchTime = moment().valueOf()
-  //   this.setState({ mappingSearch }, () => {
-  //     setTimeout(() => {
-  //       if (moment().valueOf() - mappingSearch[detailNo].searchTime >= 1000 && value !== '') {
-  //         mappingSearch[detailNo].loading = true
-  //         this.setState({ mappingSearch }, () => {
-  //           this.saleAPI
-  //             .searchProductMapping(true, value)
-  //             .then((response) => {
-  //               mappingSearch[detailNo].loading = false
-  //               mappingSearch[detailNo].list = response.data
-  //               this.setState({ mappingSearch })
-  //             })
-  //             .catch(() => {
-  //               mappingSearch[detailNo].loading = false
-  //               this.setState({ mappingSearch })
-  //             })
-  //         })
-  //       } else if (value === '') {
-  //         if (mappingSearch[detailNo].value !== '') {
-  //           mappingSearch[detailNo].list = [mappingSearch[detailNo].select]
-  //         } else {
-  //           mappingSearch[detailNo].list = []
-  //         }
-  //         this.setState({ mappingSearch })
-  //       }
-  //     }, 1000)
-  //   })
-  // }
   onMappingSelect = (detailNo, product) => {
     const { formData, mappingSearch } = this.state
-    // const product = mappingSearch[detailNo].list.find((product) => product.data === value)
-    // if (product) {
     const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
-    // if (product.finished) {
-    // mappingSearch[detailNo].search = ''
     mappingSearch[detailNo].value = product.data
     mappingSearch[detailNo].seqNo = product.productSeqNo
+    mappingSearch[detailNo].isVirtual = product.productType === 'VIRTUAL'
     mappingSearch[detailNo].visible = false
-    // mappingSearch[detailNo].list = [product]
     mappingSearch[detailNo].select = product
     this.setState({ mappingSearch, detailLoading: true }, () => {
-      this.saleAPI.getProductInventory(product.productSeqNo).then((response) => {
-        row.inventory = response.data
-        this.saleAPI.getProductData(product.productSeqNo).then((response) => {
-          row.productId = product.data
-          row.productSeqNo = product.productSeqNo
-          row.productName = response.data.name
-          row.kindShortName = response.data.kindShortName
-          row.norm = response.data.norm
-          row.quantity = 1
-          row.price = 0
-          row.amount = 0
-          row.color = ''
-          row.unit = response.data.unit
-          row.vendorProductId = response.data.vendorProductId
-          this.setState({ formData, detailLoading: false })
-        })
+      // this.saleAPI.getProductInventory(product.productSeqNo).then((response) => {
+      // row.inventory = response.data
+      this.saleAPI.getProductData(product.productSeqNo, formData.customerId).then((response) => {
+        row.productId = product.data
+        row.productSeqNo = product.productSeqNo
+        row.productName = response.data.name
+        row.kindShortName = response.data.kindShortName
+        row.norm = response.data.norm
+        row.quantity = 1
+        row.price = response.data.price
+        row.amount = response.data.price
+        row.color = ''
+        row.unit = response.data.unit
+        row.vendorProductId = response.data.vendorProductId
+        this.setState({ formData, detailLoading: false })
       })
-    })
-    //   } else {
-    //     mappingSearch[detailNo].search = value
-    //     mappingSearch[detailNo].value = product.data
-    //     mappingSearch[detailNo].seqNo = product.productSeqNo
-    //     mappingSearch[detailNo].list = [product]
-    //     mappingSearch[detailNo].select = product
-    //     row.productId = product.data
-    //     row.productSeqNo = null
-    //     row.productName = ''
-    //     row.kindShortName = ''
-    //     row.norm = ''
-    //     row.quantity = 1
-    //     row.price = 0
-    //     row.amount = 0
-    //     row.color = ''
-    //     row.unit = ''
-    //     row.vendorProductId = ''
-    //     this.setState({ formData, mappingSearch })
-    //   }
-    // }
-  }
-  // onMappingClear = (detailNo) => {
-  //   const { formData, mappingSearch } = this.state
-  //   const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
-  //   mappingSearch[detailNo] = {
-  //     loading: false,
-  //     value: '',
-  //     seqNo: null,
-  //     search: '',
-  //     searchTime: 0,
-  //     list: [],
-  //     select: {},
-  //     historyLoading: true,
-  //     historyList: []
-  //   }
-  //   row.productId = ''
-  //   row.productSeqNo = null
-  //   row.productName = ''
-  //   row.kindShortName = ''
-  //   row.norm = ''
-  //   row.quantity = 1
-  //   row.price = 0
-  //   row.amount = 0
-  //   row.remark = ''
-  //   row.color = ''
-  //   row.vendorProductId = ''
-  //   this.setState({ formData, mappingSearch })
-  // }
-
-  // field validator
-  checkData = (formData, fieldKey) => {
-    const { formStatus } = this.state
-    const field = formStatus.find((field) => field.key === fieldKey)
-    if (field) {
-      const value = formData[fieldKey]
-      let error = false
-      if (field.required && !value) {
-        error = true
-      }
-      if (field.length && field.length.length > 0 && value) {
-        if (field.length.length === 1 && value.length > field.length[0]) {
-          error = true
-        } else if (
-          field.length.length > 1 &&
-          (value.length < field.length[0] || value.length > field.length[1])
-        ) {
-          error = true
-        }
-      }
-      if (field.regExp && !field.regExp.test(value)) {
-        error = true
-      }
-      field.error = error
-    }
-    this.setState({ formData, formStatus }, () => this.checkCanSubmit())
-  }
-  checkRecordData = (detailNo, record, fieldKey) => {
-    const { recordStatus } = this.state
-    const status = recordStatus[detailNo]
-    if (status) {
-    }
-    this.setState({ recordStatus }, () => this.checkCanSubmit())
-  }
-  checkCanSubmit = () => {
-    return new Promise((resolve) => {
-      let recordError = false
-      const keys = Object.keys(this.state.recordStatus)
-      for (const key of keys) {
-        if (this.state.recordStatus[key].error) {
-          recordError = true
-          break
-        }
-      }
-      this.setState(
-        {
-          canSubmit: !this.state.formStatus.some((field) => field.error) && !recordError
-        },
-        () => resolve(true)
-      )
+      // })
     })
   }
 
@@ -1001,11 +752,9 @@ export default class SaleForm extends React.Component {
             this.setState({
               loading: false,
               formData,
-              formStatus: JSON.parse(JSON.stringify(formRules)),
               search: {
                 vendorId: ''
-              },
-              canSubmit: false
+              }
             })
           }
         })
@@ -1042,7 +791,6 @@ export default class SaleForm extends React.Component {
         })
     })
   }
-
   saveSaleData = async (isAdd, formData) => {
     let salesId = ''
     if (isAdd) {
@@ -1072,7 +820,7 @@ export default class SaleForm extends React.Component {
             }
           })
           .catch((error) => {
-            message.error(error.response.data.message)
+            message.error(error.data.message)
             reject(false)
           })
       })
@@ -1102,8 +850,8 @@ export default class SaleForm extends React.Component {
               reject(false)
             }
           })
-          .catch(() => {
-            message.error('資料更新失敗')
+          .catch((response) => {
+            message.error(response.data.message)
             reject(false)
           })
       })
@@ -1112,8 +860,8 @@ export default class SaleForm extends React.Component {
       this.saleAPI
         .saveSaleConfirmFlag(salesId, formData.confirm)
         .then(() => resolve(true))
-        .catch(() => {
-          message.error('資料更新失敗')
+        .catch((response) => {
+          message.error(response.data.message)
           reject(false)
         })
     })
@@ -1121,11 +869,16 @@ export default class SaleForm extends React.Component {
       this.saleAPI
         .saveSalePayFlag(salesId, formData.pay)
         .then(() => resolve(true))
-        .catch(() => {
-          message.error('資料更新失敗')
+        .catch((response) => {
+          message.error(response.data.message)
           reject(false)
         })
     })
+  }
+
+  openPrint = () => {
+    const url = `${window.location.href.split('#')[0]}#/Sale/Print/${this.props.salesId}`
+    window.open(url)
   }
 
   handleCancel = () => {
@@ -1187,7 +940,6 @@ export default class SaleForm extends React.Component {
             <Row {...rowSetting}>
               <Col {...colSetting1}>
                 <FormItem
-                  required={true}
                   title='銷貨日期'
                   content={
                     <DatePicker
@@ -1202,7 +954,6 @@ export default class SaleForm extends React.Component {
               </Col>
               <Col {...colSetting2}>
                 <FormItem
-                  required={true}
                   title='客戶'
                   content={
                     <Select
@@ -1223,7 +974,6 @@ export default class SaleForm extends React.Component {
               </Col>
               <Col span={24}>
                 <FormItem
-                  required={false}
                   title='備註'
                   align='flex-start'
                   content={
@@ -1231,16 +981,13 @@ export default class SaleForm extends React.Component {
                       onChange={this.onInputChange}
                       value={this.state.formData.note}
                       id='note'
-                      autoSize={{ minRows: 4, maxRows: 4 }}
+                      autoSize={{ minRows: 1, maxRows: 4 }}
                     />
                   }
-                  message='長度需在255字內'
-                  error={this.getFormErrorStatus('note')}
                 />
               </Col>
-              <Col span={24}>
+              <Col span={12}>
                 <FormItem
-                  required={false}
                   title='已收款'
                   content={
                     <Switch
@@ -1248,12 +995,10 @@ export default class SaleForm extends React.Component {
                       onChange={this.onSwitchChange.bind(this, 'pay')}
                     />
                   }
-                  error={this.getFormErrorStatus('pay')}
                 />
               </Col>
-              <Col span={24}>
+              <Col span={12}>
                 <FormItem
-                  required={false}
                   title='已回單'
                   content={
                     <Switch
@@ -1261,7 +1006,6 @@ export default class SaleForm extends React.Component {
                       onChange={this.onSwitchChange.bind(this, 'confirm')}
                     />
                   }
-                  error={this.getFormErrorStatus('confirm')}
                 />
               </Col>
             </Row>
@@ -1273,10 +1017,30 @@ export default class SaleForm extends React.Component {
               size='small'
               columns={this.getDetailColumns()}
               dataSource={JSON.parse(JSON.stringify(this.state.formData.salesDetails))}
+              expandable={{
+                columnWidth: 36,
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  record.productSeqNo && (
+                    <Space className='list-table-option'>
+                      <Button size='small' onClick={() => onExpand(record)}>
+                        <ProductExpandIcon
+                          style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        />
+                      </Button>
+                    </Space>
+                  ),
+                expandedRowRender: this.renderProductDetail,
+                rowExpandable: (record) => record.productSeqNo
+              }}
               footer={() => (
                 <div className='purchase-detail-table-footer'>
                   <div>
-                    <Button onClick={this.onProductAdd}>新增商品</Button>
+                    <Button
+                      onClick={this.onProductAdd}
+                      disabled={this.state.formData.customerId === ''}
+                    >
+                      新增商品
+                    </Button>
                   </div>
                   <div>
                     <span className='purchase-product-total-amount'>
@@ -1285,7 +1049,7 @@ export default class SaleForm extends React.Component {
                   </div>
                 </div>
               )}
-              scroll={{ x: 1900 }}
+              scroll={{ x: 980 }}
               loading={this.state.detailLoading}
               pagination={false}
             />
@@ -1302,7 +1066,7 @@ export default class SaleForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    disabled={this.state.formData.customerId === ''}
                     onClick={this.handleCreate.bind(this, true)}
                   >
                     儲存
@@ -1310,7 +1074,7 @@ export default class SaleForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
+                    disabled={this.state.formData.customerId === ''}
                     onClick={this.handleCreate.bind(this, false)}
                   >
                     儲存並繼續新增
@@ -1321,7 +1085,6 @@ export default class SaleForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, false)}
                   >
                     儲存
@@ -1329,10 +1092,16 @@ export default class SaleForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, true)}
                   >
                     儲存並返回列表
+                  </Button>
+                  <Button
+                    className='form-option-print'
+                    icon={<PrinterOutlined />}
+                    onClick={this.openPrint}
+                  >
+                    列印
                   </Button>
                 </>
               )}

@@ -4,7 +4,7 @@ import { Breadcrumb, Card, Col, Row, Input, Button, Space, Modal, Spin, message 
 import { FormItem } from '../../component/FormItem'
 import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { createHashHistory } from 'history'
-import { initData, formRules } from './levelType'
+import { initData } from './levelType'
 // import addressDistrict from '../../model/resource/addressDistrict.json'
 import LevelAPI from '../../model/api/level'
 
@@ -17,9 +17,7 @@ export default class LevelForm extends React.Component {
     this.state = {
       loading: !props.createFlag,
       formData: JSON.parse(JSON.stringify(initData)),
-      formStatus: JSON.parse(JSON.stringify(formRules)),
-      validId: false,
-      canSubmit: false
+      validId: false
     }
     if (!props.createFlag) {
       this.getLevelData()
@@ -31,18 +29,14 @@ export default class LevelForm extends React.Component {
       this.setState({
         loading: false,
         formData: JSON.parse(JSON.stringify(initData)),
-        formStatus: JSON.parse(JSON.stringify(formRules)),
-        validId: false,
-        canSubmit: false
+        validId: false
       })
     } else if (!this.props.createFlag && prevProps.gradeId !== this.props.gradeId) {
       this.setState(
         {
           loading: true,
           formData: JSON.parse(JSON.stringify(initData)),
-          formStatus: JSON.parse(JSON.stringify(formRules)),
-          validId: true,
-          canSubmit: false
+          validId: true
         },
         () => this.getLevelData()
       )
@@ -66,49 +60,12 @@ export default class LevelForm extends React.Component {
       })
   }
 
-  getFormErrorStatus = (key) => {
-    const { formStatus } = this.state
-    const field = formStatus.find((field) => field.key === key)
-    return field ? field.error : false
-  }
-
   onInputChange = (event) => {
     const type = event.target.getAttribute('id')
     const text = event.target.value
     const { formData } = this.state
     formData[type] = text
-    this.checkData(formData, type)
-  }
-
-  // field validator
-  checkData = (formData, fieldKey) => {
-    const { formStatus } = this.state
-    const field = formStatus.find((field) => field.key === fieldKey)
-    if (field) {
-      const value = formData[fieldKey]
-      let error = false
-      if (field.required && !value) {
-        error = true
-      }
-      if (field.length && field.length.length > 0 && value) {
-        if (field.length.length === 1 && value.length > field.length[0]) {
-          error = true
-        } else if (
-          field.length.length > 1 &&
-          (value.length < field.length[0] || value.length > field.length[1])
-        ) {
-          error = true
-        }
-      }
-      if (field.regExp && !field.regExp.test(value)) {
-        error = true
-      }
-      field.error = error
-    }
-    this.setState({ formData, formStatus }, () => this.checkCanSubmit())
-  }
-  checkCanSubmit = () => {
-    this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) })
+    this.setState({ formData })
   }
 
   checkId = () => {
@@ -150,15 +107,19 @@ export default class LevelForm extends React.Component {
               layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
               this.setState({
                 loading: false,
-                formData: JSON.parse(JSON.stringify(initData)),
-                formStatus: JSON.parse(JSON.stringify(formRules)),
-                canSubmit: false
+                formData: JSON.parse(JSON.stringify(initData))
               })
             }
           } else {
             Modal.error({
               title: response.message,
               icon: <ExclamationCircleOutlined />,
+              content: response.data.map((tip, index) => (
+                <>
+                  {index > 0 && <br />}
+                  {tip.split(': ')[1]}
+                </>
+              )),
               okText: '確認',
               cancelText: null,
               onOk: () => {
@@ -168,7 +129,7 @@ export default class LevelForm extends React.Component {
           }
         })
         .catch((error) => {
-          message.error(error.response.data.message)
+          message.error(error.data.message)
           this.setState({ loading: false })
         })
     })
@@ -251,7 +212,6 @@ export default class LevelForm extends React.Component {
             <Row {...rowSetting}>
               <Col {...colSetting}>
                 <FormItem
-                  required={true}
                   title='等級代號'
                   content={
                     <Input
@@ -262,13 +222,10 @@ export default class LevelForm extends React.Component {
                       disabled={!this.props.createFlag}
                     />
                   }
-                  message='等級代號為必填,長度需在2字內'
-                  error={this.getFormErrorStatus('gradeId')}
                 />
               </Col>
               <Col {...colSetting}>
                 <FormItem
-                  required={true}
                   title='等級名稱'
                   content={
                     <Input
@@ -277,8 +234,6 @@ export default class LevelForm extends React.Component {
                       id='name'
                     />
                   }
-                  message='等級名稱為必填,長度需在10字'
-                  error={this.getFormErrorStatus('name')}
                 />
               </Col>
             </Row>
@@ -290,7 +245,6 @@ export default class LevelForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    // disabled={!this.state.canSubmit}
                     disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, true)}
                   >
@@ -299,7 +253,6 @@ export default class LevelForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    // disabled={!this.state.canSubmit}
                     disabled={!this.state.validId}
                     onClick={this.handleCreate.bind(this, false)}
                   >
@@ -311,7 +264,6 @@ export default class LevelForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    // disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, false)}
                   >
                     儲存
@@ -319,7 +271,6 @@ export default class LevelForm extends React.Component {
                   <Button
                     type='primary'
                     icon={<CheckOutlined />}
-                    // disabled={!this.state.canSubmit}
                     onClick={this.handleSubmit.bind(this, true)}
                   >
                     儲存並返回列表

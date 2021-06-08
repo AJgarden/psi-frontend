@@ -320,8 +320,7 @@ export default class Product extends React.Component {
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
         <PageDrawer
-          width={480}
-          placement='right'
+          placement='bottom'
           closeIcon={<UtilCloseIcon />}
           title={this.state.detailCreate ? '新增商品' : '編輯商品資料'}
           visible={this.state.detailVisible}

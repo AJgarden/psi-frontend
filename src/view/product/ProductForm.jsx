@@ -19,10 +19,10 @@ import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-de
 import { ListAddIcon, PhotoViewIcon, PhotoUploadIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
-import { initData, additionData, formRules } from './productType'
+import { initData, additionData } from './productType'
+import SelectProductModal from './SelectProductModal'
 import ProductAPI from '../../model/api/product'
 import StaticStorage from '../../model/storage/static'
-import moment from 'moment'
 
 export default class ProductForm extends React.Component {
   history = createHashHistory()
@@ -39,13 +39,11 @@ export default class ProductForm extends React.Component {
       additionData: { ...additionData },
       picOpen: false,
       picUrl: '',
-      formStatus: JSON.parse(JSON.stringify(formRules)),
       search: {
         partId: '',
         customCode1: '',
         customCode2: '',
-        customCode3: '',
-        productId: ''
+        customCode3: ''
       },
       codeSelect: {
         part: null,
@@ -57,10 +55,7 @@ export default class ProductForm extends React.Component {
       kindsList: [],
       gradesList: [],
       colorsList: [],
-      productList: [],
-      productSelect: {},
-      productSearchLoading: false,
-      canSubmit: false
+      selectVisible: false
     }
     if (!props.createFlag) {
       this.getInitData(false).then(() =>
@@ -69,13 +64,6 @@ export default class ProductForm extends React.Component {
     } else {
       this.getInitData(true).then(() => this.setState({ inited: true, loading: false }))
     }
-    // this.getInitData().then(() => {
-    //   if (!props.createFlag) {
-    //     this.getProductData().then(() => this.setState({ inited: true, loading: false }))
-    //   } else {
-    //     this.setState({ inited: true, loading: false })
-    //   }
-    // })
   }
 
   componentDidUpdate(prevProps) {
@@ -92,18 +80,13 @@ export default class ProductForm extends React.Component {
           additionData: { ...additionData },
           picOpen: false,
           picUrl: '',
-          formStatus: JSON.parse(JSON.stringify(formRules)),
           search: {
             partId: '',
             customCode1: '',
             customCode2: '',
-            customCode3: '',
-            productId: ''
+            customCode3: ''
           },
-          productList: [],
-          productSelect: {},
-          productSearchLoading: false,
-          canSubmit: false
+          selectVisible: false
         },
         () => {
           if (!this.props.createFlag) {
@@ -113,13 +96,6 @@ export default class ProductForm extends React.Component {
           } else {
             this.getInitData(true).then(() => this.setState({ inited: true, loading: false }))
           }
-          // this.getInitData().then(() => {
-          //   if (!this.props.createFlag) {
-          //     this.getProductData().then(() => this.setState({ inited: true, loading: false }))
-          //   } else {
-          //     this.setState({ inited: true, loading: false })
-          //   }
-          // })
         }
       )
     }
@@ -161,9 +137,7 @@ export default class ProductForm extends React.Component {
         .getProductData(this.props.seqNo)
         .then((response) => {
           if (response.code === 0) {
-            this.setState({ formData: response.data }, () =>
-              this.checkCanSubmit().then(() => resolve(true))
-            )
+            this.setState({ formData: response.data }, () => resolve(true))
           } else {
             reject(false)
             message.error(response.message)
@@ -198,124 +172,54 @@ export default class ProductForm extends React.Component {
           .catch(() => resolve(true))
       })
     }
-    if (
-      this.state.formData.productType === 'VIRTUAL' &&
-      this.state.formData.mappingProductSeqNo !== 0
-    ) {
-      await new Promise((resolve) => {
-        this.productAPI
-          .searchProductMapping(true, this.state.formData.mappingProductId)
-          .then((response) => {
+  }
+
+  onTypeChange = (value) => {
+    const { formData } = this.state
+    formData.productType = value
+    this.setState(
+      {
+        loading: value === 'REAL' && formData.seqNo !== 0,
+        formData
+      },
+      () => {
+        if (value === 'REAL' && formData.seqNo !== 0) {
+          this.productAPI.getProductAdditionData(formData.seqNo).then((response) => {
             if (response.code === 0) {
-              this.setState({ productList: response.data, productSelect: response.data[0] }, () =>
-                resolve(true)
-              )
-            } else {
-              resolve(true)
+              this.setState({ loading: false, additionData: response.data })
             }
           })
-          .catch(() => resolve(true))
-      })
-    }
+        }
+      }
+    )
   }
-
-  getFormErrorStatus = (key) => {
-    const { formStatus } = this.state
-    const field = formStatus.find((field) => field.key === key)
-    return field ? field.error : false
-  }
-
   onInputChange = (event) => {
     const type = event.target.getAttribute('id')
     const text = event.target.value
     const { formData } = this.state
     formData[type] = text
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
   onSelectChange = (type, value) => {
     const { formData } = this.state
     formData[type] = value
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
   onNumberChange = (type, value) => {
     const { formData } = this.state
     formData[type] = value
-    this.checkData(formData, type)
+    this.setState({ formData })
   }
 
-  // mapping product search & select
-  getMappingProductDisplay = (product) => {
-    let display = product.desc1
-    if (product.desc2 || product.desc3 || product.desc4 || product.desc5) {
-      let additionDisplay = ''
-      additionDisplay += product.desc2 ? product.desc2 : ''
-      additionDisplay += product.desc3
-        ? additionDisplay !== ''
-          ? `, ${product.desc3}`
-          : product.desc3
-        : ''
-      additionDisplay += product.desc4
-        ? additionDisplay !== ''
-          ? `, ${product.desc4}`
-          : product.desc4
-        : ''
-      additionDisplay += product.desc5
-        ? additionDisplay !== ''
-          ? `, ${product.desc5}`
-          : product.desc5
-        : ''
-      display += ` [${additionDisplay}]`
-    }
-    return display
+  onSwitchProductModal = () => {
+    this.setState({ selectVisible: !this.state.selectVisible })
   }
-  onMappingSearch = (value) => {
-    const { search, formData } = this.state
-    search.productId = value
-    this.productSearchTime = moment().valueOf()
-    this.setState({ search }, () => {
-      setTimeout(() => {
-        if (moment().valueOf() - this.productSearchTime >= 1000 && value !== '') {
-          this.setState({ productSearchLoading: true }, () => {
-            this.productAPI
-              .searchProductMapping(true, value)
-              .then((response) => {
-                this.setState({ productList: response.data, productSearchLoading: false })
-              })
-              .catch(() => {
-                this.setState({ productList: [], productSearchLoading: false })
-              })
-          })
-        } else if (value === '') {
-          if (formData.mappingProductId !== '') {
-            this.setState({ productList: [this.state.productSelect] })
-          } else {
-            this.setState({ productList: [] })
-          }
-        }
-      }, 1000)
-    })
-  }
-  onMappingSelect = (value) => {
-    const { search, formData, productList } = this.state
-    const product = productList.find((product) => product.data === value)
-    if (product) {
-      if (product.finished) {
-        search.productId = ''
-        formData.mappingProductId = product.data
-        formData.mappingProductSeqNo = product.productSeqNo
-        this.setState({ search, productList: [product], productSelect: product }, () =>
-          this.checkData(formData, 'mappingProductSeqNo')
-        )
-      } else {
-        search.productId = value
-        formData.mappingProductId = product.data
-        formData.mappingProductSeqNo = null
-        this.setState({ search, productList: [product], productSelect: product }, () => {
-          // this.onMappingSearch(value)
-          this.checkData(formData, 'mappingProductSeqNo')
-        })
-      }
-    }
+  onMappingSelect = (product) => {
+    console.log(product)
+    const { formData } = this.state
+    formData.mappingProductId = product.data
+    formData.mappingProductSeqNo = product.productSeqNo
+    this.setState({ formData, selectVisible: false })
   }
 
   // code select
@@ -348,7 +252,6 @@ export default class ProductForm extends React.Component {
     }
   }
   onCodeSelect = (key, value, option) => {
-    console.log(option)
     const { formData, search, codeSelect, kindsList } = this.state
     if (key === 'partId') {
       search.partId = ''
@@ -422,7 +325,6 @@ export default class ProductForm extends React.Component {
   getPartOptions = () => {
     const { formData, search, partsList } = this.state
     if (search.partId === '') {
-      // const parts = partsList.slice(0, 100)
       return partsList.map((part) => {
         return {
           label: `${part.partId} - ${part.name}`,
@@ -449,7 +351,6 @@ export default class ProductForm extends React.Component {
   getKindOptions = () => {
     const { formData, search, kindsList } = this.state
     if (search.customCode1 === '') {
-      // const kinds = kindsList.slice(0, 100)
       return kindsList.map((kind) => {
         return {
           label: `${kind.kindId} - ${kind.name}`,
@@ -479,7 +380,6 @@ export default class ProductForm extends React.Component {
   getGradeOptions = () => {
     const { formData, search, gradesList } = this.state
     if (search.customCode2 === '') {
-      // const grades = gradesList.slice(0, 100)
       return gradesList.map((grade) => {
         return {
           label: `${grade.gradeId} - ${grade.name}`,
@@ -509,7 +409,6 @@ export default class ProductForm extends React.Component {
   getColorOptions = () => {
     const { formData, search, colorsList } = this.state
     if (search.customCode3 === '') {
-      // const colors = colorsList.slice(0, 100)
       return colorsList.map((color) => {
         return {
           label: `${color.colorId} - ${color.name}`,
@@ -535,41 +434,6 @@ export default class ProductForm extends React.Component {
         }
       })
     }
-  }
-
-  // field validator
-  checkData = (formData, fieldKey) => {
-    const { formStatus } = this.state
-    const field = formStatus.find((field) => field.key === fieldKey)
-    if (field) {
-      const value = formData[fieldKey]
-      let error = false
-      if (field.required && !value) {
-        error = true
-      }
-      if (field.length && field.length.length > 0 && value) {
-        if (field.length.length === 1 && value.length > field.length[0]) {
-          error = true
-        } else if (
-          field.length.length > 1 &&
-          (value.length < field.length[0] || value.length > field.length[1])
-        ) {
-          error = true
-        }
-      }
-      if (field.regExp && !field.regExp.test(value)) {
-        error = true
-      }
-      field.error = error
-    }
-    this.setState({ formData, formStatus }, () => this.checkCanSubmit())
-  }
-  checkCanSubmit = () => {
-    return new Promise((resolve) => {
-      this.setState({ canSubmit: !this.state.formStatus.some((field) => field.error) }, () =>
-        resolve(true)
-      )
-    })
   }
 
   onAdditionNumberChange = (type, value) => {
@@ -618,98 +482,33 @@ export default class ProductForm extends React.Component {
         .addProductData(this.state.formData)
         .then((response) => {
           if (response.code === 0) {
-            const { additionData } = this.state
-            this.productAPI
-              .updateProductAdditionData(response.data.seqNo, {
-                length: additionData.length,
-                width: additionData.width,
-                height: additionData.height,
-                weight: additionData.weight
-              })
+            this.updateAddition(this.state.formData.productType, response.data.seqNo)
               .then((response) => {
-                if (response.code === 0) {
-                  message.success('成功新增資料')
-                  if (back) {
-                    if (this.props.isDrawMode) {
-                      this.props.onClose()
-                    } else {
-                      this.history.push('/Products/List')
-                    }
+                message.success('成功新增資料')
+                if (back) {
+                  if (this.props.isDrawMode) {
+                    this.props.onClose()
                   } else {
-                    const drawerContent = document.querySelector('.ant-drawer-body')
-                    const layoutContent = document.getElementById('layout-content-wrapper')
-                    if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
-                    if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
-                    this.setState({
-                      loading: false,
-                      formData: JSON.parse(JSON.stringify(initData)),
-                      formStatus: JSON.parse(JSON.stringify(formRules)),
-                      search: {
-                        partId: '',
-                        customCode1: '',
-                        customCode2: '',
-                        customCode3: ''
-                      },
-                      canSubmit: false
-                    })
+                    this.history.push('/Products/List')
                   }
                 } else {
-                  message.error(response.message)
-                }
-              })
-          } else {
-            Modal.error({
-              title: response.message,
-              icon: <ExclamationCircleOutlined />,
-              okText: '確認',
-              cancelText: null,
-              onOk: () => {
-                this.setState({ loading: false })
-              }
-            })
-          }
-        })
-        .catch((error) => {
-          message.error(error.response.data.message)
-          this.setState({ loading: false })
-        })
-    })
-  }
-  // 修改
-  handleSubmit = (back) => {
-    this.setState({ loading: true }, () => {
-      this.productAPI
-        .updateProductData(this.state.formData)
-        .then((response) => {
-          if (response.code === 0) {
-            const { additionData } = this.state
-            this.productAPI
-              .updateProductAdditionData(this.state.formData.seqNo, {
-                length: additionData.length,
-                width: additionData.width,
-                height: additionData.height,
-                weight: additionData.weight
-              })
-              .then((response) => {
-                if (response.code === 0) {
-                  message.success('成功更新資料')
-                  if (back) {
-                    if (this.props.isDrawMode) {
-                      this.props.onClose()
-                    } else {
-                      this.history.push('/Products/List')
+                  const drawerContent = document.querySelector('.ant-drawer-body')
+                  const layoutContent = document.getElementById('layout-content-wrapper')
+                  if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
+                  if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
+                  this.setState({
+                    loading: false,
+                    formData: JSON.parse(JSON.stringify(initData)),
+                    search: {
+                      partId: '',
+                      customCode1: '',
+                      customCode2: '',
+                      customCode3: ''
                     }
-                  } else {
-                    const drawerContent = document.querySelector('.ant-drawer-body')
-                    const layoutContent = document.getElementById('layout-content-wrapper')
-                    if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
-                    if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
-                    this.getProductData()
-                  }
-                } else {
-                  message.error(response.message)
+                  })
                 }
               })
+              .catch((error) => message.error(error))
           } else {
             Modal.error({
               title: response.message,
@@ -728,11 +527,87 @@ export default class ProductForm extends React.Component {
             })
           }
         })
-        .catch(() => {
-          message.error('資料更新失敗')
+        .catch((error) => {
+          message.error(error.data.message)
           this.setState({ loading: false })
         })
     })
+  }
+  // 修改
+  handleSubmit = (back) => {
+    this.setState({ loading: true }, () => {
+      this.productAPI
+        .updateProductData(this.state.formData)
+        .then((response) => {
+          if (response.code === 0) {
+            this.updateAddition(this.state.formData.productType, this.state.formData.seqNo)
+              .then(() => {
+                message.success('成功更新資料')
+                if (back) {
+                  if (this.props.isDrawMode) {
+                    this.props.onClose()
+                  } else {
+                    this.history.push('/Products/List')
+                  }
+                } else {
+                  const drawerContent = document.querySelector('.ant-drawer-body')
+                  const layoutContent = document.getElementById('layout-content-wrapper')
+                  if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
+                  if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
+                  this.getProductData().then(() => this.setState({ loading: false }))
+                }
+              })
+              .catch((error) => message.error(error))
+          } else {
+            Modal.error({
+              title: response.message,
+              icon: <ExclamationCircleOutlined />,
+              content: response.data.map((tip, index) => (
+                <>
+                  {index > 0 && <br />}
+                  {tip.split(': ')[1]}
+                </>
+              )),
+              okText: '確認',
+              cancelText: null,
+              onOk: () => {
+                this.setState({ loading: false })
+              }
+            })
+          }
+        })
+        .catch((error) => {
+          message.error(error.data.message)
+          this.setState({ loading: false })
+        })
+    })
+  }
+  updateAddition = async (type, seqNo) => {
+    if (type === 'REAL') {
+      const { additionData } = this.state
+      const data = {
+        length: additionData.length,
+        width: additionData.width,
+        height: additionData.height,
+        weight: additionData.weight
+      }
+      return new Promise((resolve, reject) => {
+        this.productAPI
+          .updateProductAdditionData(seqNo, data)
+          .then((response) => {
+            if (response.code === 0) {
+              resolve(true)
+            } else {
+              reject(response.message)
+            }
+          })
+          .catch((error) => {
+            reject(error.data.message)
+          })
+      })
+    } else {
+      return Promise.resolve(true)
+    }
   }
 
   handleCancel = () => {
@@ -784,9 +659,19 @@ export default class ProductForm extends React.Component {
       md: 12,
       lg: 12
     }
-    const picColSetting = this.props.isDrawMode
+    const addColSetting = this.props.isDrawMode
       ? {
           span: 12
+        }
+      : {
+          xs: 24,
+          sm: 24,
+          md: 12,
+          lg: 12
+        }
+    const picColSetting = this.props.isDrawMode
+      ? {
+          span: 6
         }
       : {
           xs: 12,
@@ -811,19 +696,18 @@ export default class ProductForm extends React.Component {
                 <Row {...rowSetting}>
                   <Col {...colSetting3}>
                     <FormItem
-                      required={false}
                       title='商品編號'
                       content={<Input value={this.state.formData.productId} disabled={true} />}
                     />
                   </Col>
                   <Col {...colSetting3}>
                     <FormItem
-                      required={true}
                       title='商品種類'
                       content={
                         <Select
                           value={this.state.formData.productType}
-                          onChange={this.onSelectChange.bind(this, 'productType')}
+                          // onChange={this.onSelectChange.bind(this, 'productType')}
+                          onChange={this.onTypeChange}
                           // disabled={!this.props.createFlag}
                           style={{ width: '100%' }}
                         >
@@ -838,7 +722,6 @@ export default class ProductForm extends React.Component {
                   </Col>
                   <Col {...colSetting3}>
                     <FormItem
-                      required={true}
                       title='代碼'
                       align='flex-start'
                       content={
@@ -924,13 +807,10 @@ export default class ProductForm extends React.Component {
                           </Col>
                         </Row>
                       }
-                      message='零件編號為必填'
-                      error={this.getFormErrorStatus('partId')}
                     />
                   </Col>
                   <Col {...colSetting2}>
                     <FormItem
-                      required={false}
                       title='車種'
                       content={
                         <Input
@@ -943,7 +823,6 @@ export default class ProductForm extends React.Component {
                   </Col>
                   <Col {...colSetting2}>
                     <FormItem
-                      required={false}
                       title='單位'
                       content={
                         <Select
@@ -963,7 +842,6 @@ export default class ProductForm extends React.Component {
                   </Col>
                   <Col {...colSetting3}>
                     <FormItem
-                      required={true}
                       title='商品名稱'
                       content={
                         <Input
@@ -972,46 +850,34 @@ export default class ProductForm extends React.Component {
                           id='name'
                         />
                       }
-                      message='商品名稱為必填'
-                      error={this.getFormErrorStatus('name')}
                     />
                   </Col>
                   {this.state.formData.productType === 'VIRTUAL' ? (
                     <Col {...colSetting3}>
                       <FormItem
-                        required={true}
                         title='對應料號'
                         content={
-                          <Spin spinning={this.state.productSearchLoading}>
-                            <Select
-                              showSearch={true}
-                              showArrow={false}
-                              value={this.state.formData.mappingProductId}
-                              searchValue={this.state.search.productId}
-                              onSearch={this.onMappingSearch}
-                              onSelect={this.onMappingSelect}
-                              optionFilterProp='children'
-                              style={{ width: '100%' }}
-                              notFoundContent={null}
-                              className='product-search'
-                            >
-                              {this.state.productList.map((product) => (
-                                <Select.Option key={product.data} value={product.data}>
-                                  {this.getMappingProductDisplay(product)}
-                                </Select.Option>
-                              ))}
-                            </Select>
-                          </Spin>
+                          <Button
+                            onClick={this.onSwitchProductModal}
+                            type={this.state.formData.mappingProductId === '' ? 'primary' : 'default'}
+                            style={{ width: '100%' }}
+                          >
+                            {this.state.formData.mappingProductId === '' ? '選取商品' : this.state.formData.mappingProductId}
+                          </Button>
                         }
-                        message='對應料號為必選'
-                        error={this.getFormErrorStatus('mappingProductId')}
+                      />
+                      <SelectProductModal
+                        type='sale'
+                        visible={this.state.selectVisible}
+                        value={this.state.formData.mappingProductId}
+                        onSelect={this.onMappingSelect}
+                        onClose={this.onSwitchProductModal}
                       />
                     </Col>
                   ) : (
                     <>
                       <Col {...colSetting1}>
                         <FormItem
-                          required={true}
                           title='定價1'
                           content={
                             <InputNumber
@@ -1027,7 +893,6 @@ export default class ProductForm extends React.Component {
                       </Col>
                       <Col {...colSetting1}>
                         <FormItem
-                          required={false}
                           title='定價2'
                           content={
                             <InputNumber
@@ -1043,7 +908,6 @@ export default class ProductForm extends React.Component {
                       </Col>
                       <Col {...colSetting1}>
                         <FormItem
-                          required={false}
                           title='定價3'
                           content={
                             <InputNumber
@@ -1059,7 +923,6 @@ export default class ProductForm extends React.Component {
                       </Col>
                       <Col {...colSetting2}>
                         <FormItem
-                          required={false}
                           title='規格'
                           content={
                             <Input
@@ -1076,7 +939,6 @@ export default class ProductForm extends React.Component {
                     <>
                       <Col {...colSetting2}>
                         <FormItem
-                          required={false}
                           title='原廠料號'
                           content={
                             <Input
@@ -1087,9 +949,8 @@ export default class ProductForm extends React.Component {
                           }
                         />
                       </Col>
-                      <Col {...colSetting1}>
+                      <Col {...colSetting2}>
                         <FormItem
-                          required={false}
                           title='安全量'
                           content={
                             <InputNumber
@@ -1103,9 +964,8 @@ export default class ProductForm extends React.Component {
                           }
                         />
                       </Col>
-                      <Col {...colSetting1}>
+                      {/* <Col {...colSetting1}>
                         <FormItem
-                          required={false}
                           title='庫存量'
                           content={
                             <InputNumber
@@ -1118,10 +978,9 @@ export default class ProductForm extends React.Component {
                             />
                           }
                         />
-                      </Col>
-                      <Col {...colSetting1}>
+                      </Col> */}
+                      <Col {...colSetting2}>
                         <FormItem
-                          required={false}
                           title='庫存地點'
                           content={
                             <Input
@@ -1140,7 +999,6 @@ export default class ProductForm extends React.Component {
                 <Row {...rowSetting}>
                   <Col span={24}>
                     <FormItem
-                      required={false}
                       align='flex-start'
                       title='備註'
                       content={
@@ -1151,8 +1009,6 @@ export default class ProductForm extends React.Component {
                           autoSize={{ minRows: 4, maxRows: 4 }}
                         />
                       }
-                      message='長度需在255字內'
-                      error={this.getFormErrorStatus('note')}
                     />
                   </Col>
                 </Row>
@@ -1160,9 +1016,8 @@ export default class ProductForm extends React.Component {
               {this.state.formData.productType === 'REAL' && (
                 <Card className='form-detail-card'>
                   <Row {...rowSetting}>
-                    <Col {...colSetting2}>
+                    <Col {...addColSetting}>
                       <FormItem
-                        required={false}
                         title='長(cm)'
                         content={
                           <InputNumber
@@ -1176,9 +1031,8 @@ export default class ProductForm extends React.Component {
                         }
                       />
                     </Col>
-                    <Col {...colSetting2}>
+                    <Col {...addColSetting}>
                       <FormItem
-                        required={false}
                         title='寬(cm)'
                         content={
                           <InputNumber
@@ -1192,9 +1046,8 @@ export default class ProductForm extends React.Component {
                         }
                       />
                     </Col>
-                    <Col {...colSetting2}>
+                    <Col {...addColSetting}>
                       <FormItem
-                        required={false}
                         title='高(cm)'
                         content={
                           <InputNumber
@@ -1208,9 +1061,8 @@ export default class ProductForm extends React.Component {
                         }
                       />
                     </Col>
-                    <Col {...colSetting2}>
+                    <Col {...addColSetting}>
                       <FormItem
-                        required={false}
                         title='重量(g)'
                         content={
                           <InputNumber
@@ -1382,7 +1234,6 @@ export default class ProductForm extends React.Component {
                       <Button
                         type='primary'
                         icon={<CheckOutlined />}
-                        disabled={!this.state.canSubmit}
                         onClick={this.handleCreate.bind(this, true)}
                       >
                         儲存
@@ -1390,7 +1241,6 @@ export default class ProductForm extends React.Component {
                       <Button
                         type='primary'
                         icon={<CheckOutlined />}
-                        disabled={!this.state.canSubmit}
                         onClick={this.handleCreate.bind(this, false)}
                       >
                         儲存並繼續新增
@@ -1401,7 +1251,6 @@ export default class ProductForm extends React.Component {
                       <Button
                         type='primary'
                         icon={<CheckOutlined />}
-                        disabled={!this.state.canSubmit}
                         onClick={this.handleSubmit.bind(this, false)}
                       >
                         儲存
@@ -1409,7 +1258,6 @@ export default class ProductForm extends React.Component {
                       <Button
                         type='primary'
                         icon={<CheckOutlined />}
-                        disabled={!this.state.canSubmit}
                         onClick={this.handleSubmit.bind(this, true)}
                       >
                         儲存並返回列表

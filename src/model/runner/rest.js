@@ -50,7 +50,7 @@ export const restInstance = (method, requestUrl, data) => {
     axios(config)
       .then((response) => resolve(response))
       .catch((error) => {
-        reject(error)
+        reject(error.response)
         console.log(error.response)
       })
   })

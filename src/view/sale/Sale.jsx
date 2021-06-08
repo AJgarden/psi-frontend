@@ -21,9 +21,10 @@ import {
   ListSearchIcon,
   ListEditIcon,
   ListTickIcon,
-  UtilCloseIcon
+  ListPrintIcon
+  // UtilCloseIcon
 } from '../icon/Icon'
-import { PageDrawer } from '../../component/PageDrawer'
+// import { PageDrawer } from '../../component/PageDrawer'
 import { getPaginationSetting } from '../../component/paginationSetting'
 import SaleAPI from '../../model/api/sale'
 import StaticStorage from '../../model/storage/static'
@@ -128,7 +129,7 @@ export default class Sale extends React.Component {
         dataIndex: 'salesId',
         title: '執行',
         fixed: 'left',
-        width: 50,
+        width: 70,
         render: (salesId) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -138,6 +139,15 @@ export default class Sale extends React.Component {
                 onClick={_this.onDetailOpen.bind(_this, salesId)}
               >
                 <ListEditIcon />
+              </Button>
+            </Tooltip>
+            <Tooltip title='列印'>
+              <Button
+                className='list-table-option-print'
+                size='small'
+                onClick={_this.openPrint.bind(_this, salesId)}
+              >
+                <ListPrintIcon />
               </Button>
             </Tooltip>
           </Space>
@@ -206,6 +216,11 @@ export default class Sale extends React.Component {
         }
       }
     ]
+  }
+
+  openPrint = (salesId) => {
+    const url = `${window.location.href.split('#')[0]}#/Sale/Print/${salesId}`
+    window.open(url)
   }
 
   onConfirmChange = (salesId, status) => {
@@ -323,7 +338,7 @@ export default class Sale extends React.Component {
         </div>
         <Table
           className='list-table-wrapper'
-          rowKey='purchaseId'
+          rowKey='salesId'
           size='small'
           columns={this.getColumns()}
           loading={this.state.loading}

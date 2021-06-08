@@ -35,7 +35,7 @@ export default class SelectProductModal extends React.Component {
 
   getSearchList = () => {
     this.productAPI
-      .queryProduct(this.props.type === 'purchase', this.state.value)
+      .queryProduct(true, this.state.value)
       .then((response) => {
         this.setState({
           loading: false,
@@ -83,7 +83,7 @@ export default class SelectProductModal extends React.Component {
           <Button
             size='small'
             className='purchase-product-modal-select'
-            onClick={_this.selectProduct.bind(_this, row)}
+            onClick={() => _this.props.onSelect(row)}
           >
             <ProductSelectIcon />
           </Button>
@@ -106,12 +106,8 @@ export default class SelectProductModal extends React.Component {
   }
   selectProduct = (product) => {
     this.setState({ value: product.data }, () => {
-      this.onSelect(product)
+      this.props.onSelect(product)
     })
-  }
-
-  onSelect = (product) => {
-    this.props.onSelect(this.props.detailNo, product)
   }
 
   render() {
@@ -121,9 +117,9 @@ export default class SelectProductModal extends React.Component {
         title='尋找商品'
         visible={this.props.visible}
         destroyOnClose={true}
-        onCancel={() => this.props.onClose(this.props.detailNo)}
+        onCancel={this.props.onClose}
         footer={[
-          <Button key='close' onClick={() => this.props.onClose(this.props.detailNo)}>
+          <Button key='close' onClick={this.props.onClose}>
             關閉
           </Button>
         ]}

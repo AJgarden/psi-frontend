@@ -10,6 +10,17 @@ body
 // ant design
 .ant-switch
   vertical-align: top
+.ant-drawer-bottom
+  .ant-drawer-content-wrapper
+    width: 1000px
+    height: 90vh !important
+    top: 10vh
+    left: 50%
+    bottom: 0
+    transform: translate(-50%, 100%) !important
+  &.ant-drawer-open
+    .ant-drawer-content-wrapper
+      transform: translate(-50%, 0) !important
 
 #root, .layout-wrapper
   height: 100%

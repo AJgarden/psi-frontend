@@ -39,5 +39,3 @@ export const additionData = {
   pic4Url: '',
   productSeqNo: null
 }
-
-export const formRules = []

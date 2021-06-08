@@ -5,7 +5,3 @@ export const initData = {
   note: '',
   purchaseDetails: []
 }
-
-export const formRules = []
-
-export const recordRules = []

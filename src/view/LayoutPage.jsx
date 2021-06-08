@@ -30,6 +30,7 @@ import Purchase from './purchase/Purchase'
 import PurchaseDetail from './purchase/PurchaseDetail'
 import Sale from './sale/Sale'
 import SaleDetail from './sale/SaleDetail'
+import SalePrint from './sale/SalePrint'
 import StaticStorage from '../model/storage/static'
 import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
@@ -46,6 +47,7 @@ export default class LayoutPage extends React.Component {
     this.state = {
       isLand: !cookies.find((cookie) => cookie.includes('MOTOBUY_AUTH')),
       isAuth: false,
+      isPrint: props.location.pathname.includes('Print'),
       siderCollapsed: false
     }
     if (cookies.find((cookie) => cookie.includes('MOTOBUY_AUTH'))) {
@@ -102,7 +104,17 @@ export default class LayoutPage extends React.Component {
 
   render() {
     return this.state.isLand ? (
-      this.state.isAuth ? (
+      this.state.isAuth ? this.state.isPrint ? (
+        <ConfigProvider locale={zhTW}>
+          <Layout className='print-wrapper'>
+            <Layout.Content>
+              <Switch>
+                <Route exact path='/Sale/Print/:salesId' component={SalePrint} />
+              </Switch>
+            </Layout.Content>
+          </Layout>
+        </ConfigProvider>
+      ) : (
         <ConfigProvider locale={zhTW}>
           <Layout className='layout-wrapper'>
             <Layout.Sider

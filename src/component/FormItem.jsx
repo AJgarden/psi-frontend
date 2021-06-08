@@ -5,16 +5,16 @@ export const FormItem = ({ required, align = 'center', title, content, message, 
   return (
     <div style={{ display: 'flex', alignItems: align }}>
       <div style={{ marginRight: 8, width: 80, textAlign: 'right' }}>
-        {required && (
+        {/* {required && (
           <Typography.Text type='danger' style={{ marginRight: 5 }}>
             *
           </Typography.Text>
-        )}
+        )} */}
         <Typography.Text>{title}</Typography.Text>
       </div>
       <div style={{ width: 'calc(100% - 80px)', position: 'relative' }}>
         {content}
-        {error && (
+        {/* {error && (
           <span
             style={{
               color: 'red',
@@ -27,7 +27,7 @@ export const FormItem = ({ required, align = 'center', title, content, message, 
           >
             {message}
           </span>
-        )}
+        )} */}
       </div>
     </div>
   )

@@ -43,8 +43,10 @@ export default class SaleAPI {
     )
   }
 
-  getProductData = (seqNo) => {
-    return restInstance('get', `/v1/products/${seqNo}`).then((response) => response.data)
+  getProductData = (productSeqNo, customerId) => {
+    return restInstance('get', `/v1/sales/salesProductItem/${productSeqNo}/${customerId}`).then(
+      (response) => response.data
+    )
   }
 
   getProductInventory = (seqNo) => {
@@ -72,5 +74,9 @@ export default class SaleAPI {
       pageSize: 9999,
       colorId: ''
     }).then((response) => response.data)
+  }
+
+  getPrintData = (salesId) => {
+    return restInstance('get', `/v1/sales/print/${salesId}`).then((response) => response.data)
   }
 }

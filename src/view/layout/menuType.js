@@ -59,6 +59,10 @@ export const routes = [
     title: '快速編修 - 商品管理'
   },
   {
+    path: '/Products/Add',
+    title: '新增 - 商品管理'
+  },
+  {
     path: '/Products',
     title: '商品管理'
   },
@@ -185,14 +189,14 @@ export const menuType = [
         routes: ['Products', 'QuickEdit'],
         title: '快速編修',
         accessRoles: ['ROLE_PRODUCT_UPDATE']
+      },
+      {
+        key: 'ProductsAdd',
+        routes: ['Products', 'Add'],
+        title: '新增商品',
+        accessRoles: [],
+        hidden: true
       }
-      // },
-      // {
-      //   key: 'ProductsImport',
-      //   routes: ['Products', 'Import'],
-      //   title: '匯入',
-      //   accessRoles: ['ROLE_PRODUCT_IMPORT']
-      // }
     ]
   },
   {
@@ -213,6 +217,13 @@ export const menuType = [
         routes: ['Purchase', 'Add'],
         title: '新增',
         accessRoles: ['ROLE_PRODUCT_ADD']
+      },
+      {
+        key: 'PurchaseDetail',
+        routes: ['Purchase', 'Detail'],
+        title: '修改進貨單資料',
+        accessRoles: [],
+        hidden: true
       }
     ]
   },
@@ -234,6 +245,13 @@ export const menuType = [
         routes: ['Sale', 'Add'],
         title: '新增',
         accessRoles: ['ROLE_SALES_ADD']
+      },
+      {
+        key: 'SaleDetail',
+        routes: ['Sale', 'Detail'],
+        title: '修改銷貨單資料',
+        accessRoles: [],
+        hidden: true
       }
     ]
   }

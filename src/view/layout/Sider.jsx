@@ -69,7 +69,7 @@ export const LayoutSider = (props) => {
                     children.accessRoles.filter((role) => roles.includes(role)).length > 0
                   ) {
                     return (
-                      <Menu.Item key={children.key} data={children}>
+                      <Menu.Item key={children.key} data={children} className={children.hidden ? 'hidden' : ''}>
                         {children.title}
                       </Menu.Item>
                     )
@@ -78,7 +78,7 @@ export const LayoutSider = (props) => {
                 })}
               </Menu.SubMenu>
             ) : (
-              <Menu.Item key={menu.key} icon={menu.icon} data={menu}>
+              <Menu.Item key={menu.key} icon={menu.icon} data={menu} className={menu.hidden ? 'hidden' : ''}>
                 {menu.title}
               </Menu.Item>
             )

@@ -2,19 +2,26 @@ import React from 'react'
 import Icon from '@ant-design/icons'
 
 const ProductSelectSvg = () => (
-  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' />
   </svg>
 )
 export const ProductSelectIcon = (props) => <Icon component={ProductSelectSvg} {...props} />
 const ProductNextSvg = () => (
-  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
     <path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' />
   </svg>
 )
 export const ProductNextIcon = (props) => <Icon component={ProductNextSvg} {...props} />
+const ProductExpandSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
+    <path d='M24 24H0V0h24v24z' fill='none' opacity='.87' />
+    <path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z' />
+  </svg>
+)
+export const ProductExpandIcon = (props) => <Icon component={ProductExpandSvg} {...props} />
 
 const CarouselNextSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
@@ -76,6 +83,14 @@ const ListImageSvg = () => (
   </svg>
 )
 export const ListImageIcon = (props) => <Icon component={ListImageSvg} {...props} />
+const ListPrintSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M19 8h-1V3H6v5H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zM8 5h8v3H8V5zm8 12v2H8v-4h8v2zm2-2v-2H6v2H4v-4c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v4h-2z' />
+    <circle cx='18' cy='11.5' r='1' />
+  </svg>
+)
+export const ListPrintIcon = (props) => <Icon component={ListPrintSvg} {...props} />
 const ListDeleteSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
