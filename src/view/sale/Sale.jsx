@@ -162,7 +162,7 @@ export default class Sale extends React.Component {
         render: (record, row) => {
           return (
             <Switch
-              defaultChecked={record}
+              checked={record}
               onChange={_this.onConfirmChange.bind(_this, row.salesId, !record)}
             />
           )
@@ -224,13 +224,17 @@ export default class Sale extends React.Component {
   }
 
   onConfirmChange = (salesId, status) => {
-    this.setState({ loading: true }, () => {
+    const { list } = this.state
+    const row = list.find((record) => record.salesId === salesId)
+    row.confirm = status
+    this.setState({ loading: true, list }, () => {
       this.saleAPI
         .saveSaleConfirmFlag(salesId, status)
         .then(() => this.getList())
         .catch(() => {
           message.error('修改回單狀態失敗')
-          this.setState({ loading: false })
+          row.confirm = !status
+          this.setState({ loading: false, list })
         })
     })
   }
