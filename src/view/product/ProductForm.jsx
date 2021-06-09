@@ -248,7 +248,7 @@ export default class ProductForm extends React.Component {
         formData.productId = productId
       }
       search[key] = value.toUpperCase()
-      this.setState({ search }, () => this.checkData(formData, key))
+      this.setState({ search, formData })
     }
   }
   onCodeSelect = (key, value, option) => {
@@ -269,7 +269,7 @@ export default class ProductForm extends React.Component {
     else if (key === 'customCode3') codeSelect.color = option
     formData.productId = this.generateProductIdName().productId
     formData.name = this.generateProductIdName().productName
-    this.setState({ search, codeSelect }, () => this.checkData(formData, key))
+    this.setState({ search, codeSelect, formData })
   }
   onCodeClear = (key) => {
     const { formData, search, codeSelect } = this.state
@@ -282,7 +282,7 @@ export default class ProductForm extends React.Component {
     else if (key === 'customCode3') codeSelect.color = null
     formData.productId = this.generateProductIdName().productId
     formData.name = this.generateProductIdName().productName
-    this.setState({ search }, () => this.checkData(formData, key))
+    this.setState({ search, formData })
   }
   generateProductIdName = () => {
     const { codeSelect } = this.state
