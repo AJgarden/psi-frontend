@@ -48,7 +48,7 @@ export default class CustomerForm extends React.Component {
       .getCustomerData(this.props.customerId)
       .then((response) => {
         if (response.code === 0) {
-          this.setState({ loading: false, formData: response.data }, () => this.checkCanSubmit())
+          this.setState({ loading: false, formData: response.data })
         } else {
           message.error(response.message)
           this.history.push('/Basic/Customer')

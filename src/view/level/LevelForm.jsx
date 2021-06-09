@@ -48,7 +48,7 @@ export default class LevelForm extends React.Component {
       .getLevelData(this.props.gradeId)
       .then((response) => {
         if (response.code === 0) {
-          this.setState({ loading: false, formData: response.data }, () => this.checkCanSubmit())
+          this.setState({ loading: false, formData: response.data })
         } else {
           message.error(response.message)
           this.history.push('/Parts/Level')

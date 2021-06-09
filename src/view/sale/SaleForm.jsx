@@ -145,7 +145,7 @@ export default class SaleForm extends React.Component {
                 // this.getProductInventory().then((salesDetails) => {
                 //   const { formData } = this.state
                 //   formData.salesDetails = salesDetails
-                //   this.setState({ formData }, () => this.checkCanSubmit().then(() => resolve(true)))
+                //   this.setState({ formData }, () => resolve(true))
                 // })
               }
             )

@@ -47,7 +47,7 @@ export default class ComponentForm extends React.Component {
       .getComponentData(this.props.partId)
       .then((response) => {
         if (response.code === 0) {
-          this.setState({ loading: false, formData: response.data }, () => this.checkCanSubmit())
+          this.setState({ loading: false, formData: response.data })
         } else {
           message.error(response.message)
           this.history.push('/Parts/Component')
