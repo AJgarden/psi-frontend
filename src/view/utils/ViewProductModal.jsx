@@ -19,27 +19,10 @@ export default class ViewProductModal extends React.Component {
     if (!prevProps.visible && this.props.visible) {
       this.setState({ loading: true, data: {}, additionData: {} }, () => {
         this.productAPI
-          .getProductData(this.props.seqNo)
-          .then((res1) => {
-            if (res1.code === 0) {
-              if (res1.data.productType === 'REAL') {
-                this.productAPI
-                  .getProductAdditionData(this.props.seqNo)
-                  .then((res2) => {
-                    if (res2.code === 0) {
-                      this.setState({ loading: false, data: res1.data, additionData: res2.data })
-                    } else {
-                      message.error('取得商品資料失敗!')
-                      this.props.onClose()
-                    }
-                  })
-                  .catch(() => {
-                    message.error('取得商品資料失敗!')
-                    this.props.onClose()
-                  })
-              } else {
-                this.setState({ loading: false, data: res1.data })
-              }
+          .getProductInfo(this.props.seqNo)
+          .then((response) => {
+            if (response.code === 0) {
+              this.setState({ loading: false, data: response.data })
             } else {
               message.error('取得商品資料失敗!')
               this.props.onClose()
@@ -69,7 +52,7 @@ export default class ViewProductModal extends React.Component {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
   }
   getVolumn = (data) => {
-    return !data ? '' : data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    return data === null ? '' : data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
 
   render() {
@@ -118,76 +101,60 @@ export default class ViewProductModal extends React.Component {
                     <td>{this.state.data.vendorProductId}</td>
                   </tr>
                 </table>
-                {this.state.data.productType === 'REAL' && (
-                  <>
-                    <table className='view-product-table addition'>
-                      <tr>
-                        <th>長 (cm)</th>
-                        <th>寬 (cm)</th>
-                        <th>高 (cm)</th>
-                        <th>重量 (g)</th>
-                      </tr>
-                      <tr>
-                        <td>{this.getVolumn(this.state.additionData.length)}</td>
-                        <td>{this.getVolumn(this.state.additionData.width)}</td>
-                        <td>{this.getVolumn(this.state.additionData.height)}</td>
-                        <td>{this.getVolumn(this.state.additionData.weight)}</td>
-                      </tr>
-                    </table>
-                    <table className='view-product-table addition'>
-                      <tr>
-                        <td>
-                          <div>
-                            {!this.state.additionData.pic1Url ? (
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
-                            ) : (
-                              <img
-                                src={this.state.additionData.pic1Url}
-                                alt={this.state.data.name}
-                              />
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          <div>
-                            {!this.state.additionData.pic2Url ? (
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
-                            ) : (
-                              <img
-                                src={this.state.additionData.pic2Url}
-                                alt={this.state.data.name}
-                              />
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          <div>
-                            {!this.state.additionData.pic3Url ? (
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
-                            ) : (
-                              <img
-                                src={this.state.additionData.pic3Url}
-                                alt={this.state.data.name}
-                              />
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          <div>
-                            {!this.state.additionData.pic4Url ? (
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
-                            ) : (
-                              <img
-                                src={this.state.additionData.pic4Url}
-                                alt={this.state.data.name}
-                              />
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-                  </>
-                )}
+                <table className='view-product-table addition'>
+                  <tr>
+                    <th>長 (cm)</th>
+                    <th>寬 (cm)</th>
+                    <th>高 (cm)</th>
+                    <th>重量 (g)</th>
+                  </tr>
+                  <tr>
+                    <td>{this.getVolumn(this.state.data.length)}</td>
+                    <td>{this.getVolumn(this.state.data.width)}</td>
+                    <td>{this.getVolumn(this.state.data.height)}</td>
+                    <td>{this.getVolumn(this.state.data.weight)}</td>
+                  </tr>
+                </table>
+                <table className='view-product-table addition'>
+                  <tr>
+                    <td>
+                      <div>
+                        {!this.state.data.pic1Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img src={this.state.data.pic1Url} alt={this.state.data.name} />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        {!this.state.data.pic2Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img src={this.state.data.pic2Url} alt={this.state.data.name} />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        {!this.state.data.pic3Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img src={this.state.data.pic3Url} alt={this.state.data.name} />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        {!this.state.data.pic4Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img src={this.state.data.pic4Url} alt={this.state.data.name} />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
               </>
             )}
           </div>

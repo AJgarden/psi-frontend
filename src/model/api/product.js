@@ -13,6 +13,10 @@ export default class ProductAPI {
     return restInstance('get', `/v1/products/${seqNo}`).then((response) => response.data)
   }
 
+  getProductInfo = (seqNo) => {
+    return restInstance('get', `/v1/products/info/${seqNo}`).then((response) => response.data)
+  }
+
   addProductData = (data) => {
     return restInstance('post', '/v1/products/0', data).then((response) => response.data)
   }
