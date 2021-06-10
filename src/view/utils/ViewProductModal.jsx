@@ -22,20 +22,24 @@ export default class ViewProductModal extends React.Component {
           .getProductData(this.props.seqNo)
           .then((res1) => {
             if (res1.code === 0) {
-              this.productAPI
-                .getProductAdditionData(this.props.seqNo)
-                .then((res2) => {
-                  if (res2.code === 0) {
-                    this.setState({ loading: false, data: res1.data, additionData: res2.data })
-                  } else {
+              if (res1.data.productType === 'REAL') {
+                this.productAPI
+                  .getProductAdditionData(this.props.seqNo)
+                  .then((res2) => {
+                    if (res2.code === 0) {
+                      this.setState({ loading: false, data: res1.data, additionData: res2.data })
+                    } else {
+                      message.error('取得商品資料失敗!')
+                      this.props.onClose()
+                    }
+                  })
+                  .catch(() => {
                     message.error('取得商品資料失敗!')
                     this.props.onClose()
-                  }
-                })
-                .catch(() => {
-                  message.error('取得商品資料失敗!')
-                  this.props.onClose()
-                })
+                  })
+              } else {
+                this.setState({ loading: false, data: res1.data })
+              }
             } else {
               message.error('取得商品資料失敗!')
               this.props.onClose()

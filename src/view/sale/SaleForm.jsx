@@ -263,7 +263,7 @@ export default class SaleForm extends React.Component {
       {
         dataIndex: 'detailNo',
         title: '刪除',
-        width: 60,
+        width: 50,
         fixed: 'left',
         render: (data) => (
           <Space className='list-table-option'>
@@ -324,9 +324,24 @@ export default class SaleForm extends React.Component {
         }
       },
       {
+        dataIndex: 'kindShortName',
+        title: '車種',
+        width: 200
+      },
+      {
+        dataIndex: 'productName',
+        title: '名稱',
+        width: 200
+      },
+      {
+        dataIndex: 'norm',
+        title: '規格',
+        width: 80
+      },
+      {
         dataIndex: 'quantity',
         title: '數量',
-        width: 100,
+        width: 80,
         render: (data, row) => {
           return (
             row.productSeqNo && (
@@ -391,15 +406,29 @@ export default class SaleForm extends React.Component {
       {
         dataIndex: 'amount',
         title: '金額',
-        width: 140,
+        width: 100,
         render: (data, row) => {
           return row.productSeqNo && `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
         }
       },
       {
+        dataIndex: 'remark',
+        title: '備註',
+        render: (data, row) => {
+          return (
+            row.productSeqNo && (
+              <Input
+                value={data}
+                onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'remark')}
+              />
+            )
+          )
+        }
+      },
+      {
         dataIndex: 'color',
         title: '顏色',
-        width: 140,
+        width: 100,
         render: (data, row) => {
           return (
             row.productSeqNo && (
@@ -422,60 +451,61 @@ export default class SaleForm extends React.Component {
             )
           )
         }
-      },
-      {
-        dataIndex: 'vendorProductId',
-        title: '原廠料號',
-        render: (data, row) => {
-          return (
-            row.productSeqNo && (
-              <Input
-                value={data}
-                onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'vendorProductId')}
-              />
-            )
-          )
-        }
       }
+      // {
+      //   dataIndex: 'vendorProductId',
+      //   title: '原廠料號',
+      //   width: 160,
+      //   render: (data, row) => {
+      //     return (
+      //       row.productSeqNo && (
+      //         <Input
+      //           value={data}
+      //           onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'vendorProductId')}
+      //         />
+      //       )
+      //     )
+      //   }
+      // }
     ]
   }
 
-  renderProductDetail = (record) => {
-    return (
-      <Row gutter={0}>
-        <Col span={8}>
-          <div className='product-detail-table-expand-group'>
-            <div className='product-detail-table-expand-group-title'>商品名稱</div>
-            <div className='product-detail-table-expand-group-content'>{record.productName}</div>
-          </div>
-        </Col>
-        <Col span={8}>
-          <div className='product-detail-table-expand-group'>
-            <div className='product-detail-table-expand-group-title'>車種簡稱</div>
-            <div className='product-detail-table-expand-group-content'>{record.kindShortName}</div>
-          </div>
-        </Col>
-        <Col span={8}>
-          <div className='product-detail-table-expand-group'>
-            <div className='product-detail-table-expand-group-title'>規格</div>
-            <div className='product-detail-table-expand-group-content'>{record.norm}</div>
-          </div>
-        </Col>
-        <Col span={24}>
-          <div className='product-detail-table-expand-group'>
-            <div className='product-detail-table-expand-group-title'>備註</div>
-            <div className='product-detail-table-expand-group-content'>
-              <Input.TextArea
-                value={record.remark}
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                onChange={this.onDetailInputChange.bind(this, record.detailNo, 'remark')}
-              />
-            </div>
-          </div>
-        </Col>
-      </Row>
-    )
-  }
+  // renderProductDetail = (record) => {
+  //   return (
+  //     <Row gutter={0}>
+  //       <Col span={8}>
+  //         <div className='product-detail-table-expand-group'>
+  //           <div className='product-detail-table-expand-group-title'>商品名稱</div>
+  //           <div className='product-detail-table-expand-group-content'>{record.productName}</div>
+  //         </div>
+  //       </Col>
+  //       <Col span={8}>
+  //         <div className='product-detail-table-expand-group'>
+  //           <div className='product-detail-table-expand-group-title'>車種簡稱</div>
+  //           <div className='product-detail-table-expand-group-content'>{record.kindShortName}</div>
+  //         </div>
+  //       </Col>
+  //       <Col span={8}>
+  //         <div className='product-detail-table-expand-group'>
+  //           <div className='product-detail-table-expand-group-title'>規格</div>
+  //           <div className='product-detail-table-expand-group-content'>{record.norm}</div>
+  //         </div>
+  //       </Col>
+  //       <Col span={24}>
+  //         <div className='product-detail-table-expand-group'>
+  //           <div className='product-detail-table-expand-group-title'>備註</div>
+  //           <div className='product-detail-table-expand-group-content'>
+  //             <Input.TextArea
+  //               value={record.remark}
+  //               autoSize={{ minRows: 1, maxRows: 4 }}
+  //               onChange={this.onDetailInputChange.bind(this, record.detailNo, 'remark')}
+  //             />
+  //           </div>
+  //         </div>
+  //       </Col>
+  //     </Row>
+  //   )
+  // }
 
   onSwitchProductModal = (detailNo) => {
     const { mappingSearch } = this.state
@@ -1017,21 +1047,21 @@ export default class SaleForm extends React.Component {
               size='small'
               columns={this.getDetailColumns()}
               dataSource={JSON.parse(JSON.stringify(this.state.formData.salesDetails))}
-              expandable={{
-                columnWidth: 36,
-                expandIcon: ({ expanded, onExpand, record }) =>
-                  record.productSeqNo && (
-                    <Space className='list-table-option'>
-                      <Button size='small' onClick={() => onExpand(record)}>
-                        <ProductExpandIcon
-                          style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                        />
-                      </Button>
-                    </Space>
-                  ),
-                expandedRowRender: this.renderProductDetail,
-                rowExpandable: (record) => record.productSeqNo
-              }}
+              // expandable={{
+              //   columnWidth: 36,
+              //   expandIcon: ({ expanded, onExpand, record }) =>
+              //     record.productSeqNo && (
+              //       <Space className='list-table-option'>
+              //         <Button size='small' onClick={() => onExpand(record)}>
+              //           <ProductExpandIcon
+              //             style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              //           />
+              //         </Button>
+              //       </Space>
+              //     ),
+              //   expandedRowRender: this.renderProductDetail,
+              //   rowExpandable: (record) => record.productSeqNo
+              // }}
               footer={() => (
                 <div className='purchase-detail-table-footer'>
                   <div>
@@ -1049,7 +1079,7 @@ export default class SaleForm extends React.Component {
                   </div>
                 </div>
               )}
-              scroll={{ x: 980 }}
+              scroll={{ x: 1250 }}
               loading={this.state.detailLoading}
               pagination={false}
             />
