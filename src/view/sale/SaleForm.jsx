@@ -347,7 +347,7 @@ export default class SaleForm extends React.Component {
             row.productSeqNo && (
               <InputNumber
                 value={data}
-                min={1}
+                min={0}
                 max={999999}
                 step={1}
                 onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'quantity')}
