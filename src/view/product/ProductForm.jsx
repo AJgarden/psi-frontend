@@ -31,11 +31,15 @@ export default class ProductForm extends React.Component {
 
   constructor(props) {
     super(props)
+    const formData = JSON.parse(JSON.stringify(initData))
+    if (StaticStorage.unitList.length > 0) {
+      formData.unit = StaticStorage.unitList[0].unit
+    }
     this.state = {
       inited: false,
       loading: true,
       productType: [],
-      formData: JSON.parse(JSON.stringify(initData)),
+      formData,
       additionData: { ...additionData },
       picOpen: false,
       picUrl: '',
@@ -72,11 +76,15 @@ export default class ProductForm extends React.Component {
       (!prevProps.drawModeVisible && this.props.drawModeVisible) ||
       (!this.props.createFlag && prevProps.seqNo !== this.props.seqNo)
     ) {
+      const formData = JSON.parse(JSON.stringify(initData))
+      if (StaticStorage.unitList.length > 0) {
+        formData.unit = StaticStorage.unitList[0].unit
+      }
       this.setState(
         {
           inited: false,
           loading: true,
-          formData: JSON.parse(JSON.stringify(initData)),
+          formData,
           additionData: { ...additionData },
           picOpen: false,
           picUrl: '',
@@ -478,11 +486,13 @@ export default class ProductForm extends React.Component {
   // 新增
   handleCreate = (back) => {
     this.setState({ loading: true }, () => {
+      const data = { ...this.state.formData }
+      delete data.productId
       this.productAPI
-        .addProductData(this.state.formData)
+        .addProductData(data)
         .then((response) => {
           if (response.code === 0) {
-            this.updateAddition(this.state.formData.productType, response.data.seqNo)
+            this.updateAddition(data.productType, response.data.seqNo)
               .then((response) => {
                 message.success('成功新增資料')
                 if (back) {
@@ -536,11 +546,13 @@ export default class ProductForm extends React.Component {
   // 修改
   handleSubmit = (back) => {
     this.setState({ loading: true }, () => {
+      const data = { ...this.state.formData }
+      delete data.productId
       this.productAPI
-        .updateProductData(this.state.formData)
+        .updateProductData(data)
         .then((response) => {
           if (response.code === 0) {
-            this.updateAddition(this.state.formData.productType, this.state.formData.seqNo)
+            this.updateAddition(data.productType, data.seqNo)
               .then(() => {
                 message.success('成功更新資料')
                 if (back) {

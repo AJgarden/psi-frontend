@@ -1,5 +1,3 @@
-import StatisStorage from '../../model/storage/static'
-
 export const initData = {
   seqNo: 0,
   productId: '',
@@ -12,7 +10,7 @@ export const initData = {
   name: '',
   mappingProductId: '',
   mappingProductSeqNo: null,
-  unit: StatisStorage.unitList.length > 0 ? StatisStorage.unitList[0].unit : '',
+  unit: '',
   price1: 0,
   price2: 0,
   price3: 0,
@@ -25,10 +23,10 @@ export const initData = {
 }
 
 export const additionData = {
-  width: null,
-  height: null,
-  weight: null,
-  length: null,
+  width: 0,
+  height: 0,
+  weight: 0,
+  length: 0,
   pic1GoogleBlobId: '',
   pic1Url: '',
   pic2GoogleBlobId: '',
