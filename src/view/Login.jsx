@@ -44,7 +44,11 @@ export const Login = (props) => {
           message.success('登入成功')
           // save auth cookie
           const auth = new Buffer(`${loginData.userId}:${loginData.password}`).toString('base64')
-          document.cookie = `MOTOBUY_AUTH=${auth}; path=/; max-age=86400`
+          if (keepLogin) {
+            document.cookie = `MOTOBUY_AUTH=${auth}; path=/; max-age=86400`
+          } else {
+            document.cookie = `MOTOBUY_AUTH=${auth}; path=/`
+          }
           // save permission roles
           localStorage.setItem(
             'MOTOBUY_ROLES',

@@ -57,7 +57,7 @@ export default class LayoutPage extends React.Component {
 
   componentDidMount() {
     window.logout = this.onLogout
-    window.addEventListener('beforeunload', this.clearCookie)
+    // window.addEventListener('beforeunload', this.clearCookie)
     const cookies = document.cookie.split(';')
     if (cookies.find((cookie) => cookie.includes('MOTOBUY_AUTH'))) {
       testRestInstance('get', '/v1/auth')
@@ -73,9 +73,9 @@ export default class LayoutPage extends React.Component {
         .catch(() => this.setState({ isLand: true }))
     }
   }
-  componentWillUnmount() {
-    this.clearCookie()
-  }
+  // componentWillUnmount() {
+  //   this.clearCookie()
+  // }
 
   getGlobalData = async () => {
     await new Promise((resolve) => {
