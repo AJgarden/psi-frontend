@@ -51,7 +51,7 @@ export const restInstance = (method, requestUrl, data) => {
       .then((response) => resolve(response))
       .catch((error) => {
         reject(error.response)
-        if (error.response.code === 401) window.logout()
+        if (error.response.status === 401) window.logout()
         console.log(error.response)
       })
   })
@@ -74,7 +74,7 @@ export const restUploadInstance = (method, requestUrl, data) => {
       .then((response) => resolve(response))
       .catch((error) => {
         reject(error)
-        if (error.response.code === 401) window.logout()
+        if (error.response.status === 401) window.logout()
         console.log(error.response)
       })
   })
@@ -100,7 +100,7 @@ export const testRestInstance = (method, requestUrl, data) => {
       .then((response) => resolve(response))
       .catch((error) => {
         reject(error)
-        if (error.response.code === 401) window.logout()
+        if (error.response.status === 401) window.logout()
         console.log(error.response)
       })
   })

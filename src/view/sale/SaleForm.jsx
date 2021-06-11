@@ -20,7 +20,12 @@ import {
   message,
   InputNumber
 } from 'antd'
-import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined, PrinterOutlined } from '@ant-design/icons'
+import {
+  CheckOutlined,
+  CloseOutlined,
+  ExclamationCircleOutlined,
+  PrinterOutlined
+} from '@ant-design/icons'
 import { ListDeleteIcon, ListSearchIcon, ProductExpandIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
@@ -758,15 +763,18 @@ export default class SaleForm extends React.Component {
   }
 
   // 新增
-  handleCreate = (back) => {
+  handleCreate = (back, print) => {
     this.setState({ loading: true }, () => {
       const { formData } = this.state
       formData.accountDate = moment(formData.accountDate).format('YYYY-MM-DD')
       formData.salesDetails = formData.salesDetails.filter((record) => record.productSeqNo !== null)
       this.saveSaleData(true, formData)
-        .then(() => {
+        .then((salesId) => {
           message.success('成功新增資料')
           if (back) {
+            if (print) {
+              window.open(`${window.location.href.split('#')[0]}#/Sale/Print/${salesId}`)
+            }
             if (this.props.isDrawMode) {
               this.props.onClose()
             } else {
@@ -889,7 +897,7 @@ export default class SaleForm extends React.Component {
     await new Promise((resolve, reject) => {
       this.saleAPI
         .saveSaleConfirmFlag(salesId, formData.confirm)
-        .then(() => resolve(true))
+        .then(() => resolve(salesId))
         .catch((response) => {
           message.error(response.data.message)
           reject(false)
@@ -898,17 +906,17 @@ export default class SaleForm extends React.Component {
     await new Promise((resolve, reject) => {
       this.saleAPI
         .saveSalePayFlag(salesId, formData.pay)
-        .then(() => resolve(true))
+        .then(() => resolve(salesId))
         .catch((response) => {
           message.error(response.data.message)
           reject(false)
         })
     })
+    return salesId
   }
 
   openPrint = () => {
-    const url = `${window.location.href.split('#')[0]}#/Sale/Print/${this.props.salesId}`
-    window.open(url)
+    window.open(`${window.location.href.split('#')[0]}#/Sale/Print/${this.props.salesId}`)
   }
 
   handleCancel = () => {
@@ -968,6 +976,14 @@ export default class SaleForm extends React.Component {
         <Spin spinning={this.state.loading}>
           <Card className='form-detail-card'>
             <Row {...rowSetting}>
+              {!this.props.createFlag && (
+                <Col span={24}>
+                  <FormItem
+                    title='銷售單號'
+                    content={<span style={{ color: '#2a9d8f' }}>{this.props.salesId}</span>}
+                  />
+                </Col>
+              )}
               <Col {...colSetting1}>
                 <FormItem
                   title='銷貨日期'
@@ -1097,7 +1113,7 @@ export default class SaleForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     disabled={this.state.formData.customerId === ''}
-                    onClick={this.handleCreate.bind(this, true)}
+                    onClick={this.handleCreate.bind(this, true, false)}
                   >
                     儲存
                   </Button>
@@ -1105,9 +1121,17 @@ export default class SaleForm extends React.Component {
                     type='primary'
                     icon={<CheckOutlined />}
                     disabled={this.state.formData.customerId === ''}
-                    onClick={this.handleCreate.bind(this, false)}
+                    onClick={this.handleCreate.bind(this, false, false)}
                   >
                     儲存並繼續新增
+                  </Button>
+                  <Button
+                    className='form-option-print'
+                    icon={<PrinterOutlined />}
+                    disabled={this.state.formData.customerId === ''}
+                    onClick={this.handleCreate.bind(this, true, true)}
+                  >
+                    儲存並列印
                   </Button>
                 </>
               ) : (

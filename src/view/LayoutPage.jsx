@@ -101,7 +101,12 @@ export default class LayoutPage extends React.Component {
   onLogin = () => {
     this.getGlobalData().then(() => this.setState({ isAuth: true }))
   }
-  onLogout = () => {
+  onLogout = (self = false) => {
+    if (self) {
+      message.success('已成功登出')
+    } else {
+      message.error('授權已過期，請重新登入')
+    }
     document.cookie = 'MOTOBUY_AUTH=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
     this.history.replace('/')
     this.setState({ isAuth: false })

@@ -33,6 +33,7 @@
   display: flex;
   align-items: flex-start;
   line-height: 24px;
+  font-size: 15px;
 }
 .print-backward .header .header-left {
   width: 548px;
@@ -109,6 +110,7 @@
   display: flex;
   align-items: flex-start;
   line-height: 24px;
+  font-size: 17px;
 }
 .print-forward .data-header .data-header-left {
   width: 548px;
@@ -131,6 +133,7 @@
 }
 .print-forward .data-table table td {
   height: 24px;
+  font-size: 15px;
   padding: 0 4px;
 }
 .print-forward .data-table table td div {

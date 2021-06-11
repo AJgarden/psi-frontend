@@ -30,12 +30,13 @@ export default class SalePrint extends React.Component {
         })
       } else {
         this.setState({ printData: response })
+        document.title = '列印銷貨單 - MOTOBUY PSI'
       }
     })
   }
 
   getPrice = (value) => {
-    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.0'
+    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
 
   generateEmptyNote = (page) => {
@@ -51,6 +52,22 @@ export default class SalePrint extends React.Component {
             <td colSpan='6'></td>
           </tr>
         )
+      }
+      return null
+    }
+    return null
+  }
+
+  generateSpecialNote = (page) => {
+    const { printData } = this.state
+    if (page + 1 === printData.length) {
+      if (printData[page].specialNotes && printData[page].specialNotes.length > 0) {
+        return printData[page].specialNotes.map((note, index) => (
+          <tr key={`spnote-${index}`}>
+            <td></td>
+            <td colSpan='10'>{note}</td>
+          </tr>
+        ))
       }
       return null
     }
@@ -81,7 +98,7 @@ export default class SalePrint extends React.Component {
                 <td colSpan='2'></td>
                 <td
                   colSpan='2'
-                  style={{ lineHeight: '18px', verticalAlign: 'top', padding: '0 6px' }}
+                  style={{ fontSize: 15, lineHeight: '18px', verticalAlign: 'top', padding: '0 6px' }}
                   dangerouslySetInnerHTML={{
                     __html: printData[page].note.replace('\n', '<br />')
                   }}
@@ -89,10 +106,62 @@ export default class SalePrint extends React.Component {
                 <td colSpan='2'></td>
                 <td></td>
                 <td
-                  colSpan='4'
-                  style={{ textAlign: 'right', verticalAlign: 'top', padding: '9px 10px' }}
+                  colSpan='2'
+                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 10px' }}
                 >
                   {this.getPrice(printData[page].totalAmount)}
+                </td>
+                <td
+                  colSpan='2'
+                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 10px' }}
+                >
+                  {printData[page].customerId}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )
+    } else {
+      return (
+        <div className='data-footer'>
+          <table style={{ width: '100%', tableLayout: 'fixed' }}>
+            <colgroup>
+              <col width='16' />
+              <col width='34' />
+              <col width='102' />
+              <col width='106' />
+              <col width='132' />
+              <col width='75' />
+              <col width='56' />
+              <col width='56' />
+              <col width='68' />
+              <col width='53' />
+              <col />
+            </colgroup>
+            <tfoot>
+              <tr>
+                <td colSpan='2'></td>
+                <td
+                  colSpan='2'
+                  style={{ fontSize: 15, lineHeight: '18px', verticalAlign: 'top', padding: '0 6px' }}
+                  dangerouslySetInnerHTML={{
+                    __html: printData[page].note.replace('\n', '<br />')
+                  }}
+                ></td>
+                <td colSpan='2'></td>
+                <td></td>
+                <td
+                  colSpan='2'
+                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 0 6px 10px' }}
+                >
+                  == 接下頁 ==
+                </td>
+                <td
+                  colSpan='2'
+                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 10px' }}
+                >
+                  {printData[page].customerId}
                 </td>
               </tr>
             </tfoot>
@@ -100,7 +169,6 @@ export default class SalePrint extends React.Component {
         </div>
       )
     }
-    return null
   }
 
   render() {
@@ -317,6 +385,7 @@ export default class SalePrint extends React.Component {
                       </tr>
                     ))}
                     {this.generateEmptyNote(index)}
+                    {this.generateSpecialNote(index)}
                   </tbody>
                 </table>
               </div>

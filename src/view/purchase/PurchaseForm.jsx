@@ -822,6 +822,14 @@ export default class PurchaseForm extends React.Component {
         <Spin spinning={this.state.loading}>
           <Card className='form-detail-card'>
             <Row {...rowSetting}>
+              {!this.props.createFlag && (
+                <Col span={24}>
+                  <FormItem
+                    title='進貨單號'
+                    content={<span style={{ color: '#2a9d8f' }}>{this.props.purchaseId}</span>}
+                  />
+                </Col>
+              )}
               <Col {...colSetting1}>
                 <FormItem
                   title='進貨日期'

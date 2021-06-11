@@ -17,7 +17,7 @@ export const LayoutHeader = (props) => {
         <Button>
           <HeaderNotifyEmptyIcon />
         </Button>
-        <Button onClick={props.onLogout}>
+        <Button onClick={() => props.onLogout(true)}>
           <HeaderLogoutIcon />
         </Button>
         <Button className='layout-header-account'>
