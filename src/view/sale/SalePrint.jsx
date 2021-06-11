@@ -39,6 +39,22 @@ export default class SalePrint extends React.Component {
     return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
 
+  generateNextNote = (page) => {
+    const { printData } = this.state
+    if (page + 1 < printData.length) {
+      return (
+        <tr>
+          <td colSpan='3'></td>
+          <td colSpan='2' style={{ textAlign: 'center' }}>
+            ==== 接下頁 ====
+          </td>
+          <td colSpan='6'></td>
+        </tr>
+      )
+    }
+    return null
+  }
+
   generateEmptyNote = (page) => {
     const { printData } = this.state
     if (page + 1 === printData.length) {
@@ -76,99 +92,61 @@ export default class SalePrint extends React.Component {
 
   generateFoot = (page) => {
     const { printData } = this.state
-    if (page + 1 === printData.length) {
-      return (
-        <div className='data-footer'>
-          <table style={{ width: '100%', tableLayout: 'fixed' }}>
-            <colgroup>
-              <col width='16' />
-              <col width='34' />
-              <col width='102' />
-              <col width='106' />
-              <col width='132' />
-              <col width='75' />
-              <col width='56' />
-              <col width='56' />
-              <col width='68' />
-              <col width='53' />
-              <col />
-            </colgroup>
-            <tfoot>
-              <tr>
-                <td colSpan='2'></td>
-                <td
-                  colSpan='2'
-                  style={{ fontSize: 15, lineHeight: '18px', verticalAlign: 'top', padding: '0 6px' }}
-                  dangerouslySetInnerHTML={{
-                    __html: printData[page].note.replace('\n', '<br />')
-                  }}
-                ></td>
-                <td colSpan='2'></td>
-                <td></td>
-                <td
-                  colSpan='2'
-                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 10px' }}
-                >
-                  {this.getPrice(printData[page].totalAmount)}
-                </td>
-                <td
-                  colSpan='2'
-                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 10px' }}
-                >
-                  {printData[page].customerId}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      )
-    } else {
-      return (
-        <div className='data-footer'>
-          <table style={{ width: '100%', tableLayout: 'fixed' }}>
-            <colgroup>
-              <col width='16' />
-              <col width='34' />
-              <col width='102' />
-              <col width='106' />
-              <col width='132' />
-              <col width='75' />
-              <col width='56' />
-              <col width='56' />
-              <col width='68' />
-              <col width='53' />
-              <col />
-            </colgroup>
-            <tfoot>
-              <tr>
-                <td colSpan='2'></td>
-                <td
-                  colSpan='2'
-                  style={{ fontSize: 15, lineHeight: '18px', verticalAlign: 'top', padding: '0 6px' }}
-                  dangerouslySetInnerHTML={{
-                    __html: printData[page].note.replace('\n', '<br />')
-                  }}
-                ></td>
-                <td colSpan='2'></td>
-                <td></td>
-                <td
-                  colSpan='2'
-                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 0 6px 10px' }}
-                >
-                  == 接下頁 ==
-                </td>
-                <td
-                  colSpan='2'
-                  style={{ fontSize: 17, textAlign: 'right', verticalAlign: 'top', padding: '6px 10px' }}
-                >
-                  {printData[page].customerId}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      )
-    }
+    return (
+      <div className='data-footer'>
+        <table style={{ width: '100%', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col width='16' />
+            <col width='34' />
+            <col width='102' />
+            <col width='106' />
+            <col width='132' />
+            <col width='75' />
+            <col width='56' />
+            <col width='56' />
+            <col width='68' />
+            <col width='53' />
+            <col />
+          </colgroup>
+          <tfoot>
+            <tr>
+              <td colSpan='2'></td>
+              <td
+                colSpan='2'
+                style={{ fontSize: 15, lineHeight: '18px', verticalAlign: 'top', padding: '0 6px' }}
+                dangerouslySetInnerHTML={{
+                  __html: printData[page].note.replace('\n', '<br />')
+                }}
+              ></td>
+              <td colSpan='2'></td>
+              <td></td>
+              <td
+                colSpan='2'
+                style={{
+                  fontSize: 17,
+                  textAlign: 'right',
+                  verticalAlign: 'top',
+                  padding: '6px 10px'
+                }}
+              >
+                {page + 1 === printData.length ? this.getPrice(printData[page].totalAmount) : '--'}
+              </td>
+              <td
+                colSpan='2'
+                style={{
+                  fontSize: 17,
+                  textAlign: 'right',
+                  verticalAlign: 'top',
+                  padding: '6px 10px'
+                }}
+              >
+                {printData[page].customerId}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    )
   }
 
   render() {
@@ -384,6 +362,7 @@ export default class SalePrint extends React.Component {
                         </td>
                       </tr>
                     ))}
+                    {this.generateNextNote(index)}
                     {this.generateEmptyNote(index)}
                     {this.generateSpecialNote(index)}
                   </tbody>
