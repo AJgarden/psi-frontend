@@ -36,6 +36,8 @@ export const Login = (props) => {
     setIsLogin(true)
     if (keepLogin) {
       document.cookie = `MOTOBUY_KEEP_LOGIN=${keepLogin}; path=/; max-age=86400`
+    } else {
+      document.cookie = 'MOTOBUY_KEEP_LOGIN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
     }
     restInstanceWithoutAuth('post', '/v1/author/login', loginData)
       .then((response) => {
