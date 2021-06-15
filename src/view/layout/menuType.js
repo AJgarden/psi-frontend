@@ -11,8 +11,16 @@ import {
 
 export const routes = [
   {
-    path: '/Dashboard',
-    title: '儀表板'
+    path: '/Report/Purchase',
+    title: '進貨單 - 報表'
+  },
+  {
+    path: '/Report/Sale',
+    title: '銷貨單 - 報表'
+  },
+  {
+    path: '/Report',
+    title: '報表'
   },
   {
     path: '/Basic/Supplier',
@@ -105,11 +113,25 @@ export const menuType = [
   //   accessRoles: []
   // },
   {
-    key: 'Dashboard',
-    routes: ['Dashboard'],
+    key: 'Report',
+    routes: ['Report'],
     icon: <SiderMenuDashboardIcon />,
-    title: '儀表板',
-    accessRoles: []
+    title: '報表',
+    accessRoles: ['ROLE_REPORT'],
+    children: [
+      {
+        key: 'ReportPurchase',
+        routes: ['Report', 'Purchase'],
+        title: '進貨單報表',
+        accessRoles: ['ROLE_PURCHASE_REPORT']
+      },
+      {
+        key: 'ReportSale',
+        routes: ['Report', 'Sale'],
+        title: '銷貨單報表',
+        accessRoles: ['ROLE_SALES_REPORT']
+      }
+    ]
   },
   {
     key: 'Basic',

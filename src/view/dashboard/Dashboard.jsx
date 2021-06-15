@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Spin, Row, Col, Card, Statistic } from 'antd'
+import { Tabs, Spin, Row, Col, Card, Statistic } from 'antd'
 import { createHashHistory } from 'history'
 
 export default class Dashboard extends React.Component {
@@ -15,12 +15,12 @@ export default class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    this.history.replace('/Dashboard')
+    this.history.replace('/Report')
   }
 
   render() {
     return (
-      <div>Dashboard</div>
+      <div className=''>Dashboard</div>
       // <Spin spinning={this.state.loading}>
       //   <Row gutter={36}>
       //     <Col xs={12} sm={12} md={12} lg={6}>

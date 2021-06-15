@@ -1,6 +1,6 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
-import { ConfigProvider, Layout, message } from 'antd'
+import { ConfigProvider, Layout, message, BackTop } from 'antd'
 import zhTW from 'antd/lib/locale/zh_TW'
 import moment from 'moment'
 import 'moment/locale/zh-tw'
@@ -10,6 +10,7 @@ import { Login } from './Login'
 import { LayoutSider } from './layout/Sider'
 import { LayoutHeader } from './layout/Header'
 import Dashboard from './dashboard/Dashboard'
+import PurchaseReport from './dashboard/PurchaseReport'
 import SaleReport from './dashboard/SaleReport'
 import Supplier from './supplier/Supplier'
 import SupplierDetail from './supplier/SupplierDetail'
@@ -144,6 +145,7 @@ export default class LayoutPage extends React.Component {
                 <Layout.Content id='layout-content-wrapper' className='layout-content-wrapper'>
                   <Switch>
                     {/* Report */}
+                    <Route exact path='/Report/Purchase' component={PurchaseReport} />
                     <Route exact path='/Report/Sale' component={SaleReport} />
                     {/* Supplier */}
                     <Route
@@ -268,6 +270,7 @@ export default class LayoutPage extends React.Component {
                     <Route exact path='/Sale/List' component={Sale} />
                     <Route path='/' component={Dashboard} />
                   </Switch>
+                  <BackTop target={() => document.getElementById('layout-content-wrapper')} className='layout-content-backtop' />
                 </Layout.Content>
                 <Layout.Footer className='layout-footer'>2021 &copy; Copyright</Layout.Footer>
               </Layout>

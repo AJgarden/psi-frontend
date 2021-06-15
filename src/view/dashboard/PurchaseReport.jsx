@@ -3,7 +3,7 @@ import { Spin, Row, Col, DatePicker, Select, Button, Table, Typography, message 
 import moment from 'moment'
 import ReportAPI from '../../model/api/report'
 
-export default class SaleReport extends React.Component {
+export default class PurchaseReport extends React.Component {
   reportAPI = new ReportAPI()
 
   constructor(props) {
@@ -13,34 +13,32 @@ export default class SaleReport extends React.Component {
       filter: {
         beginDate: moment().startOf('month').valueOf(),
         endDate: moment().endOf('month').valueOf(),
-        customerIdBegin: undefined,
-        customerIdEnd: undefined
+        vendorIdBegin: undefined,
+        vendorIdEnd: undefined
       },
-      customerList: [],
+      vendorList: [],
       loading: false,
       list: [],
       statistic: {
         count: 0,
-        totalAmount: 0,
-        totalPayedAmount: 0,
-        totalUnPayedAmount: 0
+        totalAmount: 0
       }
     }
-    this.getCustomerList()
+    this.getVendorList()
       .then(() => this.setState({ inited: true }))
       .catch(() => this.setState({ inited: true }))
   }
 
-  getCustomerList = async () => {
+  getVendorList = async () => {
     await new Promise((resolve, reject) => {
       this.reportAPI
-        .getCustomerList()
+        .getVendorList()
         .then((response) => {
           if (response.code === 0) {
             const { filter } = this.state
-            filter.customerIdBegin = response.data.list[0].customerId
-            filter.customerIdEnd = response.data.list[response.data.list.length - 1].customerId
-            this.setState({ customerList: response.data.list, filter }, () => resolve(true))
+            filter.vendorIdBegin = response.data.list[0].vendorId
+            filter.vendorIdEnd = response.data.list[response.data.list.length - 1].vendorId
+            this.setState({ vendorList: response.data.list, filter }, () => resolve(true))
           } else {
             message.error(response.message)
             reject(false)
@@ -54,23 +52,21 @@ export default class SaleReport extends React.Component {
     await new Promise((resolve, reject) => {
       const { filter } = this.state
       this.reportAPI
-        .getSaleReport({
+        .getPurchaseReport({
           beginDate: moment(filter.beginDate).format('YYYY-MM-DD'),
           endDate: moment(filter.endDate).format('YYYY-MM-DD'),
-          customerIdBegin: filter.customerIdBegin,
-          customerIdEnd: filter.customerIdEnd
+          vendorIdBegin: filter.vendorIdBegin,
+          vendorIdEnd: filter.vendorIdEnd
         })
         .then((response) => {
           if (response.code === 0) {
             const statistic = {
               count: response.data.count,
-              totalAmount: response.data.totalAmount,
-              totalPayedAmount: response.data.totalPayedAmount,
-              totalUnPayedAmount: response.data.totalUnPayedAmount
+              totalAmount: response.data.totalAmount
             }
             this.setState(
               {
-                list: response.data.salesReportItemOutputs.map((row, index) => {
+                list: response.data.purchaseReportItemOutputs.map((row, index) => {
                   return {
                     ...row,
                     index
@@ -92,35 +88,35 @@ export default class SaleReport extends React.Component {
     })
   }
 
-  getStartCustomerOptions = () => {
-    const { customerList, filter } = this.state
-    const list = customerList.filter((customer) => {
-      if (filter.customerIdEnd) {
-        return customer.customerId < filter.customerIdEnd
+  getStartVendorOptions = () => {
+    const { vendorList, filter } = this.state
+    const list = vendorList.filter((vendor) => {
+      if (filter.vendorIdEnd) {
+        return vendor.vendorId < filter.vendorIdEnd
       } else {
         return true
       }
     })
-    return list.map((customer) => {
+    return list.map((vendor) => {
       return {
-        label: `${customer.customerId} - ${customer.name}`,
-        value: customer.customerId
+        label: `${vendor.vendorId} - ${vendor.name}`,
+        value: vendor.vendorId
       }
     })
   }
-  getEndCustomerOptions = () => {
-    const { customerList, filter } = this.state
-    const list = customerList.filter((customer) => {
-      if (filter.customerIdBegin) {
-        return customer.customerId > filter.customerIdBegin
+  getEndVendorOptions = () => {
+    const { vendorList, filter } = this.state
+    const list = vendorList.filter((vendor) => {
+      if (filter.vendorIdBegin) {
+        return vendor.vendorId > filter.vendorIdBegin
       } else {
         return true
       }
     })
-    return list.map((customer) => {
+    return list.map((vendor) => {
       return {
-        label: `${customer.customerId} - ${customer.name}`,
-        value: customer.customerId
+        label: `${vendor.vendorId} - ${vendor.name}`,
+        value: vendor.vendorId
       }
     })
   }
@@ -131,7 +127,7 @@ export default class SaleReport extends React.Component {
     filter.endDate = moment(dates[1]).valueOf()
     this.setState({ filter })
   }
-  onCustomerChange = (key, value) => {
+  onVendorChange = (key, value) => {
     const { filter } = this.state
     filter[key] = value
     this.setState({ filter })
@@ -139,7 +135,7 @@ export default class SaleReport extends React.Component {
 
   getSearchDisabled = () => {
     const { filter } = this.state
-    if (!filter.beginDate || !filter.endDate || !filter.customerIdBegin || !filter.customerIdEnd) {
+    if (!filter.beginDate || !filter.endDate || !filter.vendorIdBegin || !filter.vendorIdEnd) {
       return true
     }
     return false
@@ -148,23 +144,21 @@ export default class SaleReport extends React.Component {
     this.setState({ loading: true }, () => {
       const { filter } = this.state
       this.reportAPI
-        .getSaleReport({
+        .getPurchaseReport({
           beginDate: moment(filter.beginDate).format('YYYY-MM-DD'),
           endDate: moment(filter.endDate).format('YYYY-MM-DD'),
-          customerIdBegin: filter.customerIdBegin,
-          customerIdEnd: filter.customerIdEnd
+          vendorIdBegin: filter.vendorIdBegin,
+          vendorIdEnd: filter.vendorIdEnd
         })
         .then((response) => {
           if (response.code === 0) {
             const statistic = {
               count: response.data.count,
-              totalAmount: response.data.totalAmount,
-              totalPayedAmount: response.data.totalPayedAmount,
-              totalUnPayedAmount: response.data.totalUnPayedAmount
+              totalAmount: response.data.totalAmount
             }
             this.setState({
               loading: false,
-              list: response.data.salesReportItemOutputs.map((row, index) => {
+              list: response.data.purchaseReportItemOutputs.map((row, index) => {
                 return {
                   ...row,
                   index
@@ -194,14 +188,14 @@ export default class SaleReport extends React.Component {
       render: (record) => record + 1
     },
     {
-      dataIndex: 'customerId',
-      title: '客戶代號',
+      dataIndex: 'vendorId',
+      title: '廠商代號',
       fixed: 'left',
       width: 140
     },
     {
-      dataIndex: 'customerName',
-      title: '客戶名稱',
+      dataIndex: 'vendorName',
+      title: '廠商名稱',
       fixed: 'left'
     },
     {
@@ -213,28 +207,13 @@ export default class SaleReport extends React.Component {
     },
     {
       dataIndex: 'totalAmount',
-      title: '應收款',
+      title: '應付款',
       width: 140,
-      align: 'right',
-      render: (record) => `$ ${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-    },
-    {
-      dataIndex: 'totalPayedAmount',
-      title: '已收款',
-      width: 140,
-      align: 'right',
-      render: (record) => `$ ${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-    },
-    {
-      dataIndex: 'totalUnPayedAmount',
-      title: '未收款',
-      width: 140,
-      fixed: 'right',
       align: 'right',
       render: (record) => {
         return (
           <Typography.Text type='danger'>
-            $ {`${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+            {`$ ${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
           </Typography.Text>
         )
       }
@@ -251,18 +230,8 @@ export default class SaleReport extends React.Component {
           <Typography.Text type='success'>{this.state.statistic.count}</Typography.Text>
         </Table.Summary.Cell>
         <Table.Summary.Cell align='right'>
-          <Typography.Text type='success'>
-            $ {`${this.state.statistic.totalAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-          </Typography.Text>
-        </Table.Summary.Cell>
-        <Table.Summary.Cell align='right'>
-          <Typography.Text type='secondary'>
-            $ {`${this.state.statistic.totalPayedAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-          </Typography.Text>
-        </Table.Summary.Cell>
-        <Table.Summary.Cell align='right'>
           <Typography.Text type='danger'>
-            $ {`${this.state.statistic.totalUnPayedAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+            $ {`${this.state.statistic.totalAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
           </Typography.Text>
         </Table.Summary.Cell>
       </Table.Summary.Row>
@@ -294,9 +263,9 @@ export default class SaleReport extends React.Component {
                 <div className='report-header-group-content'>
                   <Select
                     placeholder='選擇客戶代號'
-                    value={this.state.filter.customerIdBegin}
-                    options={this.getStartCustomerOptions()}
-                    onChange={this.onCustomerChange.bind(this, 'customerIdBegin')}
+                    value={this.state.filter.vendorIdBegin}
+                    options={this.getStartVendorOptions()}
+                    onChange={this.onVendorChange.bind(this, 'vendorIdBegin')}
                     style={{ width: '100%' }}
                   />
                 </div>
@@ -308,9 +277,9 @@ export default class SaleReport extends React.Component {
                 <div className='report-header-group-content'>
                   <Select
                     placeholder='選擇客戶代號'
-                    value={this.state.filter.customerIdEnd}
-                    options={this.getEndCustomerOptions()}
-                    onChange={this.onCustomerChange.bind(this, 'customerIdEnd')}
+                    value={this.state.filter.vendorIdEnd}
+                    options={this.getEndVendorOptions()}
+                    onChange={this.onVendorChange.bind(this, 'vendorIdEnd')}
                     style={{ width: '100%' }}
                   />
                 </div>
@@ -325,13 +294,13 @@ export default class SaleReport extends React.Component {
         </div>
         <Table
           className='list-table-wrapper'
-          rowKey='customerId'
+          rowKey='vendorId'
           size='small'
           columns={this.getColumns()}
           loading={this.state.loading}
           dataSource={this.state.list}
           summary={this.getSummary}
-          scroll={{ x: 920 }}
+          scroll={{ x: 640 }}
           pagination={false}
         />
       </Spin>
