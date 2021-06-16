@@ -1,10 +1,19 @@
 import React from 'react'
-import { Spin, Row, Col, DatePicker, Select, Button, Table, Typography, message } from 'antd'
+import { Spin, Row, Col, Space, DatePicker, Select, Button, Table, Typography, message } from 'antd'
+import CsvDownloader from 'react-csv-downloader'
 import moment from 'moment'
 import ReportAPI from '../../model/api/report'
 
 export default class SaleReport extends React.Component {
   reportAPI = new ReportAPI()
+  headers = [
+    { id: 'customerId', displayName: '客戶代號' },
+    { id: 'customerName', displayName: '客戶名稱' },
+    { id: 'count', displayName: '筆數' },
+    { id: 'totalAmount', displayName: '總金額' },
+    { id: 'totalPayedAmount', displayName: '已付款金額' },
+    { id: 'totalUnPayedAmount', displayName: '未付款金額' }
+  ]
 
   constructor(props) {
     super(props)
@@ -206,28 +215,28 @@ export default class SaleReport extends React.Component {
     },
     {
       dataIndex: 'count',
-      title: '單數',
+      title: '筆數',
       width: 100,
       align: 'right',
       render: (record) => `${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     {
       dataIndex: 'totalAmount',
-      title: '應收款',
+      title: '總金額',
       width: 140,
       align: 'right',
       render: (record) => `$ ${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     {
       dataIndex: 'totalPayedAmount',
-      title: '已收款',
+      title: '已付款金額',
       width: 140,
       align: 'right',
       render: (record) => `$ ${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     {
       dataIndex: 'totalUnPayedAmount',
-      title: '未收款',
+      title: '未付款金額',
       width: 140,
       fixed: 'right',
       align: 'right',
@@ -246,19 +255,15 @@ export default class SaleReport extends React.Component {
       <Table.Summary.Row style={{ backgroundColor: '#edf6f9' }}>
         <Table.Summary.Cell />
         <Table.Summary.Cell />
-        <Table.Summary.Cell>總計:</Table.Summary.Cell>
-        <Table.Summary.Cell align='right'>
-          <Typography.Text type='success'>{this.state.statistic.count}</Typography.Text>
-        </Table.Summary.Cell>
+        <Table.Summary.Cell />
+        <Table.Summary.Cell align='right'>總金額:</Table.Summary.Cell>
         <Table.Summary.Cell align='right'>
           <Typography.Text type='success'>
             $ {`${this.state.statistic.totalAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
           </Typography.Text>
         </Table.Summary.Cell>
         <Table.Summary.Cell align='right'>
-          <Typography.Text type='secondary'>
-            $ {`${this.state.statistic.totalPayedAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-          </Typography.Text>
+          $ {`${this.state.statistic.totalPayedAmount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
         </Table.Summary.Cell>
         <Table.Summary.Cell align='right'>
           <Typography.Text type='danger'>
@@ -268,11 +273,81 @@ export default class SaleReport extends React.Component {
       </Table.Summary.Row>
     ) : null
 
+  getCsvData = () => {
+    const { filter, list } = this.state
+    const output = list.map((row) => {
+      return {
+        ...row,
+        customerId: '[' + row.customerId + ']'
+      }
+    })
+    output.unshift(
+      {
+        customerId: '起始日期',
+        customerName: moment(filter.beginDate).format('YYYY-MM-DD'),
+        count: '起始客戶代號',
+        totalAmount: '[' + filter.customerIdBegin + ']'
+      },
+      {
+        customerId: '結束日期',
+        customerName: moment(filter.endDate).format('YYYY-MM-DD'),
+        count: '結束客戶代號',
+        totalAmount: '[' + filter.customerIdEnd + ']'
+      },
+      {},
+      {
+        customerId: '客戶代號',
+        customerName: '客戶名稱',
+        count: '筆數',
+        totalAmount: '總金額',
+        totalPayedAmount: '已付款金額',
+        totalUnPayedAmount: '未付款金額'
+      }
+    )
+    return output
+  }
+  getCsvFilename = () => {
+    const { filter } = this.state
+    return `銷貨單報表_${moment().format('YYYY-MM-DD_HH:mm')}_${moment(filter.beginDate).format(
+      'YYYY-MM-DD'
+    )}_${moment(filter.endDate).format('YYYY-MM-DD')}_${filter.customerIdBegin}_${
+      filter.customerIdEnd
+    }`
+  }
+
   render() {
     return (
       <Spin spinning={!this.state.inited} size='large'>
         <div className='report-header'>
           <Row gutter={24}>
+            <Col xs={24} sm={24} xl={12}>
+              <div className='report-header-group'>
+                <div className='report-header-group-title'>起始客戶代號</div>
+                <div className='report-header-group-content'>
+                  <Select
+                    placeholder='選擇客戶代號'
+                    value={this.state.filter.customerIdBegin}
+                    options={this.getStartCustomerOptions()}
+                    onChange={this.onCustomerChange.bind(this, 'customerIdBegin')}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+            </Col>
+            <Col xs={24} sm={24} xl={12}>
+              <div className='report-header-group'>
+                <div className='report-header-group-title'>結束客戶代號</div>
+                <div className='report-header-group-content'>
+                  <Select
+                    placeholder='選擇客戶代號'
+                    value={this.state.filter.customerIdEnd}
+                    options={this.getEndCustomerOptions()}
+                    onChange={this.onCustomerChange.bind(this, 'customerIdEnd')}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+            </Col>
             <Col xs={24} sm={24} xl={12}>
               <div className='report-header-group'>
                 <div className='report-header-group-title'>查詢日期</div>
@@ -288,38 +363,30 @@ export default class SaleReport extends React.Component {
                 </div>
               </div>
             </Col>
-            <Col xs={24} sm={24} lg={12} xl={6}>
-              <div className='report-header-group'>
-                <div className='report-header-group-title'>起始客戶</div>
-                <div className='report-header-group-content'>
-                  <Select
-                    placeholder='選擇客戶代號'
-                    value={this.state.filter.customerIdBegin}
-                    options={this.getStartCustomerOptions()}
-                    onChange={this.onCustomerChange.bind(this, 'customerIdBegin')}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              </div>
-            </Col>
-            <Col xs={24} sm={24} lg={12} xl={6}>
-              <div className='report-header-group'>
-                <div className='report-header-group-title'>結束客戶</div>
-                <div className='report-header-group-content'>
-                  <Select
-                    placeholder='選擇客戶代號'
-                    value={this.state.filter.customerIdEnd}
-                    options={this.getEndCustomerOptions()}
-                    onChange={this.onCustomerChange.bind(this, 'customerIdEnd')}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              </div>
-            </Col>
-            <Col span={24} style={{ textAlign: 'right ' }}>
-              <Button type='primary' disabled={this.getSearchDisabled()} onClick={this.searchData}>
-                搜尋
-              </Button>
+            <Col xs={24} sm={24} xl={12} style={{ textAlign: 'right ' }}>
+              <Space>
+                <Button
+                  type='primary'
+                  disabled={this.getSearchDisabled()}
+                  onClick={this.searchData}
+                >
+                  搜尋
+                </Button>
+                <CsvDownloader
+                  columns={this.headers}
+                  datas={this.getCsvData()}
+                  noHeader={true}
+                  filename={this.getCsvFilename()}
+                >
+                  <Button
+                    type='primary'
+                    disabled={this.state.list.length === 0}
+                    // onClick={this.onExport}
+                  >
+                    匯出CSV
+                  </Button>
+                </CsvDownloader>
+              </Space>
             </Col>
           </Row>
         </div>

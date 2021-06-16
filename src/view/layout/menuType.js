@@ -11,18 +11,6 @@ import {
 
 export const routes = [
   {
-    path: '/Report/Purchase',
-    title: '進貨單 - 報表'
-  },
-  {
-    path: '/Report/Sale',
-    title: '銷貨單 - 報表'
-  },
-  {
-    path: '/Report',
-    title: '報表'
-  },
-  {
     path: '/Basic/Supplier',
     title: '廠商 - 基本資料'
   },
@@ -99,6 +87,18 @@ export const routes = [
     title: '銷貨單'
   },
   {
+    path: '/Report/Purchase',
+    title: '進貨單 - 報表'
+  },
+  {
+    path: '/Report/Sale',
+    title: '銷貨單 - 報表'
+  },
+  {
+    path: '/Report',
+    title: '報表'
+  },
+  {
     path: '/',
     title: '首頁'
   }
@@ -112,27 +112,6 @@ export const menuType = [
   //   title: '首頁',
   //   accessRoles: []
   // },
-  {
-    key: 'Report',
-    routes: ['Report'],
-    icon: <SiderMenuDashboardIcon />,
-    title: '報表',
-    accessRoles: ['ROLE_REPORT'],
-    children: [
-      {
-        key: 'ReportPurchase',
-        routes: ['Report', 'Purchase'],
-        title: '進貨單報表',
-        accessRoles: ['ROLE_PURCHASE_REPORT']
-      },
-      {
-        key: 'ReportSale',
-        routes: ['Report', 'Sale'],
-        title: '銷貨單報表',
-        accessRoles: ['ROLE_SALES_REPORT']
-      }
-    ]
-  },
   {
     key: 'Basic',
     routes: ['Basic'],
@@ -276,5 +255,26 @@ export const menuType = [
         hidden: true
       }
     ]
-  }
+  },
+  {
+    key: 'Report',
+    routes: ['Report'],
+    icon: <SiderMenuDashboardIcon />,
+    title: '報表',
+    accessRoles: ['ROLE_REPORT'],
+    children: [
+      {
+        key: 'ReportPurchase',
+        routes: ['Report', 'Purchase'],
+        title: '進貨單報表',
+        accessRoles: ['ROLE_PURCHASE_REPORT']
+      },
+      {
+        key: 'ReportSale',
+        routes: ['Report', 'Sale'],
+        title: '銷貨單報表',
+        accessRoles: ['ROLE_SALES_REPORT']
+      }
+    ]
+  },
 ]

@@ -1,10 +1,17 @@
 import React from 'react'
-import { Spin, Row, Col, DatePicker, Select, Button, Table, Typography, message } from 'antd'
+import { Spin, Row, Col, Space, DatePicker, Select, Button, Table, Typography, message } from 'antd'
+import CsvDownloader from 'react-csv-downloader'
 import moment from 'moment'
 import ReportAPI from '../../model/api/report'
 
 export default class PurchaseReport extends React.Component {
   reportAPI = new ReportAPI()
+  headers = [
+    { id: 'vendorId', displayName: '廠商代號' },
+    { id: 'vendorName', displayName: '廠商名稱' },
+    { id: 'count', displayName: '筆數' },
+    { id: 'totalAmount', displayName: '進貨金額' }
+  ]
 
   constructor(props) {
     super(props)
@@ -200,14 +207,14 @@ export default class PurchaseReport extends React.Component {
     },
     {
       dataIndex: 'count',
-      title: '單數',
+      title: '筆數',
       width: 100,
       align: 'right',
       render: (record) => `${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     {
       dataIndex: 'totalAmount',
-      title: '應付款',
+      title: '進貨金額',
       width: 140,
       align: 'right',
       render: (record) => {
@@ -236,12 +243,79 @@ export default class PurchaseReport extends React.Component {
         </Table.Summary.Cell>
       </Table.Summary.Row>
     ) : null
+  getCsvData = () => {
+    const { filter, list } = this.state
+    const output = list.map((row) => {
+      return {
+        ...row,
+        vendorId: '[' + row.vendorId + ']'
+      }
+    })
+    output.unshift(
+      {
+        vendorId: '起始日期',
+        vendorName: moment(filter.beginDate).format('YYYY-MM-DD'),
+        count: '起始廠商代號',
+        totalAmount: '[' + filter.vendorIdBegin + ']'
+      },
+      {
+        vendorId: '結束日期',
+        vendorName: moment(filter.endDate).format('YYYY-MM-DD'),
+        count: '結束廠商代號',
+        totalAmount: '[' + filter.vendorIdEnd + ']'
+      },
+      {},
+      {
+        vendorId: '客戶代號',
+        vendorName: '客戶名稱',
+        count: '筆數',
+        totalAmount: '總金額'
+      }
+    )
+    return output
+  }
+  getCsvFilename = () => {
+    const { filter } = this.state
+    return `進貨單報表_${moment().format('YYYY-MM-DD_HH:mm')}_${moment(filter.beginDate).format(
+      'YYYY-MM-DD'
+    )}_${moment(filter.endDate).format('YYYY-MM-DD')}_${filter.customerIdBegin}_${
+      filter.customerIdEnd
+    }`
+  }
 
   render() {
     return (
       <Spin spinning={!this.state.inited} size='large'>
         <div className='report-header'>
           <Row gutter={24}>
+            <Col xs={24} sm={24} xl={12}>
+              <div className='report-header-group'>
+                <div className='report-header-group-title'>起始廠商代碼</div>
+                <div className='report-header-group-content'>
+                  <Select
+                    placeholder='選擇客戶代號'
+                    value={this.state.filter.vendorIdBegin}
+                    options={this.getStartVendorOptions()}
+                    onChange={this.onVendorChange.bind(this, 'vendorIdBegin')}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+            </Col>
+            <Col xs={24} sm={24} xl={12}>
+              <div className='report-header-group'>
+                <div className='report-header-group-title'>結束廠商代碼</div>
+                <div className='report-header-group-content'>
+                  <Select
+                    placeholder='選擇客戶代號'
+                    value={this.state.filter.vendorIdEnd}
+                    options={this.getEndVendorOptions()}
+                    onChange={this.onVendorChange.bind(this, 'vendorIdEnd')}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+            </Col>
             <Col xs={24} sm={24} xl={12}>
               <div className='report-header-group'>
                 <div className='report-header-group-title'>查詢日期</div>
@@ -257,38 +331,30 @@ export default class PurchaseReport extends React.Component {
                 </div>
               </div>
             </Col>
-            <Col xs={24} sm={24} lg={12} xl={6}>
-              <div className='report-header-group'>
-                <div className='report-header-group-title'>起始客戶</div>
-                <div className='report-header-group-content'>
-                  <Select
-                    placeholder='選擇客戶代號'
-                    value={this.state.filter.vendorIdBegin}
-                    options={this.getStartVendorOptions()}
-                    onChange={this.onVendorChange.bind(this, 'vendorIdBegin')}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              </div>
-            </Col>
-            <Col xs={24} sm={24} lg={12} xl={6}>
-              <div className='report-header-group'>
-                <div className='report-header-group-title'>結束客戶</div>
-                <div className='report-header-group-content'>
-                  <Select
-                    placeholder='選擇客戶代號'
-                    value={this.state.filter.vendorIdEnd}
-                    options={this.getEndVendorOptions()}
-                    onChange={this.onVendorChange.bind(this, 'vendorIdEnd')}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              </div>
-            </Col>
             <Col span={24} style={{ textAlign: 'right ' }}>
-              <Button type='primary' disabled={this.getSearchDisabled()} onClick={this.searchData}>
-                搜尋
-              </Button>
+              <Space>
+                <Button
+                  type='primary'
+                  disabled={this.getSearchDisabled()}
+                  onClick={this.searchData}
+                >
+                  搜尋
+                </Button>
+                <CsvDownloader
+                  columns={this.headers}
+                  datas={this.getCsvData()}
+                  noHeader={true}
+                  filename={this.getCsvFilename()}
+                >
+                  <Button
+                    type='primary'
+                    disabled={this.state.list.length === 0}
+                    // onClick={this.onExport}
+                  >
+                    匯出CSV
+                  </Button>
+                </CsvDownloader>
+              </Space>
             </Col>
           </Row>
         </div>
