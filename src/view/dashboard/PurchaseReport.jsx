@@ -331,7 +331,7 @@ export default class PurchaseReport extends React.Component {
                 </div>
               </div>
             </Col>
-            <Col span={24} style={{ textAlign: 'right ' }}>
+            <Col xs={24} sm={24} xl={12} style={{ textAlign: 'right ' }}>
               <Space>
                 <Button
                   type='primary'
