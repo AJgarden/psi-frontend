@@ -50,18 +50,7 @@ export default class SaleForm extends React.Component {
         customerId: ''
       },
       detailLoading: false,
-      mappingSearch: {
-        1: {
-          loading: false,
-          value: '',
-          seqNo: null,
-          isVirtual: false,
-          visible: false,
-          select: {},
-          historyLoading: true,
-          historyData: {}
-        }
-      },
+      mappingSearch: {},
       customerList: [],
       colorList: [],
       viewProduct: false,
@@ -92,18 +81,7 @@ export default class SaleForm extends React.Component {
             customerId: ''
           },
           detailLoading: false,
-          mappingSearch: {
-            1: {
-              loading: false,
-              value: '',
-              seqNo: null,
-              isVirtual: false,
-              visible: false,
-              select: {},
-              historyLoading: true,
-              historyData: {}
-            }
-          },
+          mappingSearch: {},
           viewProduct: false,
           viewSeqNo: null
         },
@@ -254,14 +232,44 @@ export default class SaleForm extends React.Component {
     }
   }
   onCodeSelect = (value) => {
-    const { formData, search, customerList } = this.state
+    const { formData, mappingSearch, search, customerList } = this.state
+    if (formData.customerId === '') {
+      formData.salesDetails = [
+        {
+          detailNo: 1,
+          productId: '',
+          productSeqNo: null,
+          productName: '',
+          kindShortName: '',
+          norm: '',
+          quantity: 1,
+          inventory: 0,
+          price: 0,
+          amount: 0,
+          remark: '',
+          color: '',
+          vendorProductId: ''
+        }
+      ]
+      mappingSearch[1] = {
+        loading: false,
+        value: '',
+        seqNo: null,
+        isVirtual: false,
+        visible: false,
+        select: {},
+        historyLoading: true,
+        historyData: {}
+      }
+    }
     search.customerId = ''
     formData.customerId = value
     const customer = customerList.find(
       (customer) => customer.customerId.toLowerCase() === value.toLowerCase()
     )
     if (customer) formData.customerName = customer.name
-    this.setState({ search, formData })
+
+    this.setState({ search, formData, mappingSearch })
   }
   // get code options
   getCustomerOptions = () => {
@@ -271,7 +279,7 @@ export default class SaleForm extends React.Component {
         (customer) =>
           formData.customerId === customer.customerId ||
           (search.customerId &&
-            customer.customerId.toLowerCase().includes(search.customerId.toLowerCase()))
+            customer.customerId.toLowerCase().match(`^${search.customerId.toLowerCase()}`, 'i'))
       )
       .map((customer) => {
         return {

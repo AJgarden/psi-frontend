@@ -222,7 +222,7 @@ export default class ReceiveForm extends React.Component {
         (customer) =>
           formData.customerId === customer.customerId ||
           (search.customerId &&
-            customer.customerId.toLowerCase().includes(search.customerId.toLowerCase()))
+            customer.customerId.toLowerCase().match(`^${search.customerId.toLowerCase()}`, 'i'))
       )
       .map((customer) => {
         return {
@@ -434,6 +434,7 @@ export default class ReceiveForm extends React.Component {
                       content={
                         <Select
                           placeholder='搜尋客戶代號'
+                          autoFocus={true}
                           value={this.state.formData.customerId}
                           searchValue={this.state.search.customerId}
                           showSearch={true}
@@ -625,8 +626,6 @@ export default class ReceiveForm extends React.Component {
                       }
                     />
                   </Col>
-                </Row>
-                <Row {...rowSetting}>
                   <Col {...colSetting1}>
                     <FormItem
                       title='折讓金額'
@@ -643,8 +642,6 @@ export default class ReceiveForm extends React.Component {
                       }
                     />
                   </Col>
-                </Row>
-                <Row {...rowSetting}>
                   <Col {...colSetting1}>
                     <FormItem
                       title='其他金額'
@@ -661,8 +658,6 @@ export default class ReceiveForm extends React.Component {
                       }
                     />
                   </Col>
-                </Row>
-                <Row {...rowSetting}>
                   <Col {...colSetting1}>
                     <FormItem
                       title='帳款調整'
@@ -679,8 +674,6 @@ export default class ReceiveForm extends React.Component {
                       }
                     />
                   </Col>
-                </Row>
-                <Row {...rowSetting}>
                   <Col {...colSetting1}>
                     <FormItem
                       title='對扣帳'

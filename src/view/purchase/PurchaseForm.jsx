@@ -43,18 +43,7 @@ export default class PurchaseForm extends React.Component {
         vendorId: ''
       },
       detailLoading: false,
-      mappingSearch: {
-        1: {
-          loading: false,
-          value: '',
-          seqNo: null,
-          isVirtual: false,
-          visible: false,
-          select: {},
-          historyLoading: true,
-          historyList: []
-        }
-      },
+      mappingSearch: {},
       vendorList: [],
       colorList: [],
       viewProduct: false,
@@ -85,18 +74,7 @@ export default class PurchaseForm extends React.Component {
             vendorId: ''
           },
           detailLoading: false,
-          mappingSearch: {
-            1: {
-              loading: false,
-              value: '',
-              seqNo: null,
-              isVirtual: false,
-              visible: false,
-              select: {},
-              historyLoading: true,
-              historyList: []
-            }
-          },
+          mappingSearch: {},
           canSubmit: false,
           viewProduct: false,
           viewSeqNo: null
@@ -218,14 +196,42 @@ export default class PurchaseForm extends React.Component {
     }
   }
   onCodeSelect = (value) => {
-    const { formData, search, vendorList } = this.state
+    const { formData, mappingSearch, search, vendorList } = this.state
+    if (formData.vendorId === '') {
+      formData.purchaseDetails = [
+        {
+          detailNo: 1,
+          productId: '',
+          productSeqNo: null,
+          productName: '',
+          kindShortName: '',
+          norm: '',
+          quantity: 1,
+          price: 0,
+          amount: 0,
+          remark: '',
+          color: '',
+          vendorProductId: ''
+        }
+      ]
+      mappingSearch[1] = {
+        loading: false,
+        value: '',
+        seqNo: null,
+        isVirtual: false,
+        visible: false,
+        select: {},
+        historyLoading: true,
+        historyList: []
+      }
+    }
     search.vendorId = ''
     formData.vendorId = value
     const vendor = vendorList.find(
       (vendor) => vendor.vendorId.toLowerCase() === value.toLowerCase()
     )
     if (vendor) formData.vendorName = vendor.name
-    this.setState({ search, formData })
+    this.setState({ search, formData, mappingSearch })
   }
   // get code options
   getVendorOptions = () => {
@@ -234,7 +240,7 @@ export default class PurchaseForm extends React.Component {
       .filter(
         (vendor) =>
           formData.vendorId === vendor.vendorId ||
-          (search.vendorId && vendor.vendorId.toLowerCase().includes(search.vendorId.toLowerCase()))
+          (search.vendorId && vendor.vendorId.toLowerCase().match(`^${search.vendorId.toLowerCase()}`, 'i'))
       )
       .map((vendor) => {
         return {
