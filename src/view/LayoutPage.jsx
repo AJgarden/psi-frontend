@@ -34,6 +34,8 @@ import PurchaseDetail from './purchase/PurchaseDetail'
 import Sale from './sale/Sale'
 import SaleDetail from './sale/SaleDetail'
 import SalePrint from './sale/SalePrint'
+import Receive from './receive/Receive'
+import ReceiveDetail from './receive/ReceiveDetail'
 import StaticStorage from '../model/storage/static'
 import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
@@ -268,6 +270,18 @@ export default class LayoutPage extends React.Component {
                       render={(props) => <SaleDetail {...props} createFlag={false} />}
                     />
                     <Route exact path='/Sale/List' component={Sale} />
+                    {/* Receive */}
+                    <Route
+                      exact
+                      path='/Receive/Add'
+                      render={(props) => <ReceiveDetail {...props} createFlag={true} />}
+                    />
+                    <Route
+                      exact
+                      path='/Receive/Detail/:paymentReceiveId'
+                      render={(props) => <ReceiveDetail {...props} createFlag={false} />}
+                    />
+                    <Route exact path='/Receive/List' component={Receive} />
                     <Route path='/' component={Dashboard} />
                   </Switch>
                   <BackTop target={() => document.getElementById('layout-content-wrapper')} className='layout-content-backtop' />

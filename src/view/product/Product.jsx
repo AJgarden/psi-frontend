@@ -105,6 +105,7 @@ export default class Product extends React.Component {
         dataIndex: 'seqNo',
         title: '執行',
         width: 70,
+        fixed: 'left',
         render: (seqNo) => (
           <Space className='list-table-option'>
             <Tooltip title='編輯'>
@@ -132,12 +133,14 @@ export default class Product extends React.Component {
         title: '序',
         width: 80,
         align: 'center',
+        fixed: 'left',
         render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
       },
       {
         title: '商品編號',
         dataIndex: 'productId',
-        width: 120
+        width: 120,
+        fixed: 'left'
       },
       {
         title: '車種名稱',

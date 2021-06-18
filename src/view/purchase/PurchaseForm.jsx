@@ -183,28 +183,26 @@ export default class PurchaseForm extends React.Component {
   }
   onDateChange = (type, date) => {
     const { formData } = this.state
-    formData[type] = date
+    formData[type] = moment(date).valueOf()
     this.setState({ formData })
   }
 
   // code select
-  onCodeSearch = (key, value) => {
+  onCodeSearch = (value) => {
     if (!value.includes(' ')) {
       const { search } = this.state
-      search[key] = value.toUpperCase()
+      search.vendorId = value.toUpperCase()
       this.setState({ search })
     }
   }
-  onCodeSelect = (key, value) => {
+  onCodeSelect = (value) => {
     const { formData, search, vendorList } = this.state
-    search[key] = ''
-    formData[key] = value
-    if (key === 'vendorId') {
-      const vendor = vendorList.find(
-        (vendor) => vendor.vendorId.toLowerCase() === value.toLowerCase()
-      )
-      if (vendor) formData.vendorName = vendor.name
-    }
+    search.vendorId = ''
+    formData.vendorId = value
+    const vendor = vendorList.find(
+      (vendor) => vendor.vendorId.toLowerCase() === value.toLowerCase()
+    )
+    if (vendor) formData.vendorName = vendor.name
     this.setState({ search, formData })
   }
   // get code options
@@ -855,8 +853,8 @@ export default class PurchaseForm extends React.Component {
                       showSearch={true}
                       showArrow={false}
                       options={this.getVendorOptions()}
-                      onSearch={this.onCodeSearch.bind(this, 'vendorId')}
-                      onSelect={this.onCodeSelect.bind(this, 'vendorId')}
+                      onSearch={this.onCodeSearch}
+                      onSelect={this.onCodeSelect}
                       style={{ width: '100%' }}
                       notFoundContent={null}
                       disabled={!this.props.createFlag}

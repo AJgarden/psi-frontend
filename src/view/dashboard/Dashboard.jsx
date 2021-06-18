@@ -15,12 +15,12 @@ export default class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    this.history.replace('/Report')
+    this.history.replace('/Dashboard')
   }
 
   render() {
     return (
-      <div className=''>Dashboard</div>
+      <div className=''>請選擇左方選單開始操作</div>
       // <Spin spinning={this.state.loading}>
       //   <Row gutter={36}>
       //     <Col xs={12} sm={12} md={12} lg={6}>

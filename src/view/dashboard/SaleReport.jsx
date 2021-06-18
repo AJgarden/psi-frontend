@@ -210,8 +210,7 @@ export default class SaleReport extends React.Component {
     },
     {
       dataIndex: 'customerName',
-      title: '客戶名稱',
-      fixed: 'left'
+      title: '客戶名稱'
     },
     {
       dataIndex: 'count',

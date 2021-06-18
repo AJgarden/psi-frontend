@@ -47,7 +47,7 @@ export default class SaleForm extends React.Component {
       loading: true,
       formData,
       search: {
-        vendorId: ''
+        customerId: ''
       },
       detailLoading: false,
       mappingSearch: {},
@@ -78,7 +78,7 @@ export default class SaleForm extends React.Component {
           loading: true,
           formData,
           search: {
-            vendorId: ''
+            customerId: ''
           },
           detailLoading: false,
           mappingSearch: {},
@@ -213,7 +213,7 @@ export default class SaleForm extends React.Component {
   }
   onDateChange = (type, date) => {
     const { formData } = this.state
-    formData[type] = date
+    formData[type] = moment(date).valueOf()
     this.setState({ formData })
   }
   onSwitchChange = (type, checked) => {
@@ -224,23 +224,21 @@ export default class SaleForm extends React.Component {
   }
 
   // code select
-  onCodeSearch = (key, value) => {
+  onCodeSearch = (value) => {
     if (!value.includes(' ')) {
       const { search } = this.state
-      search[key] = value.toUpperCase()
+      search.customerId = value.toUpperCase()
       this.setState({ search })
     }
   }
-  onCodeSelect = (key, value) => {
-    const { formData, search, vendorList } = this.state
-    search[key] = ''
-    formData[key] = value
-    if (key === 'vendorId') {
-      const vendor = vendorList.find(
-        (vendor) => vendor.vendorId.toLowerCase() === value.toLowerCase()
-      )
-      if (vendor) formData.vendorName = vendor.name
-    }
+  onCodeSelect = (value) => {
+    const { formData, search, customerList } = this.state
+    search.customerId = ''
+    formData.customerId = value
+    const customer = customerList.find(
+      (customer) => customer.customerId.toLowerCase() === value.toLowerCase()
+    )
+    if (customer) formData.customerName = customer.name
     this.setState({ search, formData })
   }
   // get code options
@@ -1009,8 +1007,8 @@ export default class SaleForm extends React.Component {
                       showSearch={true}
                       showArrow={false}
                       options={this.getCustomerOptions()}
-                      onSearch={this.onCodeSearch.bind(this, 'customerId')}
-                      onSelect={this.onCodeSelect.bind(this, 'customerId')}
+                      onSearch={this.onCodeSearch}
+                      onSelect={this.onCodeSelect}
                       style={{ width: '100%' }}
                       notFoundContent={null}
                       disabled={!this.props.createFlag}

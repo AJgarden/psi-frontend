@@ -202,21 +202,21 @@ export default class PurchaseReport extends React.Component {
     },
     {
       dataIndex: 'vendorName',
-      title: '廠商名稱',
-      fixed: 'left'
+      title: '廠商名稱'
     },
     {
       dataIndex: 'count',
       title: '筆數',
-      width: 100,
+      width: 140,
       align: 'right',
       render: (record) => `${record}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     {
       dataIndex: 'totalAmount',
       title: '進貨金額',
-      width: 140,
+      width: 200,
       align: 'right',
+      fixed: 'right',
       render: (record) => {
         return (
           <Typography.Text type='danger'>
@@ -294,6 +294,7 @@ export default class PurchaseReport extends React.Component {
                 <div className='report-header-group-content'>
                   <Select
                     placeholder='選擇客戶代號'
+                    showSearch={true}
                     value={this.state.filter.vendorIdBegin}
                     options={this.getStartVendorOptions()}
                     onChange={this.onVendorChange.bind(this, 'vendorIdBegin')}
@@ -308,6 +309,7 @@ export default class PurchaseReport extends React.Component {
                 <div className='report-header-group-content'>
                   <Select
                     placeholder='選擇客戶代號'
+                    showSearch={true}
                     value={this.state.filter.vendorIdEnd}
                     options={this.getEndVendorOptions()}
                     onChange={this.onVendorChange.bind(this, 'vendorIdEnd')}
@@ -366,7 +368,7 @@ export default class PurchaseReport extends React.Component {
           loading={this.state.loading}
           dataSource={this.state.list}
           summary={this.getSummary}
-          scroll={{ x: 640 }}
+          scroll={{ x: 740 }}
           pagination={false}
         />
       </Spin>

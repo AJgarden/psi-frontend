@@ -1,12 +1,13 @@
 import React from 'react'
 import {
   SiderMenuHomeIcon,
-  SiderMenuDashboardIcon,
   SiderMenuBasicIcon,
   SiderMenuWidgetIcon,
   SiderMenuProductIcon,
   SiderMenuPurchaseIcon,
-  SiderMenuSaleIcon
+  SiderMenuSaleIcon,
+  SiderMenuDashboardIcon,
+  SiderMenuReceiveIcon
 } from '../icon/Icon'
 
 export const routes = [
@@ -97,6 +98,18 @@ export const routes = [
   {
     path: '/Report',
     title: '報表'
+  },
+  {
+    path: '/Receive/List',
+    title: '列表 - 收款單'
+  },
+  {
+    path: '/Receive/Add',
+    title: '新增 - 收款單'
+  },
+  {
+    path: '/Receive',
+    title: '收款單'
   },
   {
     path: '/',
@@ -277,4 +290,25 @@ export const menuType = [
       }
     ]
   },
+  {
+    key: 'Receive',
+    routes: ['Receive'],
+    icon: <SiderMenuReceiveIcon />,
+    title: '收款單',
+    accessRoles: ['ROLE_ACCOUNTING'],
+    children: [
+      {
+        key: 'ReceiveList',
+        routes: ['Receive', 'List'],
+        title: '列表',
+        accessRoles: ['ROLE_ACCOUNTING_LIST']
+      },
+      {
+        key: 'ReceiveAdd',
+        routes: ['Receive', 'Add'],
+        title: '新增',
+        accessRoles: ['ROLE_ACCOUNTING_ADD']
+      }
+    ]
+  }
 ]

@@ -40,6 +40,14 @@
     > tr
       > td
         font-size: 0.875rem
+        .list-table-block
+          display: block
+          svg
+            display: block
+            width: 20px
+            height: 20px
+            fill: #e56b6f
+            margin: auto
         .list-table-tick
           display: block
           svg
@@ -74,6 +82,7 @@
               display: block
               width: 18px
               height: 18px
+              fill: #ffffff
         .list-table-addition
           .ant-btn
             display: inline-flex
@@ -115,7 +124,8 @@
         &:hover
           > td
             background: #ecf0f4
-      &.product-others
+      &.product-others,
+      &.receive-abort
         > td
           background: #fef9fa
         &:hover
