@@ -3,5 +3,20 @@ export const initData = {
   accountDate: null,
   vendorId: '',
   note: '',
-  purchaseDetails: []
+  purchaseDetails: [
+    {
+      detailNo: 1,
+      productId: '',
+      productSeqNo: null,
+      productName: '',
+      kindShortName: '',
+      norm: '',
+      quantity: 1,
+      price: 0,
+      amount: 0,
+      remark: '',
+      color: '',
+      vendorProductId: ''
+    }
+  ]
 }

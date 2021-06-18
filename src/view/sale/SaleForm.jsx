@@ -50,7 +50,18 @@ export default class SaleForm extends React.Component {
         customerId: ''
       },
       detailLoading: false,
-      mappingSearch: {},
+      mappingSearch: {
+        1: {
+          loading: false,
+          value: '',
+          seqNo: null,
+          isVirtual: false,
+          visible: false,
+          select: {},
+          historyLoading: true,
+          historyData: {}
+        }
+      },
       customerList: [],
       colorList: [],
       viewProduct: false,
@@ -81,7 +92,18 @@ export default class SaleForm extends React.Component {
             customerId: ''
           },
           detailLoading: false,
-          mappingSearch: {},
+          mappingSearch: {
+            1: {
+              loading: false,
+              value: '',
+              seqNo: null,
+              isVirtual: false,
+              visible: false,
+              select: {},
+              historyLoading: true,
+              historyData: {}
+            }
+          },
           viewProduct: false,
           viewSeqNo: null
         },
@@ -1002,6 +1024,7 @@ export default class SaleForm extends React.Component {
                   content={
                     <Select
                       placeholder='搜尋客戶代號'
+                      autoFocus={true}
                       value={this.state.formData.customerId}
                       searchValue={this.state.search.customerId}
                       showSearch={true}

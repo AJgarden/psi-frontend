@@ -131,6 +131,7 @@ export default class SelectProductModal extends React.Component {
         <div className='purchase-product-modal-search'>
           <Input
             placeholder='請輸入代碼開始尋找'
+            autoFocus={true}
             value={this.state.value}
             onChange={this.onSearchChange}
           />

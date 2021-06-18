@@ -43,7 +43,18 @@ export default class PurchaseForm extends React.Component {
         vendorId: ''
       },
       detailLoading: false,
-      mappingSearch: {},
+      mappingSearch: {
+        1: {
+          loading: false,
+          value: '',
+          seqNo: null,
+          isVirtual: false,
+          visible: false,
+          select: {},
+          historyLoading: true,
+          historyList: []
+        }
+      },
       vendorList: [],
       colorList: [],
       viewProduct: false,
@@ -74,7 +85,18 @@ export default class PurchaseForm extends React.Component {
             vendorId: ''
           },
           detailLoading: false,
-          mappingSearch: {},
+          mappingSearch: {
+            1: {
+              loading: false,
+              value: '',
+              seqNo: null,
+              isVirtual: false,
+              visible: false,
+              select: {},
+              historyLoading: true,
+              historyList: []
+            }
+          },
           canSubmit: false,
           viewProduct: false,
           viewSeqNo: null
@@ -848,6 +870,7 @@ export default class PurchaseForm extends React.Component {
                   content={
                     <Select
                       placeholder='搜尋廠商代號'
+                      autoFocus={true}
                       value={this.state.formData.vendorId}
                       searchValue={this.state.search.vendorId}
                       showSearch={true}
