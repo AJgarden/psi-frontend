@@ -133,6 +133,21 @@ export default class ReceiveForm extends React.Component {
             .startOf('day')
             .valueOf()
           formData.outstandingPayment = response.data.outstandingPayment
+          if (
+            moment(formData.lastSalesAccountingDate).date() ===
+            moment(formData.lastSalesAccountingDate).endOf('month').date()
+          ) {
+            formData.salesAccountingDate = moment(formData.lastSalesAccountingDate)
+              .add(7, 'days')
+              .endOf('month')
+              .startOf('day')
+              .valueOf()
+          } else {
+            formData.salesAccountingDate = moment(formData.lastSalesAccountingDate)
+              .add(1, 'month')
+              .startOf('day')
+              .valueOf()
+          }
           this.setState({ lastLoading: false, formData })
         } else {
           message.error(response.message)
@@ -492,7 +507,7 @@ export default class ReceiveForm extends React.Component {
                       title='上期未收'
                       content={
                         <Input
-                          value={this.state.formData.lastOutstandingPayment}
+                          value={this.state.formData.outstandingPayment}
                           disabled={true}
                           style={{ width: '100%' }}
                         />
@@ -520,7 +535,7 @@ export default class ReceiveForm extends React.Component {
                         content={
                           <Input
                             value={
-                              this.state.formData.lastOutstandingPayment +
+                              this.state.formData.outstandingPayment +
                               this.state.formData.accountsReceivable
                             }
                             disabled={true}

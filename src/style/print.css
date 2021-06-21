@@ -107,6 +107,7 @@
   padding: 16px 15px 8px;
 }
 .print-forward .data-header {
+  position: relative;
   display: flex;
   align-items: flex-start;
   line-height: 24px;
@@ -119,6 +120,12 @@
 .print-forward .data-header .data-header-right {
   width: calc(100% - 548px);
   padding-left: 52px;
+}
+.print-forward .data-header .data-header-qrcode {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 .print-forward .data-table {
   height: 220px;

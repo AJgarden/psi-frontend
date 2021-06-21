@@ -68,9 +68,10 @@ export default class Purchase extends React.Component {
 
   // search
   onDateChange = (date) => {
-    const { search } = this.state
+    const { search, pagination } = this.state
+    pagination.current = 1
     search.date = date.map((str) => moment(str).format('YYYY-MM-DD'))
-    this.setState({ search, loading: true, list: [] }, () => this.getList())
+    this.setState({ search, pagination, loading: true, list: [] }, () => this.getList())
   }
   onSelectChange = (value) => {
     const { search, pagination } = this.state

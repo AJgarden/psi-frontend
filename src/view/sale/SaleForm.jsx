@@ -54,7 +54,8 @@ export default class SaleForm extends React.Component {
       customerList: [],
       colorList: [],
       viewProduct: false,
-      viewSeqNo: null
+      viewSeqNo: null,
+      priceTabKey: 'purchase'
     }
     this.getInitData().then(() => {
       if (!props.createFlag) {
@@ -83,7 +84,8 @@ export default class SaleForm extends React.Component {
           detailLoading: false,
           mappingSearch: {},
           viewProduct: false,
-          viewSeqNo: null
+          viewSeqNo: null,
+          priceTabKey: 'purchase'
         },
         () =>
           this.getInitData().then(() => {
@@ -607,6 +609,7 @@ export default class SaleForm extends React.Component {
       isVirtual: false,
       visible: false,
       select: {},
+      historySeqNo: null,
       historyLoading: true,
       historyData: {}
     }
@@ -623,33 +626,37 @@ export default class SaleForm extends React.Component {
   onVisibleChange = (detailNo, visible) => {
     const { formData, mappingSearch } = this.state
     const row = mappingSearch[detailNo]
-    if (visible && row.seqNo && row.historyLoading) {
-      this.saleAPI
-        .getProductHistoryPrice(row.seqNo, formData.customerId)
-        .then((response) => {
-          mappingSearch[detailNo].historyLoading = false
-          mappingSearch[detailNo].historyData = {
-            ...response.data,
-            historyPurchasePrices: response.data.historyPurchasePrices.map((record, index) => {
-              return {
-                ...record,
-                index
-              }
-            }),
-            historySalesPrices: response.data.historySalesPrices.map((record, index) => {
-              return {
-                ...record,
-                index
-              }
-            })
-          }
-          this.setState({ mappingSearch })
-        })
-        .catch(() => {
-          mappingSearch[detailNo].historyLoading = false
-          mappingSearch[detailNo].historyData = {}
-          this.setState({ mappingSearch })
-        })
+    if (visible && row.seqNo && row.seqNo !== row.historySeqNo) {
+      row.historyLoading = true
+      this.setState({ mappingSearch, priceTabKey: 'purchase' }, () => {
+        this.saleAPI
+          .getProductHistoryPrice(row.seqNo, formData.customerId)
+          .then((response) => {
+            mappingSearch[detailNo].historySeqNo = row.seqNo
+            mappingSearch[detailNo].historyLoading = false
+            mappingSearch[detailNo].historyData = {
+              ...response.data,
+              historyPurchasePrices: response.data.historyPurchasePrices.map((record, index) => {
+                return {
+                  ...record,
+                  index
+                }
+              }),
+              historySalesPrices: response.data.historySalesPrices.map((record, index) => {
+                return {
+                  ...record,
+                  index
+                }
+              })
+            }
+            this.setState({ mappingSearch })
+          })
+          .catch(() => {
+            mappingSearch[detailNo].historyLoading = false
+            mappingSearch[detailNo].historyData = {}
+            this.setState({ mappingSearch })
+          })
+      })
     }
   }
   displayHistoryPrice = (detailNo) => {
@@ -658,10 +665,46 @@ export default class SaleForm extends React.Component {
     return (
       <Spin spinning={row.historyLoading}>
         <div style={{ minHeight: 200 }}>
+          <Card className='purchase-history-card'>
+            <Row gutter={12}>
+              <Col span={8}>
+                定價1:{' '}
+                <span style={{ color: '#2a9d8f' }}>
+                  {`$ ${row.historyData.price1}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                </span>
+              </Col>
+              <Col span={8}>
+                定價2:{' '}
+                <span style={{ color: '#2a9d8f' }}>
+                  {`$ ${row.historyData.price2}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                </span>
+              </Col>
+              <Col span={8}>
+                定價3:{' '}
+                <span style={{ color: '#2a9d8f' }}>
+                  {`$ ${row.historyData.price3}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                </span>
+              </Col>
+              <Col span={24}>
+                上次價格與日期:{' '}
+                <span style={{ color: '#2a9d8f' }}>
+                  {`$ ${row.historyData.lastSalesPrice}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                </span>{' '}
+                / <span style={{ color: '#2a9d8f' }}>{row.historyData.lastSalesDate}</span>
+              </Col>
+            </Row>
+          </Card>
           {Object.keys(row.historyData).length > 0 && (
             <>
-              <Tabs defaultActiveKey='purchase'>
-                <Tabs.TabPane key='purchase' tab='歷史進價'>
+              <Tabs activeKey={this.state.priceTabKey}>
+                <Tabs.TabPane
+                  key='purchase'
+                  tab={
+                    <span onMouseEnter={() => this.setState({ priceTabKey: 'purchase' })}>
+                      歷史進價
+                    </span>
+                  }
+                >
                   <div style={{ height: 271 }}>
                     <Table
                       className='purchase-history-list'
@@ -674,7 +717,14 @@ export default class SaleForm extends React.Component {
                     />
                   </div>
                 </Tabs.TabPane>
-                <Tabs.TabPane key='sale' tab='歷史售價'>
+                <Tabs.TabPane
+                  key='sale'
+                  tab={
+                    <span onMouseEnter={() => this.setState({ priceTabKey: 'sale' })}>
+                      歷史售價
+                    </span>
+                  }
+                >
                   <div style={{ height: 271 }}>
                     <Table
                       className='purchase-history-list'
@@ -706,13 +756,10 @@ export default class SaleForm extends React.Component {
       width: 180
     },
     {
-      dataIndex: 'amount',
+      dataIndex: 'price',
       title: '進價',
       width: 100,
-      render: (data, row) => {
-        const price = data / row.quantity
-        return `$ ${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-      }
+      render: (price) => `$ ${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     }
   ]
   getHistorySaleColumns = () => [
@@ -730,8 +777,8 @@ export default class SaleForm extends React.Component {
       dataIndex: 'price',
       title: '售價',
       width: 100,
-      render: (data) => {
-        return `$ ${data}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      render: (price) => {
+        return `$ ${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
       }
     }
   ]

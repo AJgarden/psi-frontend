@@ -267,6 +267,7 @@
         background: #f1f1f1
   
 .purchase-history-price
+  width: 400px
   &.ant-popover-placement-top
     > .ant-popover-content
       > .ant-popover-arrow
@@ -291,9 +292,11 @@
       .ant-tabs-ink-bar
         display: none
       .ant-tabs-tab
-        border: 1px solid #2a9d8f
-        padding: 4px 8px
+        border: none
+        padding: 0
         .ant-tabs-tab-btn
+          border: 1px solid #2a9d8f
+          padding: 4px 8px
           color: #222222
         &+ .ant-tabs-tab
           margin-left: 10px
@@ -301,6 +304,10 @@
           background: #2a9d8f
           .ant-tabs-tab-btn
             color: #ffffff
+.purchase-history-card
+  margin: 10px 10px 0
+  .ant-card-body
+    padding: 10px
 .purchase-history-list
   width: 400px
   .ant-table-small

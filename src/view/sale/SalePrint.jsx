@@ -1,5 +1,6 @@
 import React from 'react'
 import { Modal, Button } from 'antd'
+import QRCode from 'react-qr-code'
 import SaleAPI from '../../model/api/sale'
 
 export default class SalePrint extends React.Component {
@@ -316,6 +317,7 @@ export default class SalePrint extends React.Component {
                   <div>{data.accountDate}</div>
                   <div>{data.salesId}</div>
                 </div>
+                <QRCode className='data-header-qrcode' size={64} value={this.state.salesId} />
               </div>
               <div className='data-table'>
                 <table>

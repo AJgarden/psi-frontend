@@ -240,7 +240,8 @@ export default class PurchaseForm extends React.Component {
       .filter(
         (vendor) =>
           formData.vendorId === vendor.vendorId ||
-          (search.vendorId && vendor.vendorId.toLowerCase().match(`^${search.vendorId.toLowerCase()}`, 'i'))
+          (search.vendorId &&
+            vendor.vendorId.toLowerCase().match(`^${search.vendorId.toLowerCase()}`, 'i'))
       )
       .map((vendor) => {
         return {
@@ -558,6 +559,7 @@ export default class PurchaseForm extends React.Component {
       isVirtual: false,
       visible: false,
       select: {},
+      historySeqNo: null,
       historyLoading: true,
       historyList: []
     }
@@ -574,23 +576,27 @@ export default class PurchaseForm extends React.Component {
   onVisibleChange = (detailNo, visible) => {
     const { mappingSearch } = this.state
     const row = mappingSearch[detailNo]
-    if (visible && row.seqNo && row.historyLoading) {
-      this.purchaseAPI
-        .getProductHistoryPrice(row.seqNo)
-        .then((response) => {
-          mappingSearch[detailNo].historyLoading = false
-          mappingSearch[detailNo].historyList = response.data.map((price, index) => {
-            return {
-              ...price,
-              index
-            }
+    if (visible && row.seqNo && row.seqNo !== row.historySeqNo) {
+      row.historyLoading = true
+      this.setState({ mappingSearch }, () => {
+        this.purchaseAPI
+          .getProductHistoryPrice(row.seqNo)
+          .then((response) => {
+            mappingSearch[detailNo].historySeqNo = row.seqNo
+            mappingSearch[detailNo].historyLoading = false
+            mappingSearch[detailNo].historyList = response.data.map((price, index) => {
+              return {
+                ...price,
+                index
+              }
+            })
+            this.setState({ mappingSearch })
           })
-          this.setState({ mappingSearch })
-        })
-        .catch(() => {
-          mappingSearch[detailNo].historyLoading = false
-          this.setState({ mappingSearch })
-        })
+          .catch(() => {
+            mappingSearch[detailNo].historyLoading = false
+            this.setState({ mappingSearch })
+          })
+      })
     }
   }
   displayHistoryPrice = (detailNo) => {

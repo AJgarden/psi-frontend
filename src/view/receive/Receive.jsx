@@ -62,9 +62,10 @@ export default class Receive extends React.Component {
 
   // search
   onDateChange = (date) => {
-    const { search } = this.state
+    const { search, pagination } = this.state
+    pagination.current = 1
     search.date = date.map((str) => moment(str).format('YYYY-MM-DD'))
-    this.setState({ search, loading: true, list: [] }, () => this.getList())
+    this.setState({ search, pagination, loading: true, list: [] }, () => this.getList())
   }
   onSelectChange = (value) => {
     const { search, pagination } = this.state
@@ -73,6 +74,8 @@ export default class Receive extends React.Component {
       search.keyword = ''
       pagination.current = 1
       this.setState({ loading: true, list: [], search, pagination }, () => this.getList())
+    } else {
+      this.setState({ search })
     }
   }
   onInputChange = (e) => {
@@ -220,7 +223,7 @@ export default class Receive extends React.Component {
                   placeholder='搜尋欄位'
                   value={this.state.search.id}
                   allowClear={true}
-                  onChange={this.onSelectChange.bind(this, 'id')}
+                  onChange={this.onSelectChange}
                   style={{ width: 100 }}
                 >
                   <Select.Option value='PAYMENT_RECEIVE_ID'>收款單號</Select.Option>
