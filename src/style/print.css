@@ -125,7 +125,7 @@
   display: block;
   position: absolute;
   top: 0;
-  right: 0;
+  left: 450px;
 }
 .print-forward .data-table {
   height: 220px;
