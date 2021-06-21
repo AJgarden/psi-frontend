@@ -148,7 +148,7 @@ export default class ReceiveForm extends React.Component {
               .startOf('day')
               .valueOf()
           }
-          this.setState({ lastLoading: false, formData })
+          this.setState({ formData, lastLoading: false }, () => this.getCustomerAccount())
         } else {
           message.error(response.message)
           this.setState({ lastLoading: false })
@@ -226,7 +226,7 @@ export default class ReceiveForm extends React.Component {
         (customer) => customer.customerId.toLowerCase() === value.toLowerCase()
       )
       if (customer) formData.customerName = customer.name
-      this.setState({ lastLoading: true, search, formData }, () => this.getCustomerInfo())
+      this.setState({ lastLoading: true, thisLoading: true, search, formData }, () => this.getCustomerInfo())
     }
   }
   // get code options
