@@ -275,6 +275,7 @@ export default class ReceiveForm extends React.Component {
         'YYYY-MM-DD'
       )
       formData.salesAccountingDate = moment(formData.salesAccountingDate).format('YYYY-MM-DD')
+      formData.checkPostDated = moment(formData.checkPostDated).format('YYYY-MM-DD')
       this.receiveAPI
         .saveReceive(formData)
         .then((response) => {
