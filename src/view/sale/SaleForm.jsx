@@ -454,9 +454,10 @@ export default class SaleForm extends React.Component {
                   ref={(target) => (_this.refList[row.detailNo].price = target)}
                   onFocus={_this.onHistoryVisible.bind(_this, row.detailNo, true)}
                   onBlur={_this.onHistoryVisible.bind(_this, row.detailNo, false)}
-                  onKeyDown={(event) => {
-                    if (event.keyCode === 13) _this.onProductAdd()
-                  }}
+                  onKeyDown={_this.onPriceEnter.bind(_this, row.detailNo)}
+                  // onKeyDown={(event) => {
+                  //   if (event.keyCode === 13) _this.onProductAdd()
+                  // }}
                   // onFocus={() => {
                   //   line.historyLoading = true
                   //   _this.setState({ mappingSearch })
@@ -620,6 +621,19 @@ export default class SaleForm extends React.Component {
     const line = mappingSearch[detailNo]
     line.historyVisible = historyVisible
     this.setState({ mappingSearch }, () => this.onHistoryVisibleChange(detailNo))
+  }
+  onPriceEnter = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      const { mappingSearch } = this.state
+      const keys = Object.keys(mappingSearch)
+      const index = keys.indexOf(detailNo.toString())
+      console.log(keys, detailNo, index)
+      if (index + 1 < keys.length) {
+        this.refList[keys[index + 1]].productId.focus()
+      } else {
+        this.onProductAdd()
+      }
+    }
   }
 
   getDetailTotal = () => {
