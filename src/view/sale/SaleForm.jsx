@@ -31,6 +31,7 @@ import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
 import moment from 'moment'
 import SelectProductModal from '../utils/SelectProductModal'
+import SelectProductHover from '../utils/SelectProductHover'
 import ViewProductModal from '../utils/ViewProductModal'
 import { initData } from './saleType'
 import SaleAPI from '../../model/api/sale'
@@ -38,6 +39,7 @@ import SaleAPI from '../../model/api/sale'
 export default class SaleForm extends React.Component {
   history = createHashHistory()
   saleAPI = new SaleAPI()
+  refList = {}
 
   constructor(props) {
     super(props)
@@ -122,15 +124,20 @@ export default class SaleForm extends React.Component {
             response.data.salesDetails.forEach((record) => {
               mappingSearch[record.detailNo] = {
                 loading: false,
+                search: record.productId,
                 value: record.productId,
                 seqNo: record.productSeqNo,
                 isVirtual: record.productType === 'VIRTUAL',
-                search: '',
-                searchTime: 0,
-                list: [],
                 select: {},
+                historyVisible: false,
+                historySeqNo: null,
                 historyLoading: true,
                 historyData: {}
+              }
+              this.refList[record.detailNo] = {
+                productId: null,
+                qty: null,
+                price: null
               }
             })
             this.setState(
@@ -255,13 +262,20 @@ export default class SaleForm extends React.Component {
       ]
       mappingSearch[1] = {
         loading: false,
+        search: '',
         value: '',
         seqNo: null,
         isVirtual: false,
-        visible: false,
         select: {},
+        historyVisible: false,
+        historySeqNo: null,
         historyLoading: true,
         historyData: {}
+      }
+      this.refList[1] = {
+        productId: null,
+        qty: null,
+        price: null
       }
     }
     search.customerId = ''
@@ -270,8 +284,9 @@ export default class SaleForm extends React.Component {
       (customer) => customer.customerId.toLowerCase() === value.toLowerCase()
     )
     if (customer) formData.customerName = customer.name
-
-    this.setState({ search, formData, mappingSearch })
+    this.setState({ search, formData, mappingSearch }, () => {
+      this.refList[1].productId.focus()
+    })
   }
   // get code options
   getCustomerOptions = () => {
@@ -300,12 +315,12 @@ export default class SaleForm extends React.Component {
         title: '刪除',
         width: 50,
         fixed: 'left',
-        render: (data) => (
+        render: (detailNo) => (
           <Space className='list-table-option'>
             <Button
               className='list-table-option-delete'
               size='small'
-              onClick={_this.onProductDelete.bind(_this, data)}
+              onClick={_this.onProductDelete.bind(_this, detailNo)}
             >
               <ListDeleteIcon />
             </Button>
@@ -318,7 +333,7 @@ export default class SaleForm extends React.Component {
         width: 200,
         fixed: 'left',
         render: (data, row) => {
-          const { mappingSearch } = this.state
+          const { mappingSearch } = _this.state
           const line = mappingSearch[row.detailNo]
           return (
             <div className='purchase-price-row'>
@@ -327,33 +342,41 @@ export default class SaleForm extends React.Component {
                   line.value === '' || row.productType === 'OTHERS' ? 'full' : ''
                 }`}
               >
-                <Button
-                  onClick={_this.onSwitchProductModal.bind(_this, row.detailNo)}
-                  type={line.value === '' ? 'primary' : 'default'}
-                  style={{ width: '100%' }}
+                <Popover
+                  title={null}
+                  content={
+                    <SelectProductHover
+                      type='sale'
+                      detailNo={row.detailNo}
+                      keyword={line.search}
+                      onSearchSelect={_this.onSearchSelect}
+                    />
+                  }
+                  placement='rightTop'
+                  trigger='focus'
+                  destroyTooltipOnHide={true}
+                  overlayClassName={`product-select-hover ${line.search === '' ? 'hidden' : ''}`}
                 >
-                  {line.value === '' ? '選取商品' : line.isVirtual ? `*${line.value}` : line.value}
-                </Button>
+                  <Input
+                    value={line.search}
+                    onChange={_this.onSearchProduct.bind(_this, row.detailNo)}
+                    onKeyDown={_this.onSearchKeydown}
+                    onBlur={_this.onSearchBlur.bind(_this, row.detailNo)}
+                    ref={(target) => (_this.refList[row.detailNo].productId = target)}
+                  />
+                </Popover>
               </div>
               {line.value !== '' && row.productType !== 'OTHERS' && (
                 <div className='purchase-price-view'>
                   <Tooltip title='商品資訊'>
                     <Button
-                      onClick={() => this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}
+                      onClick={() => _this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}
                     >
                       <ListSearchIcon />
                     </Button>
                   </Tooltip>
                 </div>
               )}
-              <SelectProductModal
-                type='sale'
-                detailNo={row.detailNo}
-                visible={line.visible}
-                value={line.value}
-                onSelect={_this.onMappingSelect}
-                onClose={_this.onSwitchProductModal.bind(_this, row.detailNo)}
-              />
             </div>
           )
         }
@@ -387,6 +410,11 @@ export default class SaleForm extends React.Component {
                 step={1}
                 onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'quantity')}
                 style={{ width: '100%' }}
+                ref={(target) => (_this.refList[row.detailNo].qty = target)}
+                onKeyDown={_this.onDetailNumberKeydown.bind(_this, row.detailNo)}
+                // onKeyDown={(event) => {
+                //   if (event.keyCode === 13) _this.refList[row.detailNo].price.focus()
+                // }}
               />
             )
           )
@@ -402,38 +430,64 @@ export default class SaleForm extends React.Component {
         title: '售價',
         width: 140,
         render: (data, row) => {
+          const { mappingSearch } = _this.state
+          const line = mappingSearch[row.detailNo]
           return (
             row.productSeqNo && (
-              <div className='purchase-price-row'>
-                <div className='purchase-price-input'>
-                  <InputNumber
-                    value={data}
-                    min={0}
-                    max={99999999}
-                    step={1}
-                    onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'price')}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-                <div className='purchase-price-view'>
-                  {row.productSeqNo && _this.state.formData.customerId ? (
-                    <Popover
-                      title='商品歷史價格'
-                      content={_this.displayHistoryPrice(row.detailNo)}
-                      overlayClassName='purchase-history-price'
-                      onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
-                    >
-                      <Button>
-                        <ListSearchIcon />
-                      </Button>
-                    </Popover>
-                  ) : (
-                    <Button disabled={true}>
-                      <ListSearchIcon />
-                    </Button>
-                  )}
-                </div>
-              </div>
+              // <div className='purchase-price-row'>
+              //   <div className='purchase-price-input'>
+              <Popover
+                title='商品歷史價格'
+                content={_this.displayHistoryPrice(row.detailNo)}
+                visible={line.historyVisible}
+                placement='bottom'
+                overlayClassName='purchase-history-price'
+                // onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
+              >
+                <InputNumber
+                  value={data}
+                  min={0}
+                  max={99999999}
+                  step={1}
+                  onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'price')}
+                  style={{ width: '100%' }}
+                  ref={(target) => (_this.refList[row.detailNo].price = target)}
+                  onFocus={_this.onHistoryVisible.bind(_this, row.detailNo, true)}
+                  onBlur={_this.onHistoryVisible.bind(_this, row.detailNo, false)}
+                  onKeyDown={(event) => {
+                    if (event.keyCode === 13) _this.onProductAdd()
+                  }}
+                  // onFocus={() => {
+                  //   line.historyLoading = true
+                  //   _this.setState({ mappingSearch })
+                  // }}
+                  // onBlur={() => {
+                  //   line.historyLoading = false
+                  //   _this.setState({ mappingSearch })
+                  // }}
+                />
+              </Popover>
+              //   </div>
+              //   <div className='purchase-price-view'>
+              //     {row.productSeqNo && _this.state.formData.customerId ? (
+              //       <Popover
+              //         title='商品歷史價格'
+              //         content={_this.displayHistoryPrice(row.detailNo)}
+              //         placement='bottom'
+              //         overlayClassName='purchase-history-price'
+              //         onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
+              //       >
+              //         <Button ref={(target) => this.refList[row.detailNo].history = target}>
+              //           <ListSearchIcon />
+              //         </Button>
+              //       </Popover>
+              //     ) : (
+              //       <Button disabled={true}>
+              //         <ListSearchIcon />
+              //       </Button>
+              //     )}
+              //   </div>
+              // </div>
             )
           )
         }
@@ -505,47 +559,67 @@ export default class SaleForm extends React.Component {
     ]
   }
 
-  // renderProductDetail = (record) => {
-  //   return (
-  //     <Row gutter={0}>
-  //       <Col span={8}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>商品名稱</div>
-  //           <div className='product-detail-table-expand-group-content'>{record.productName}</div>
-  //         </div>
-  //       </Col>
-  //       <Col span={8}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>車種簡稱</div>
-  //           <div className='product-detail-table-expand-group-content'>{record.kindShortName}</div>
-  //         </div>
-  //       </Col>
-  //       <Col span={8}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>規格</div>
-  //           <div className='product-detail-table-expand-group-content'>{record.norm}</div>
-  //         </div>
-  //       </Col>
-  //       <Col span={24}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>備註</div>
-  //           <div className='product-detail-table-expand-group-content'>
-  //             <Input.TextArea
-  //               value={record.remark}
-  //               autoSize={{ minRows: 1, maxRows: 4 }}
-  //               onChange={this.onDetailInputChange.bind(this, record.detailNo, 'remark')}
-  //             />
-  //           </div>
-  //         </div>
-  //       </Col>
-  //     </Row>
-  //   )
-  // }
-
-  onSwitchProductModal = (detailNo) => {
+  onSearchProduct = (detailNo, event) => {
     const { mappingSearch } = this.state
-    mappingSearch[detailNo].visible = !mappingSearch[detailNo].visible
+    mappingSearch[detailNo].search = event.target.value
     this.setState({ mappingSearch })
+  }
+  onSearchKeydown = (event) => {
+    if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) event.preventDefault()
+  }
+  onSearchBlur = (detailNo) => {
+    const { mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    if (line.value === '' || !line.seqNo) {
+      line.search = ''
+    }
+    this.setState({ mappingSearch })
+  }
+  onSearchSelect = (detailNo, value, isFinished) => {
+    const { mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    if (isFinished) {
+      line.search = value.split('|')[0]
+      line.value = value.split('|')[0]
+      line.seqNo = Number(value.split('|')[1])
+      // this.refList[detailNo].productId.blur()
+      this.setState({ mappingSearch }, () => this.enterProduct(detailNo))
+    } else {
+      line.search = value
+      line.value = ''
+      line.seqNo = null
+      this.setState({ mappingSearch })
+    }
+  }
+  enterProduct = (detailNo) => {
+    const { formData, mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
+    this.setState({ detailLoading: true }, () => {
+      this.saleAPI.getProductData(line.seqNo, formData.customerId).then((response) => {
+        line.isVirtual = response.data.productType === 'VIRTUAL'
+        row.productId = line.value
+        row.productSeqNo = line.seqNo
+        row.productName = response.data.name
+        row.kindShortName = response.data.kindShortName
+        row.norm = response.data.norm
+        row.quantity = 1
+        row.price = response.data.price
+        row.amount = response.data.price
+        row.color = ''
+        row.unit = response.data.unit
+        row.vendorProductId = response.data.vendorProductId
+        this.setState({ formData, mappingSearch, detailLoading: false }, () => {
+          this.refList[detailNo].qty.focus()
+        })
+      })
+    })
+  }
+  onHistoryVisible = (detailNo, historyVisible) => {
+    const { mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    line.historyVisible = historyVisible
+    this.setState({ mappingSearch }, () => this.onHistoryVisibleChange(detailNo))
   }
 
   getDetailTotal = () => {
@@ -583,10 +657,15 @@ export default class SaleForm extends React.Component {
       this.setState({ formData })
     }
   }
+  onDetailNumberKeydown = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      this.refList[detailNo].price.focus()
+    }
+  }
 
   onProductAdd = () => {
     const { formData, mappingSearch } = this.state
-    const detailNo = formData.salesDetails.length + 1
+    const detailNo = formData.salesDetails[formData.salesDetails.length - 1].detailNo + 1
     formData.salesDetails.push({
       detailNo,
       productId: '',
@@ -604,29 +683,35 @@ export default class SaleForm extends React.Component {
     })
     mappingSearch[detailNo] = {
       loading: false,
+      search: '',
       value: '',
       seqNo: null,
       isVirtual: false,
-      visible: false,
       select: {},
+      historyVisible: false,
       historySeqNo: null,
       historyLoading: true,
       historyData: {}
     }
-    this.setState({ formData, mappingSearch })
+    this.refList[detailNo] = {
+      productId: null,
+      qty: null,
+      price: null
+    }
+    this.setState({ formData, mappingSearch }, () => this.refList[detailNo].productId.focus())
   }
   onProductDelete = (detailNo) => {
     const { formData, mappingSearch } = this.state
     const index = formData.salesDetails.findIndex((record) => record.detailNo === detailNo)
     formData.salesDetails.splice(index, 1)
     delete mappingSearch[detailNo]
-    this.setState({ formData, mappingSearch })
+    this.setState({ formData, mappingSearch }, () => delete this.refList[detailNo])
   }
 
-  onVisibleChange = (detailNo, visible) => {
+  onHistoryVisibleChange = (detailNo) => {
     const { formData, mappingSearch } = this.state
     const row = mappingSearch[detailNo]
-    if (visible && row.seqNo && row.seqNo !== row.historySeqNo) {
+    if (row.seqNo && row.seqNo !== row.historySeqNo) {
       row.historyLoading = true
       this.setState({ mappingSearch, priceTabKey: 'purchase' }, () => {
         this.saleAPI
