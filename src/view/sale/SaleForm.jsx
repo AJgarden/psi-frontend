@@ -18,7 +18,8 @@ import {
   Button,
   Modal,
   message,
-  InputNumber
+  InputNumber,
+  AutoComplete
 } from 'antd'
 import {
   CheckOutlined,
@@ -26,11 +27,10 @@ import {
   ExclamationCircleOutlined,
   PrinterOutlined
 } from '@ant-design/icons'
-import { ListDeleteIcon, ListSearchIcon, ProductExpandIcon } from '../icon/Icon'
+import { ListDeleteIcon, ListSearchIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
 import moment from 'moment'
-import SelectProductModal from '../utils/SelectProductModal'
 import SelectProductHover from '../utils/SelectProductHover'
 import ViewProductModal from '../utils/ViewProductModal'
 import { initData } from './saleType'
@@ -39,6 +39,7 @@ import SaleAPI from '../../model/api/sale'
 export default class SaleForm extends React.Component {
   history = createHashHistory()
   saleAPI = new SaleAPI()
+  remarkRef = null
   refList = {}
 
   constructor(props) {
@@ -54,6 +55,7 @@ export default class SaleForm extends React.Component {
       detailLoading: false,
       mappingSearch: {},
       customerList: [],
+      remarkList: [],
       colorList: [],
       viewProduct: false,
       viewSeqNo: null,
@@ -112,6 +114,11 @@ export default class SaleForm extends React.Component {
         this.setState({ colorList: response.data.list }, () => resolve(true))
       })
     })
+    await new Promise((resolve) => {
+      this.saleAPI.getRemarkList().then((response) => {
+        this.setState({ remarkList: response.data.map((value) => ({ value })) }, () => resolve(true))
+      })
+    })
   }
 
   getSaleData = () => {
@@ -129,6 +136,8 @@ export default class SaleForm extends React.Component {
                 seqNo: record.productSeqNo,
                 isVirtual: record.productType === 'VIRTUAL',
                 select: {},
+                selectVisible: false,
+                selectFinished: false,
                 historyVisible: false,
                 historySeqNo: null,
                 historyLoading: true,
@@ -137,7 +146,9 @@ export default class SaleForm extends React.Component {
               this.refList[record.detailNo] = {
                 productId: null,
                 qty: null,
-                price: null
+                price: null,
+                remark: null,
+                color: null
               }
             })
             this.setState(
@@ -154,14 +165,7 @@ export default class SaleForm extends React.Component {
                 },
                 mappingSearch
               },
-              () => {
-                resolve(true)
-                // this.getProductInventory().then((salesDetails) => {
-                //   const { formData } = this.state
-                //   formData.salesDetails = salesDetails
-                //   this.setState({ formData }, () => resolve(true))
-                // })
-              }
+              () => resolve(true)
             )
           } else {
             reject(false)
@@ -231,6 +235,12 @@ export default class SaleForm extends React.Component {
     formData[type] = checked
     this.setState({ formData })
   }
+  onRemarkKeydown = (event) => {
+    if (event.keyCode === 13) {
+      const key = Object.keys(this.refList)[0]
+      this.refList[key].productId.focus()
+    }
+  }
 
   // code select
   onCodeSearch = (value) => {
@@ -267,6 +277,8 @@ export default class SaleForm extends React.Component {
         seqNo: null,
         isVirtual: false,
         select: {},
+        selectVisible: false,
+        selectFinished: false,
         historyVisible: false,
         historySeqNo: null,
         historyLoading: true,
@@ -275,7 +287,9 @@ export default class SaleForm extends React.Component {
       this.refList[1] = {
         productId: null,
         qty: null,
-        price: null
+        price: null,
+        remark: null,
+        color: null
       }
     }
     search.customerId = ''
@@ -285,25 +299,37 @@ export default class SaleForm extends React.Component {
     )
     if (customer) formData.customerName = customer.name
     this.setState({ search, formData, mappingSearch }, () => {
-      this.refList[1].productId.focus()
+      this.remarkRef.focus()
     })
   }
   // get code options
   getCustomerOptions = () => {
     const { formData, search, customerList } = this.state
-    return customerList
-      .filter(
+    let list = []
+    if (search.customerId === '') {
+      if (formData.customerId === '') {
+        list = customerList.slice()
+      } else {
+        list = customerList.filter((customer) => formData.customerId === customer.customerId)
+      }
+    } else if (/.*[\u4e00-\u9fa5]+.*$/.test(search.customerId)) {
+      list = customerList.filter(
+        (customer) =>
+          formData.customerId === customer.customerId || customer.name.includes(search.customerId)
+      )
+      console.log(list)
+    } else {
+      list = customerList.filter(
         (customer) =>
           formData.customerId === customer.customerId ||
           (search.customerId &&
             customer.customerId.toLowerCase().match(`^${search.customerId.toLowerCase()}`, 'i'))
       )
-      .map((customer) => {
-        return {
-          label: `${customer.customerId} - ${customer.name}`,
-          value: customer.customerId
-        }
-      })
+    }
+    return list.map((customer) => ({
+      label: `${customer.customerId} - ${customer.name}`,
+      value: customer.customerId
+    }))
   }
 
   // purchase detail
@@ -315,17 +341,19 @@ export default class SaleForm extends React.Component {
         title: '刪除',
         width: 50,
         fixed: 'left',
-        render: (detailNo) => (
-          <Space className='list-table-option'>
-            <Button
-              className='list-table-option-delete'
-              size='small'
-              onClick={_this.onProductDelete.bind(_this, detailNo)}
-            >
-              <ListDeleteIcon />
-            </Button>
-          </Space>
-        )
+        render: (detailNo, row, index) => {
+          return index > 0 && (
+            <Space className='list-table-option'>
+              <Button
+                className='list-table-option-delete'
+                size='small'
+                onClick={_this.onProductDelete.bind(_this, detailNo)}
+              >
+                <ListDeleteIcon />
+              </Button>
+            </Space>
+          )
+        }
       },
       {
         dataIndex: 'productId',
@@ -353,14 +381,14 @@ export default class SaleForm extends React.Component {
                     />
                   }
                   placement='rightTop'
-                  trigger='focus'
+                  visible={line.selectVisible}
                   destroyTooltipOnHide={true}
-                  overlayClassName={`product-select-hover ${line.search === '' ? 'hidden' : ''}`}
+                  overlayClassName={`product-select-hover ${line.search.length > 2 ? 'product' : 'type'}`}
                 >
                   <Input
                     value={line.search}
                     onChange={_this.onSearchProduct.bind(_this, row.detailNo)}
-                    onKeyDown={_this.onSearchKeydown}
+                    onKeyDown={_this.onSearchKeydown.bind(_this, row.detailNo)}
                     onBlur={_this.onSearchBlur.bind(_this, row.detailNo)}
                     ref={(target) => (_this.refList[row.detailNo].productId = target)}
                   />
@@ -412,9 +440,6 @@ export default class SaleForm extends React.Component {
                 style={{ width: '100%' }}
                 ref={(target) => (_this.refList[row.detailNo].qty = target)}
                 onKeyDown={_this.onDetailNumberKeydown.bind(_this, row.detailNo)}
-                // onKeyDown={(event) => {
-                //   if (event.keyCode === 13) _this.refList[row.detailNo].price.focus()
-                // }}
               />
             )
           )
@@ -434,15 +459,12 @@ export default class SaleForm extends React.Component {
           const line = mappingSearch[row.detailNo]
           return (
             row.productSeqNo && (
-              // <div className='purchase-price-row'>
-              //   <div className='purchase-price-input'>
               <Popover
                 title='商品歷史價格'
                 content={_this.displayHistoryPrice(row.detailNo)}
                 visible={line.historyVisible}
-                placement='bottom'
-                overlayClassName='purchase-history-price'
-                // onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
+                placement='leftTop'
+                overlayClassName='purchase-history-price on-price-input'
               >
                 <InputNumber
                   value={data}
@@ -455,40 +477,8 @@ export default class SaleForm extends React.Component {
                   onFocus={_this.onHistoryVisible.bind(_this, row.detailNo, true)}
                   onBlur={_this.onHistoryVisible.bind(_this, row.detailNo, false)}
                   onKeyDown={_this.onPriceEnter.bind(_this, row.detailNo)}
-                  // onKeyDown={(event) => {
-                  //   if (event.keyCode === 13) _this.onProductAdd()
-                  // }}
-                  // onFocus={() => {
-                  //   line.historyLoading = true
-                  //   _this.setState({ mappingSearch })
-                  // }}
-                  // onBlur={() => {
-                  //   line.historyLoading = false
-                  //   _this.setState({ mappingSearch })
-                  // }}
                 />
               </Popover>
-              //   </div>
-              //   <div className='purchase-price-view'>
-              //     {row.productSeqNo && _this.state.formData.customerId ? (
-              //       <Popover
-              //         title='商品歷史價格'
-              //         content={_this.displayHistoryPrice(row.detailNo)}
-              //         placement='bottom'
-              //         overlayClassName='purchase-history-price'
-              //         onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
-              //       >
-              //         <Button ref={(target) => this.refList[row.detailNo].history = target}>
-              //           <ListSearchIcon />
-              //         </Button>
-              //       </Popover>
-              //     ) : (
-              //       <Button disabled={true}>
-              //         <ListSearchIcon />
-              //       </Button>
-              //     )}
-              //   </div>
-              // </div>
             )
           )
         }
@@ -507,10 +497,20 @@ export default class SaleForm extends React.Component {
         render: (data, row) => {
           return (
             row.productSeqNo && (
-              <Input
+              <AutoComplete
                 value={data}
-                onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'remark')}
+                options={_this.state.remarkList}
+                onChange={_this.onDetailSelectChange.bind(_this, row.detailNo, 'remark')}
+                onKeyDown={_this.onNoteKeydown.bind(_this, row.detailNo)}
+                ref={(target) => (_this.refList[row.detailNo].remark = target)}
+                style={{ width: '100%' }}
               />
+              // <Input
+              //   value={data}
+              //   onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'remark')}
+              //   onKeyDown={_this.onNoteKeydown.bind(_this, row.detailNo)}
+              //   ref={(target) => (_this.refList[row.detailNo].remark = target)}
+              // />
             )
           )
         }
@@ -529,8 +529,10 @@ export default class SaleForm extends React.Component {
                 showArrow={false}
                 allowClear={true}
                 onChange={_this.onDetailSelectChange.bind(_this, row.detailNo, 'color')}
+                onKeyDown={_this.onColorKeydown.bind(_this, row.detailNo)}
                 style={{ width: '100%' }}
                 notFoundContent={null}
+                ref={(target) => (_this.refList[row.detailNo].color = target)}
               >
                 {_this.state.colorList.map((color) => (
                   <Select.Option key={color.colorId} value={color.name}>
@@ -565,14 +567,29 @@ export default class SaleForm extends React.Component {
     mappingSearch[detailNo].search = event.target.value
     this.setState({ mappingSearch })
   }
-  onSearchKeydown = (event) => {
-    if (event.keyCode === 13 || event.keyCode === 38 || event.keyCode === 40) event.preventDefault()
+  onSearchKeydown = (detailNo, event) => {
+    if (event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 38 || event.keyCode === 40) {
+      event.preventDefault()
+    } else if (event.keyCode === 13) {
+      event.preventDefault()
+      const { mappingSearch } = this.state
+      const line = mappingSearch[detailNo]
+      if (line.search !== '') {
+        if (!line.selectVisible) {
+          line.selectVisible = true
+        } else if (line.selectFinished) {
+          line.selectVisible = false
+        }
+        this.setState({ mappingSearch })
+      }
+    }
   }
   onSearchBlur = (detailNo) => {
     const { mappingSearch } = this.state
     const line = mappingSearch[detailNo]
     if (line.value === '' || !line.seqNo) {
       line.search = ''
+      line.selectVisible = false
     }
     this.setState({ mappingSearch })
   }
@@ -583,12 +600,14 @@ export default class SaleForm extends React.Component {
       line.search = value.split('|')[0]
       line.value = value.split('|')[0]
       line.seqNo = Number(value.split('|')[1])
-      // this.refList[detailNo].productId.blur()
+      line.selectFinished = true
+      line.selectVisible = false
       this.setState({ mappingSearch }, () => this.enterProduct(detailNo))
     } else {
       line.search = value
       line.value = ''
       line.seqNo = null
+      line.selectFinished = false
       this.setState({ mappingSearch })
     }
   }
@@ -620,14 +639,36 @@ export default class SaleForm extends React.Component {
     const { mappingSearch } = this.state
     const line = mappingSearch[detailNo]
     line.historyVisible = historyVisible
-    this.setState({ mappingSearch }, () => this.onHistoryVisibleChange(detailNo))
+    this.setState({ mappingSearch }, () => {
+      this.onHistoryVisibleChange(detailNo)
+    })
   }
   onPriceEnter = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      this.onPriceFocusSwitch = false
+      this.refList[detailNo].remark.focus()
+      // const { mappingSearch } = this.state
+      // const keys = Object.keys(mappingSearch)
+      // const index = keys.indexOf(detailNo.toString())
+      // if (index + 1 < keys.length) {
+      //   this.refList[keys[index + 1]].productId.focus()
+      // } else {
+      //   this.onProductAdd()
+      // }
+    } else if (event.keyCode === 9) {
+      this.onPriceFocusSwitch = false
+    }
+  }
+  onNoteKeydown = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      this.refList[detailNo].color.focus()
+    }
+  }
+  onColorKeydown = (detailNo, event) => {
     if (event.keyCode === 13) {
       const { mappingSearch } = this.state
       const keys = Object.keys(mappingSearch)
       const index = keys.indexOf(detailNo.toString())
-      console.log(keys, detailNo, index)
       if (index + 1 < keys.length) {
         this.refList[keys[index + 1]].productId.focus()
       } else {
@@ -702,6 +743,8 @@ export default class SaleForm extends React.Component {
       seqNo: null,
       isVirtual: false,
       select: {},
+      selectVisible: false,
+      selectFinished: false,
       historyVisible: false,
       historySeqNo: null,
       historyLoading: true,
@@ -1183,6 +1226,7 @@ export default class SaleForm extends React.Component {
                       searchValue={this.state.search.customerId}
                       showSearch={true}
                       showArrow={false}
+                      filterOption={false}
                       options={this.getCustomerOptions()}
                       onSearch={this.onCodeSearch}
                       onSelect={this.onCodeSelect}
@@ -1196,13 +1240,16 @@ export default class SaleForm extends React.Component {
               <Col span={24}>
                 <FormItem
                   title='備註'
-                  align='flex-start'
+                  // align='flex-start'
                   content={
-                    <Input.TextArea
-                      onChange={this.onInputChange}
+                    <Input
                       value={this.state.formData.note}
                       id='note'
-                      autoSize={{ minRows: 1, maxRows: 4 }}
+                      // autoSize={{ minRows: 1, maxRows: 4 }}
+                      ref={(remarkRef) => (this.remarkRef = remarkRef)}
+                      style={{ width: '100%' }}
+                      onChange={this.onInputChange}
+                      onKeyDown={this.onRemarkKeydown}
                     />
                   }
                 />

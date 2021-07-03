@@ -52,7 +52,7 @@ export default class SelectProductHover extends React.Component {
 
   keydownListen = (event) => {
     if (!this.state.loading) {
-      if (event.keyCode === 38 || event.keyCode === 40) {
+      if (event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 38 || event.keyCode === 40) {
         const { list } = this.state
         if (list.length > 0) {
           let selectOrder = 0
@@ -64,6 +64,14 @@ export default class SelectProductHover extends React.Component {
             // down
             selectOrder =
               this.state.selectOrder + 1 === list.length ? 0 : this.state.selectOrder + 1
+          } else if (event.keyCode === 33) {
+            // pageup
+            selectOrder = 
+              this.state.selectOrder < 10 ? 0 : this.state.selectOrder - 10
+          } else if (event.keyCode === 34) {
+            // pagedown
+            selectOrder = 
+              this.state.selectOrder >= list.length - 10 ? list.length - 1 : this.state.selectOrder + 10
           }
           this.setState({ selectOrder }, () => {
             if (this.refList[selectOrder]) this.refList[selectOrder].scrollIntoView(true)
@@ -131,31 +139,6 @@ export default class SelectProductHover extends React.Component {
         }
         return obj
       })
-    // output.push({
-    //   dataIndex: 'data',
-    //   title: '選取',
-    //   fixed: 'right',
-    //   width: 60,
-    //   render: (data, row) => {
-    //     return row.finished ? (
-    //       <Button
-    //         size='small'
-    //         className='purchase-product-modal-select'
-    //         onClick={_this.selectProduct.bind(_this, row)}
-    //       >
-    //         <ProductSelectIcon />
-    //       </Button>
-    //     ) : (
-    //       <Button
-    //         size='small'
-    //         className='purchase-product-modal-next'
-    //         onClick={_this.selectPart.bind(_this, data)}
-    //       >
-    //         <ProductNextIcon />
-    //       </Button>
-    //     )
-    //   }
-    // })
     return output
   }
 

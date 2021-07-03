@@ -76,6 +76,10 @@ export default class SaleAPI {
     }).then((response) => response.data)
   }
 
+  getRemarkList = () => {
+    return restInstance('get', '/v1/common/remark').then((response) => response.data)
+  }
+
   getPrintData = (salesId) => {
     return restInstance('get', `/v1/sales/print/${salesId}`).then((response) => response.data)
   }

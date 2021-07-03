@@ -280,6 +280,12 @@
         z-index: 2
         border-top-color: #2a9d8f
         border-left-color: #2a9d8f
+  &.ant-popover-placement-leftTop
+    > .ant-popover-content
+      > .ant-popover-arrow
+        z-index: 2
+        border-top-color: #2a9d8f
+        border-right-color: #2a9d8f
   .ant-popover-title
     color: #ffffff
     background: #2a9d8f
@@ -398,7 +404,10 @@
     fill: #f4a261
 
 .product-select-hover
-  width: 600px
+  &.type
+    width: 312px
+  &.product
+    width: 876px
   .ant-popover-inner-content
     padding: 10px
     .ant-table
