@@ -41,6 +41,7 @@ export default class SaleForm extends React.Component {
   saleAPI = new SaleAPI()
   remarkRef = null
   refList = {}
+  onProductSelectClick = false
 
   constructor(props) {
     super(props)
@@ -68,6 +69,20 @@ export default class SaleForm extends React.Component {
         this.setState({ loading: false })
       }
     })
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousedown', this.onMouseDown)
+  }
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.onMouseDown)
+  }
+  onMouseDown = (event) => {
+    if (event.target.closest('.product-select-hover') !== null) {
+      this.onProductSelectClick = true
+    } else {
+      this.onProductSelectClick = false
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -116,7 +131,10 @@ export default class SaleForm extends React.Component {
     })
     await new Promise((resolve) => {
       this.saleAPI.getRemarkList().then((response) => {
-        this.setState({ remarkList: response.data.map((value) => ({ value })) }, () => resolve(true))
+        this.setState(
+          { remarkList: response.data.filter((value) => value !== '').map((value) => ({ value })) },
+          () => resolve(true)
+        )
       })
     })
   }
@@ -342,16 +360,18 @@ export default class SaleForm extends React.Component {
         width: 50,
         fixed: 'left',
         render: (detailNo, row, index) => {
-          return index > 0 && (
-            <Space className='list-table-option'>
-              <Button
-                className='list-table-option-delete'
-                size='small'
-                onClick={_this.onProductDelete.bind(_this, detailNo)}
-              >
-                <ListDeleteIcon />
-              </Button>
-            </Space>
+          return (
+            index > 0 && (
+              <Space className='list-table-option'>
+                <Button
+                  className='list-table-option-delete'
+                  size='small'
+                  onClick={_this.onProductDelete.bind(_this, detailNo)}
+                >
+                  <ListDeleteIcon />
+                </Button>
+              </Space>
+            )
           )
         }
       },
@@ -383,7 +403,10 @@ export default class SaleForm extends React.Component {
                   placement='rightTop'
                   visible={line.selectVisible}
                   destroyTooltipOnHide={true}
-                  overlayClassName={`product-select-hover ${line.search.length > 2 ? 'product' : 'type'}`}
+                  overlayClassName={`product-select-hover ${
+                    line.search.length > 2 ? 'product' : 'type'
+                  }`}
+                  getPopupContainer={() => document.getElementById('sale-form-wrapper')}
                 >
                   <Input
                     value={line.search}
@@ -568,7 +591,12 @@ export default class SaleForm extends React.Component {
     this.setState({ mappingSearch })
   }
   onSearchKeydown = (detailNo, event) => {
-    if (event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 38 || event.keyCode === 40) {
+    if (
+      event.keyCode === 33 ||
+      event.keyCode === 34 ||
+      event.keyCode === 38 ||
+      event.keyCode === 40
+    ) {
       event.preventDefault()
     } else if (event.keyCode === 13) {
       event.preventDefault()
@@ -584,14 +612,24 @@ export default class SaleForm extends React.Component {
       }
     }
   }
-  onSearchBlur = (detailNo) => {
-    const { mappingSearch } = this.state
-    const line = mappingSearch[detailNo]
-    if (line.value === '' || !line.seqNo) {
-      line.search = ''
-      line.selectVisible = false
-    }
-    this.setState({ mappingSearch })
+  onSearchBlur = (detailNo, event) => {
+    event.preventDefault()
+    setTimeout(() => {
+      const { mappingSearch } = this.state
+      const line = mappingSearch[detailNo]
+      if (!this.onProductSelectClick) {
+        if (line.value === '' || !line.seqNo) {
+          line.search = ''
+        } else {
+          line.search = line.value
+        }
+        line.selectVisible = false
+        this.refList[detailNo].productId.blur()
+        this.setState({ mappingSearch })
+      } else if (line.value === '' || !line.seqNo) {
+        this.refList[detailNo].productId.focus()
+      }
+    }, 100)
   }
   onSearchSelect = (detailNo, value, isFinished) => {
     const { mappingSearch } = this.state
@@ -608,7 +646,7 @@ export default class SaleForm extends React.Component {
       line.value = ''
       line.seqNo = null
       line.selectFinished = false
-      this.setState({ mappingSearch })
+      this.setState({ mappingSearch }, () => this.clearProduct(detailNo))
     }
   }
   enterProduct = (detailNo) => {
@@ -634,6 +672,23 @@ export default class SaleForm extends React.Component {
         })
       })
     })
+  }
+  clearProduct = (detailNo) => {
+    const { formData } = this.state
+    const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
+    row.productId = ''
+    row.productSeqNo = null
+    row.productName = ''
+    row.kindShortName = ''
+    row.norm = ''
+    row.quantity = 1
+    row.inventory = 0
+    row.price = 0
+    row.amount = 0
+    row.remark = ''
+    row.color = ''
+    row.vendorProductId = ''
+    this.setState({ formData })
   }
   onHistoryVisible = (detailNo, historyVisible) => {
     const { mappingSearch } = this.state
@@ -1179,7 +1234,7 @@ export default class SaleForm extends React.Component {
           lg: 16
         }
     return (
-      <>
+      <div id='sale-form-wrapper'>
         {!this.props.isDrawMode && (
           <Breadcrumb style={{ marginBottom: 10 }}>
             <Breadcrumb.Item>
@@ -1387,7 +1442,7 @@ export default class SaleForm extends React.Component {
             </Space>
           </div>
         </Spin>
-      </>
+      </div>
     )
   }
 }

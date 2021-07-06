@@ -146,17 +146,24 @@ export default class SelectProductHover extends React.Component {
     return index === this.state.selectOrder ? 'selected' : ''
   }
 
-  selectPart = (value) => {
-    this.setState({ loading: true, value }, () => this.getSearchList())
-  }
-  selectProduct = (product) => {
-    this.setState({ value: product.data }, () => {
-      this.onSelect(product)
-    })
-  }
-
-  onSelect = (product) => {
-    this.props.onSelect(this.props.detailNo, product)
+  onRow = (record) => {
+    return {
+      onClick: () => {
+        if (record.finished) {
+          this.props.onSearchSelect(
+            this.props.detailNo,
+            `${record.data}|${record.productSeqNo}`,
+            true
+          )
+        } else {
+          this.props.onSearchSelect(
+            this.props.detailNo,
+            record.data,
+            false
+          )
+        }
+      }
+    }
   }
 
   render() {
@@ -175,6 +182,7 @@ export default class SelectProductHover extends React.Component {
                 rowClassName={this.getClassName}
                 pagination={false}
                 scroll={{ y: 400 }}
+                onRow={this.onRow}
               />
             ) : (
               <Empty description='查無符合條件的商品' />
