@@ -16,14 +16,15 @@ import {
   Button,
   Modal,
   message,
-  InputNumber
+  InputNumber,
+  AutoComplete
 } from 'antd'
 import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
-import { ListDeleteIcon, ListSearchIcon, ProductExpandIcon } from '../icon/Icon'
+import { ListDeleteIcon, ListSearchIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
 import moment from 'moment'
-import SelectProductModal from '../utils/SelectProductModal'
+import SelectProductHover from '../utils/SelectProductHover'
 import ViewProductModal from '../utils/ViewProductModal'
 import { initData } from './purchaseType'
 import PurchaseAPI from '../../model/api/purchase'
@@ -31,6 +32,9 @@ import PurchaseAPI from '../../model/api/purchase'
 export default class PurchaseForm extends React.Component {
   history = createHashHistory()
   purchaseAPI = new PurchaseAPI()
+  remarkRef = null
+  refList = {}
+  onProductSelectClick = false
 
   constructor(props) {
     super(props)
@@ -45,6 +49,7 @@ export default class PurchaseForm extends React.Component {
       detailLoading: false,
       mappingSearch: {},
       vendorList: [],
+      remarkList: [],
       colorList: [],
       viewProduct: false,
       viewSeqNo: null
@@ -56,6 +61,20 @@ export default class PurchaseForm extends React.Component {
         this.setState({ loading: false })
       }
     })
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousedown', this.onMouseDown)
+  }
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.onMouseDown)
+  }
+  onMouseDown = (event) => {
+    if (event.target.closest('.product-select-hover') !== null) {
+      this.onProductSelectClick = true
+    } else {
+      this.onProductSelectClick = false
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -102,6 +121,14 @@ export default class PurchaseForm extends React.Component {
         this.setState({ colorList: response.data.list }, () => resolve(true))
       })
     })
+    await new Promise((resolve) => {
+      this.purchaseAPI.getRemarkList().then((response) => {
+        this.setState(
+          { remarkList: response.data.filter((value) => value !== '').map((value) => ({ value })) },
+          () => resolve(true)
+        )
+      })
+    })
   }
 
   getPurchaseData = () => {
@@ -114,15 +141,24 @@ export default class PurchaseForm extends React.Component {
             response.data.purchaseDetails.forEach((record) => {
               mappingSearch[record.detailNo] = {
                 loading: false,
+                search: record.productId,
                 value: record.productId,
                 seqNo: record.productSeqNo,
                 isVirtual: record.productType === 'VIRTUAL',
-                search: '',
-                searchTime: 0,
-                list: [],
                 select: {},
+                selectVisible: false,
+                selectFinished: false,
+                historyVisible: false,
+                historySeqNo: null,
                 historyLoading: true,
                 historyList: []
+              }
+              this.refList[record.detailNo] = {
+                productId: null,
+                qty: null,
+                price: null,
+                remark: null,
+                color: null
               }
             })
             this.setState(
@@ -138,9 +174,7 @@ export default class PurchaseForm extends React.Component {
                 },
                 mappingSearch
               },
-              () => {
-                resolve(true)
-              }
+              () => resolve(true)
             )
           } else {
             reject(false)
@@ -186,6 +220,12 @@ export default class PurchaseForm extends React.Component {
     formData[type] = moment(date).valueOf()
     this.setState({ formData })
   }
+  onRemarkKeydown = (event) => {
+    if (event.keyCode === 13) {
+      const key = Object.keys(this.refList)[0]
+      this.refList[key].productId.focus()
+    }
+  }
 
   // code select
   onCodeSearch = (value) => {
@@ -216,13 +256,24 @@ export default class PurchaseForm extends React.Component {
       ]
       mappingSearch[1] = {
         loading: false,
+        search: '',
         value: '',
         seqNo: null,
         isVirtual: false,
-        visible: false,
         select: {},
+        selectVisible: false,
+        selectFinished: false,
+        historyVisible: false,
+        historySeqNo: null,
         historyLoading: true,
         historyList: []
+      }
+      this.refList[1] = {
+        productId: null,
+        qty: null,
+        price: null,
+        remark: null,
+        color: null
       }
     }
     search.vendorId = ''
@@ -231,24 +282,34 @@ export default class PurchaseForm extends React.Component {
       (vendor) => vendor.vendorId.toLowerCase() === value.toLowerCase()
     )
     if (vendor) formData.vendorName = vendor.name
-    this.setState({ search, formData, mappingSearch })
+    this.setState({ search, formData, mappingSearch }, () => this.remarkRef.focus())
   }
   // get code options
   getVendorOptions = () => {
     const { formData, search, vendorList } = this.state
-    return vendorList
-      .filter(
+    let list = []
+    if (search.vendorId === '') {
+      if (formData.vendorId === '') {
+        list = vendorList.slice()
+      } else {
+        list = vendorList.filter((vendor) => formData.vendorId === vendor.vendorId)
+      }
+    } else if (/.*[\u4e00-\u9fa5]+.*$/.test(search.vendorId)) {
+      list = vendorList.filter(
+        (vendor) => formData.vendorId === vendor.vendorId || vendor.name.includes(search.vendorId)
+      )
+    } else {
+      list = vendorList.filter(
         (vendor) =>
           formData.vendorId === vendor.vendorId ||
           (search.vendorId &&
             vendor.vendorId.toLowerCase().match(`^${search.vendorId.toLowerCase()}`, 'i'))
       )
-      .map((vendor) => {
-        return {
-          label: `${vendor.vendorId} - ${vendor.name}`,
-          value: vendor.vendorId
-        }
-      })
+    }
+    return list.map((vendor) => ({
+      label: `${vendor.vendorId} - ${vendor.name}`,
+      value: vendor.vendorId
+    }))
   }
 
   // purchase detail
@@ -282,34 +343,49 @@ export default class PurchaseForm extends React.Component {
           const line = mappingSearch[row.detailNo]
           return (
             <div className='purchase-price-row'>
-              <div className={`purchase-price-input ${line.value === '' ? 'full' : ''}`}>
-                <Button
-                  onClick={_this.onSwitchProductModal.bind(_this, row.detailNo)}
-                  type={line.value === '' ? 'primary' : 'default'}
-                  style={{ width: '100%' }}
+              <div
+                className={`purchase-price-input ${
+                  line.value === '' || row.productType === 'OTHERS' ? 'full' : ''
+                }`}
+              >
+                <Popover
+                  title={null}
+                  content={
+                    <SelectProductHover
+                      type='sale'
+                      detailNo={row.detailNo}
+                      keyword={line.search}
+                      onSearchSelect={_this.onSearchSelect}
+                    />
+                  }
+                  placement='rightTop'
+                  visible={line.selectVisible}
+                  destroyTooltipOnHide={true}
+                  overlayClassName={`product-select-hover ${
+                    line.search.length > 2 ? 'product' : 'type'
+                  }`}
+                  getPopupContainer={() => document.getElementById('sale-form-wrapper')}
                 >
-                  {line.value === '' ? '選取商品' : line.isVirtual ? `*${line.value}` : line.value}
-                </Button>
+                  <Input
+                    value={line.search}
+                    onChange={_this.onSearchProduct.bind(_this, row.detailNo)}
+                    onKeyDown={_this.onSearchKeydown.bind(_this, row.detailNo)}
+                    onBlur={_this.onSearchBlur.bind(_this, row.detailNo)}
+                    ref={(target) => (_this.refList[row.detailNo].productId = target)}
+                  />
+                </Popover>
               </div>
-              {line.value !== '' && (
+              {line.value !== '' && row.productType !== 'OTHERS' && (
                 <div className='purchase-price-view'>
                   <Tooltip title='商品資訊'>
                     <Button
-                      onClick={() => this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}
+                      onClick={() => _this.setState({ viewProduct: true, viewSeqNo: line.seqNo })}
                     >
                       <ListSearchIcon />
                     </Button>
                   </Tooltip>
                 </div>
               )}
-              <SelectProductModal
-                type='purchase'
-                detailNo={row.detailNo}
-                visible={line.visible}
-                value={line.value}
-                onSelect={_this.onMappingSelect}
-                onClose={_this.onSwitchProductModal.bind(_this, row.detailNo)}
-              />
             </div>
           )
         }
@@ -343,6 +419,8 @@ export default class PurchaseForm extends React.Component {
                 step={1}
                 onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'quantity')}
                 style={{ width: '100%' }}
+                ref={(target) => (_this.refList[row.detailNo].qty = target)}
+                onKeyDown={_this.onDetailNumberKeydown.bind(_this, row.detailNo)}
               />
             )
           )
@@ -353,38 +431,30 @@ export default class PurchaseForm extends React.Component {
         title: '進貨價',
         width: 140,
         render: (data, row) => {
+          const { mappingSearch } = _this.state
+          const line = mappingSearch[row.detailNo]
           return (
             row.productSeqNo && (
-              <div className='purchase-price-row'>
-                <div className='purchase-price-input'>
-                  <InputNumber
-                    value={data}
-                    min={0}
-                    max={99999999}
-                    step={1}
-                    onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'price')}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-                <div className='purchase-price-view'>
-                  {row.productSeqNo ? (
-                    <Popover
-                      title='歷史進價'
-                      content={_this.displayHistoryPrice(row.detailNo)}
-                      overlayClassName='purchase-history-price'
-                      onVisibleChange={_this.onVisibleChange.bind(_this, row.detailNo)}
-                    >
-                      <Button>
-                        <ListSearchIcon />
-                      </Button>
-                    </Popover>
-                  ) : (
-                    <Button disabled={true}>
-                      <ListSearchIcon />
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <Popover
+                title='商品歷史價格'
+                content={_this.displayHistoryPrice(row.detailNo)}
+                visible={line.historyVisible}
+                placement='leftTop'
+                overlayClassName='purchase-history-price on-price-input'
+              >
+                <InputNumber
+                  value={data}
+                  min={0}
+                  max={99999999}
+                  step={1}
+                  onChange={_this.onDetailNumberChange.bind(_this, row.detailNo, 'price')}
+                  style={{ width: '100%' }}
+                  ref={(target) => (_this.refList[row.detailNo].price = target)}
+                  onFocus={_this.onHistoryVisible.bind(_this, row.detailNo, true)}
+                  onBlur={_this.onHistoryVisible.bind(_this, row.detailNo, false)}
+                  onKeyDown={_this.onPriceEnter.bind(_this, row.detailNo)}
+                />
+              </Popover>
             )
           )
         }
@@ -403,9 +473,13 @@ export default class PurchaseForm extends React.Component {
         render: (data, row) => {
           return (
             row.productSeqNo && (
-              <Input
+              <AutoComplete
                 value={data}
-                onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'remark')}
+                options={_this.state.remarkList}
+                onChange={_this.onDetailSelectChange.bind(_this, row.detailNo, 'remark')}
+                onKeyDown={_this.onNoteKeydown.bind(_this, row.detailNo)}
+                ref={(target) => (_this.refList[row.detailNo].remark = target)}
+                style={{ width: '100%' }}
               />
             )
           )
@@ -425,8 +499,10 @@ export default class PurchaseForm extends React.Component {
                 showArrow={false}
                 allowClear={true}
                 onChange={_this.onDetailSelectChange.bind(_this, row.detailNo, 'color')}
+                onKeyDown={_this.onColorKeydown.bind(_this, row.detailNo)}
                 style={{ width: '100%' }}
                 notFoundContent={null}
+                ref={(target) => (_this.refList[row.detailNo].color = target)}
               >
                 {_this.state.colorList.map((color) => (
                   <Select.Option key={color.colorId} value={color.name}>
@@ -456,47 +532,142 @@ export default class PurchaseForm extends React.Component {
     ]
   }
 
-  // renderProductDetail = (record) => {
-  //   return (
-  //     <Row gutter={0}>
-  //       <Col span={8}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>商品名稱</div>
-  //           <div className='product-detail-table-expand-group-content'>{record.productName}</div>
-  //         </div>
-  //       </Col>
-  //       <Col span={8}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>車種簡稱</div>
-  //           <div className='product-detail-table-expand-group-content'>{record.kindShortName}</div>
-  //         </div>
-  //       </Col>
-  //       <Col span={8}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>規格</div>
-  //           <div className='product-detail-table-expand-group-content'>{record.norm}</div>
-  //         </div>
-  //       </Col>
-  //       <Col span={24}>
-  //         <div className='product-detail-table-expand-group'>
-  //           <div className='product-detail-table-expand-group-title'>備註</div>
-  //           <div className='product-detail-table-expand-group-content'>
-  //             <Input.TextArea
-  //               value={record.remark}
-  //               autoSize={{ minRows: 1, maxRows: 4 }}
-  //               onChange={this.onDetailInputChange.bind(this, record.detailNo, 'remark')}
-  //             />
-  //           </div>
-  //         </div>
-  //       </Col>
-  //     </Row>
-  //   )
-  // }
-
-  onSwitchProductModal = (detailNo) => {
+  onSearchProduct = (detailNo, event) => {
     const { mappingSearch } = this.state
-    mappingSearch[detailNo].visible = !mappingSearch[detailNo].visible
+    mappingSearch[detailNo].search = event.target.value
     this.setState({ mappingSearch })
+  }
+  onSearchKeydown = (detailNo, event) => {
+    if (
+      event.keyCode === 33 ||
+      event.keyCode === 34 ||
+      event.keyCode === 38 ||
+      event.keyCode === 40
+    ) {
+      event.preventDefault()
+    } else if (event.keyCode === 13) {
+      event.preventDefault()
+      const { mappingSearch } = this.state
+      const line = mappingSearch[detailNo]
+      if (line.search !== '') {
+        if (!line.selectVisible) {
+          line.selectVisible = true
+        } else if (line.selectFinished) {
+          line.selectVisible = false
+        }
+        this.setState({ mappingSearch })
+      }
+    }
+  }
+  onSearchBlur = (detailNo, event) => {
+    event.preventDefault()
+    setTimeout(() => {
+      const { mappingSearch } = this.state
+      const line = mappingSearch[detailNo]
+      if (!this.onProductSelectClick) {
+        if (line.value === '' || !line.seqNo) {
+          line.search = ''
+        } else {
+          line.search = line.value
+        }
+        line.selectVisible = false
+        this.refList[detailNo].productId.blur()
+        this.setState({ mappingSearch })
+      } else if (line.value === '' || !line.seqNo) {
+        this.refList[detailNo].productId.focus()
+      }
+    }, 100)
+  }
+  onSearchSelect = (detailNo, value, isFinished) => {
+    const { mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    if (isFinished) {
+      line.search = value.split('|')[0]
+      line.value = value.split('|')[0]
+      line.seqNo = Number(value.split('|')[1])
+      line.selectFinished = true
+      line.selectVisible = false
+      this.setState({ mappingSearch }, () => this.enterProduct(detailNo))
+    } else {
+      line.search = value
+      line.value = ''
+      line.seqNo = null
+      line.selectFinished = false
+      this.setState({ mappingSearch }, () => this.clearProduct(detailNo))
+    }
+  }
+  enterProduct = (detailNo) => {
+    const { formData, mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    const row = formData.purchaseDetails.find((row) => row.detailNo === detailNo)
+    this.setState({ detailLoading: true }, () => {
+      this.purchaseAPI.getProductData(line.seqNo).then((response) => {
+        line.isVirtual = response.data.productType === 'VIRTUAL'
+        row.productId = line.value
+        row.productSeqNo = line.seqNo
+        row.productName = response.data.name
+        row.kindShortName = response.data.kindShortName
+        row.norm = response.data.norm
+        row.quantity = 1
+        row.price = 0
+        row.amount = 0
+        row.color = ''
+        row.unit = response.data.unit
+        row.vendorProductId = response.data.vendorProductId
+        this.setState({ formData, mappingSearch, detailLoading: false }, () => {
+          this.refList[detailNo].qty.focus()
+        })
+      })
+    })
+  }
+  clearProduct = (detailNo) => {
+    const { formData } = this.state
+    const row = formData.purchaseDetails.find((row) => row.detailNo === detailNo)
+    row.productId = ''
+    row.productSeqNo = null
+    row.productName = ''
+    row.kindShortName = ''
+    row.norm = ''
+    row.quantity = 1
+    row.price = 0
+    row.amount = 0
+    row.remark = ''
+    row.color = ''
+    row.vendorProductId = ''
+    this.setState({ formData })
+  }
+  onHistoryVisible = (detailNo, historyVisible) => {
+    const { mappingSearch } = this.state
+    const line = mappingSearch[detailNo]
+    line.historyVisible = historyVisible
+    this.setState({ mappingSearch }, () => {
+      this.onHistoryVisibleChange(detailNo)
+    })
+  }
+  onPriceEnter = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      this.onPriceFocusSwitch = false
+      this.refList[detailNo].remark.focus()
+    } else if (event.keyCode === 9) {
+      this.onPriceFocusSwitch = false
+    }
+  }
+  onNoteKeydown = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      this.refList[detailNo].color.focus()
+    }
+  }
+  onColorKeydown = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      const { mappingSearch } = this.state
+      const keys = Object.keys(mappingSearch)
+      const index = keys.indexOf(detailNo.toString())
+      if (index + 1 < keys.length) {
+        this.refList[keys[index + 1]].productId.focus()
+      } else {
+        this.onProductAdd()
+      }
+    }
   }
 
   getDetailTotal = () => {
@@ -534,6 +705,11 @@ export default class PurchaseForm extends React.Component {
       this.setState({ formData })
     }
   }
+  onDetailNumberKeydown = (detailNo, event) => {
+    if (event.keyCode === 13) {
+      this.refList[detailNo].price.focus()
+    }
+  }
 
   onProductAdd = () => {
     const { formData, mappingSearch } = this.state
@@ -554,14 +730,24 @@ export default class PurchaseForm extends React.Component {
     })
     mappingSearch[detailNo] = {
       loading: false,
+      search: '',
       value: '',
       seqNo: null,
       isVirtual: false,
-      visible: false,
       select: {},
+      selectVisible: false,
+      selectFinished: false,
+      historyVisible: false,
       historySeqNo: null,
       historyLoading: true,
       historyList: []
+    }
+    this.refList[detailNo] = {
+      productId: null,
+      qty: null,
+      price: null,
+      remark: null,
+      color: null
     }
     this.setState({ formData, mappingSearch })
   }
@@ -570,13 +756,13 @@ export default class PurchaseForm extends React.Component {
     const index = formData.purchaseDetails.findIndex((record) => record.detailNo === detailNo)
     formData.purchaseDetails.splice(index, 1)
     delete mappingSearch[detailNo]
-    this.setState({ formData, mappingSearch })
+    this.setState({ formData, mappingSearch }, () => delete this.refList[detailNo])
   }
 
-  onVisibleChange = (detailNo, visible) => {
+  onHistoryVisibleChange = (detailNo, visible) => {
     const { mappingSearch } = this.state
     const row = mappingSearch[detailNo]
-    if (visible && row.seqNo && row.seqNo !== row.historySeqNo) {
+    if (row.seqNo && row.seqNo !== row.historySeqNo) {
       row.historyLoading = true
       this.setState({ mappingSearch }, () => {
         this.purchaseAPI
@@ -603,16 +789,18 @@ export default class PurchaseForm extends React.Component {
     const { mappingSearch } = this.state
     const row = mappingSearch[detailNo]
     return (
-      <Table
-        className='purchase-history-list'
-        rowKey='index'
-        size='small'
-        columns={this.getHistoryColumns()}
-        dataSource={row.historyList}
-        scroll={{ y: 240 }}
-        loading={row.historyLoading}
-        pagination={false}
-      />
+      <Spin spinning={row.historyLoading}>
+        <Table
+          className='purchase-history-list'
+          rowKey='index'
+          size='small'
+          columns={this.getHistoryColumns()}
+          dataSource={row.historyList}
+          scroll={{ y: 240 }}
+          loading={row.historyLoading}
+          pagination={false}
+        />
+      </Spin>
     )
   }
   getHistoryColumns = () => [
@@ -636,57 +824,6 @@ export default class PurchaseForm extends React.Component {
       }
     }
   ]
-
-  // mapping product search & select
-  getMappingProductDisplay = (product) => {
-    let display = product.desc1
-    if (product.desc2 || product.desc3 || product.desc4 || product.desc5) {
-      let additionDisplay = ''
-      additionDisplay += product.desc2 ? product.desc2 : ''
-      additionDisplay += product.desc3
-        ? additionDisplay !== ''
-          ? `, ${product.desc3}`
-          : product.desc3
-        : ''
-      additionDisplay += product.desc4
-        ? additionDisplay !== ''
-          ? `, ${product.desc4}`
-          : product.desc4
-        : ''
-      additionDisplay += product.desc5
-        ? additionDisplay !== ''
-          ? `, ${product.desc5}`
-          : product.desc5
-        : ''
-      display += ` [${additionDisplay}]`
-    }
-    return display
-  }
-  onMappingSelect = (detailNo, product) => {
-    const { formData, mappingSearch } = this.state
-    const row = formData.purchaseDetails.find((row) => row.detailNo === detailNo)
-    mappingSearch[detailNo].value = product.data
-    mappingSearch[detailNo].seqNo = product.productSeqNo
-    mappingSearch[detailNo].isVirtual = product.productType === 'VIRTUAL'
-    mappingSearch[detailNo].visible = false
-    mappingSearch[detailNo].select = product
-    this.setState({ mappingSearch, detailLoading: true }, () => {
-      this.purchaseAPI.getProductData(product.productSeqNo).then((response) => {
-        row.productId = product.data
-        row.productSeqNo = product.productSeqNo
-        row.productName = response.data.name
-        row.kindShortName = response.data.kindShortName
-        row.norm = response.data.norm
-        row.quantity = 1
-        row.price = 0
-        row.amount = 0
-        row.color = ''
-        row.unit = response.data.unit
-        row.vendorProductId = response.data.vendorProductId
-        this.setState({ formData, detailLoading: false })
-      })
-    })
-  }
 
   // 新增
   handleCreate = (back) => {
@@ -840,7 +977,7 @@ export default class PurchaseForm extends React.Component {
           lg: 16
         }
     return (
-      <>
+      <div id='sale-form-wrapper'>
         {!this.props.isDrawMode && (
           <Breadcrumb style={{ marginBottom: 10 }}>
             <Breadcrumb.Item>
@@ -903,10 +1040,12 @@ export default class PurchaseForm extends React.Component {
                   align='flex-start'
                   content={
                     <Input.TextArea
-                      onChange={this.onInputChange}
                       value={this.state.formData.note}
                       id='note'
                       autoSize={{ minRows: 4, maxRows: 4 }}
+                      ref={(remarkRef) => (this.remarkRef = remarkRef)}
+                      onChange={this.onInputChange}
+                      onKeyDown={this.onRemarkKeydown}
                     />
                   }
                 />
@@ -1000,7 +1139,7 @@ export default class PurchaseForm extends React.Component {
             </Space>
           </div>
         </Spin>
-      </>
+      </div>
     )
   }
 }

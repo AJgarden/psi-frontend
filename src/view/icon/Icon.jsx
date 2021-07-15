@@ -1,6 +1,14 @@
 import React from 'react'
 import Icon from '@ant-design/icons'
 
+const SaleDeliverySvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0z' fill='none' />
+    <path d='M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z' />
+  </svg>
+)
+export const SaleDeliveryIcon = (props) => <Icon component={SaleDeliverySvg} {...props} />
+
 const ProductSelectSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#ffffff'>
     <path d='M0 0h24v24H0V0z' fill='none' />
@@ -62,6 +70,20 @@ const PhotoViewSvg = () => (
 )
 export const PhotoViewIcon = (props) => <Icon component={PhotoViewSvg} {...props} />
 
+const ListFeedbackSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0V0z' fill='none' />
+    <path d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zm-9-4h2v2h-2zm0-6h2v4h-2z' />
+  </svg>
+)
+export const ListFeedbackIcon = (props) => <Icon component={ListFeedbackSvg} {...props} />
+const ListFlagSvg = () => (
+  <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
+    <path d='M0 0h24v24H0z' fill='none' />
+    <path d='M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z' />
+  </svg>
+)
+export const ListFlagIcon = (props) => <Icon component={ListFlagSvg} {...props} />
 const ListBlockSvg = () => (
   <svg height='36px' viewBox='0 0 24 24' width='36px' fill='#000000'>
     <path d='M0 0h24v24H0V0z' fill='none' />

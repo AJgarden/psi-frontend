@@ -51,4 +51,8 @@ export default class PurchaseAPI {
       colorId: ''
     }).then((response) => response.data)
   }
+
+  getRemarkList = () => {
+    return restInstance('get', '/v1/common/remark').then((response) => response.data)
+  }
 }

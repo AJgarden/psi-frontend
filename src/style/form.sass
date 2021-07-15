@@ -391,17 +391,19 @@
 .form-option-print
   color: #f4a261 !important
   border-color: #f4a261 !important
+  .anticon,
+  .anticon svg
+    width: 14px
+    height: 14px
+    fill: #f4a261
   &:focus
     color: #de731b !important
     border-color: #de731b !important
   &:disabled
     color: rgba(0, 0, 0, 0.25) !important
     border-color: #d9d9d9 !important
-  .anticon,
-  .anticon svg
-    width: 14px
-    height: 14px
-    fill: #f4a261
+    .anticon svg
+      fill: rgba(0, 0, 0, 0.25)
 
 .product-select-hover
   &.type
@@ -435,5 +437,59 @@
         > td
           background: #a8dadc
 
+.sales-delivery-log-modal
+  width: 800px !important
+  .view-product-table
+    width: 100%
+    table-layout: fixed
+    &+ .view-product-table
+      margin-top: 20px
+    th, td
+      width: 20%
+      border-right: 1px solid #ffffff
+      padding: 4px 8px
+      vertical-align: top
+    th
+      color: #ffffff
+      background: #2a9d8f
+    td
+      height: 38.5px
+      border-bottom: 1px solid #ffffff
+      background: #f7f7f7
+      padding: 8px
+    &.addition
+      th, td
+        width: 25%
+      td
+        > div
+          position: relative
+          padding-bottom: 100%
+          .ant-empty
+            position: absolute
+            width: 100%
+            margin: 0
+            top: 50%
+            transform: translateY(-50%)
+          > img
+            display: block
+            cursor: pointer
+            position: absolute
+            max-width: 100%
+            max-height: 100%
+            margin: 0
+            top: 50%
+            left: 50%
+            transform: translate(-50%, -50%)
 
-
+.sale-delivery-switch
+  display: block
+  border: none
+  background: #00bbf9 !important
+  padding: 3px
+  margin-left: 10px
+  .anticon,
+  .anticon svg
+    display: block
+    width: 18px
+    height: 18px
+    fill: #ffffff

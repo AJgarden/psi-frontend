@@ -30,8 +30,8 @@ export default class SalePrint extends React.Component {
           onOk: () => window.close()
         })
       } else {
-        this.setState({ printData: response })
         document.title = '列印銷貨單 - MOTOBUY PSI'
+        this.setState({ printData: response }, () => window.print())
       }
     })
   }
@@ -154,9 +154,9 @@ export default class SalePrint extends React.Component {
     return (
       <>
         <div className='print-btn'>
-          <Button type='primary' onClick={() => window.print()}>
+          {/* <Button type='primary' onClick={() => window.print()}>
             列印
-          </Button>
+          </Button> */}
           <Button onClick={() => window.close()}>關閉視窗</Button>
         </div>
         {this.state.printData.map((data, index) => (

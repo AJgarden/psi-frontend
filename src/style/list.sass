@@ -83,6 +83,25 @@
               width: 18px
               height: 18px
               fill: #ffffff
+        .list-table-delivery
+          display: flex
+          align-items: center
+          justify-content: space-between
+          .anticon
+            display: block
+            svg
+              display: block
+              width: 24px
+              height: 24px
+            &.list-table-delivery-flag
+              svg
+                fill: #2a9d8f
+              &.disabled
+                svg
+                  fill: rgba(0, 0, 0, 0.25)
+            &.list-table-delivery-feedback
+              svg
+                fill: #e63946
         .list-table-addition
           .ant-btn
             display: inline-flex

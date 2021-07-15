@@ -21,7 +21,9 @@ import {
   ListSearchIcon,
   ListEditIcon,
   ListTickIcon,
-  ListPrintIcon
+  ListPrintIcon,
+  ListFlagIcon,
+  ListFeedbackIcon
   // UtilCloseIcon
 } from '../icon/Icon'
 // import { PageDrawer } from '../../component/PageDrawer'
@@ -169,12 +171,37 @@ export default class Sale extends React.Component {
           )
         }
       },
+      // {
+      //   title: '序',
+      //   width: 80,
+      //   fixed: 'left',
+      //   align: 'center',
+      //   render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
+      // },
       {
-        title: '序',
-        width: 80,
+        title: '送貨',
+        dataIndex: 'deliveryMan',
         fixed: 'left',
         align: 'center',
-        render: (a, b, i) => (pagination.current - 1) * pagination.pageSize + i + 1
+        width: 70,
+        render: (record, row) => {
+          return (
+            <div className='list-table-delivery'>
+              {(record && record !== '') ? (
+                <Tooltip title='已送貨'>
+                  <ListFlagIcon className='list-table-delivery-flag' />
+                </Tooltip>
+              ) : (
+                <ListFlagIcon className='list-table-delivery-flag disabled' />
+              )}
+              {(row.replyDesc && row.replyDesc !== '') && (
+                <Tooltip title={row.replyDesc}>
+                  <ListFeedbackIcon className='list-table-delivery-feedback' />
+                </Tooltip>
+              )}
+            </div>
+          )
+        }
       },
       {
         title: '銷貨編號',
@@ -267,9 +294,6 @@ export default class Sale extends React.Component {
     })
     this.history.push(`/Sale/Detail/${salesId}`)
   }
-  // onDetailOpen = (detailPurchaseId) =>
-  //   this.setState({ detailPurchaseId, detailVisible: true })
-  // onDetailClose = () => this.setState({ detailVisible: false })
 
   render() {
     return (
@@ -351,22 +375,6 @@ export default class Sale extends React.Component {
           scroll={{ x: 1110 }}
           pagination={getPaginationSetting(this.state.pagination, this.onPageChange)}
         />
-        {/* <PageDrawer
-          width={480}
-          placement='right'
-          closeIcon={<UtilCloseIcon />}
-          title={this.state.detailCreate ? '新增商品' : '編輯商品資料'}
-          visible={this.state.detailVisible}
-          onClose={this.onDetailClose}
-        >
-          <PurchaseDetail
-            createFlag={false}
-            isDrawMode={true}
-            drawModeVisible={this.state.detailVisible}
-            purchaseId={this.state.detailPurchaseId}
-            onClose={this.onDetailClose}
-          />
-        </PageDrawer> */}
       </>
     )
   }

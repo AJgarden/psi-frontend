@@ -19,7 +19,8 @@ import {
   Modal,
   message,
   InputNumber,
-  AutoComplete
+  AutoComplete,
+  Empty
 } from 'antd'
 import {
   CheckOutlined,
@@ -27,7 +28,7 @@ import {
   ExclamationCircleOutlined,
   PrinterOutlined
 } from '@ant-design/icons'
-import { ListDeleteIcon, ListSearchIcon } from '../icon/Icon'
+import { ListDeleteIcon, ListSearchIcon, SaleDeliveryIcon } from '../icon/Icon'
 import { FormItem } from '../../component/FormItem'
 import { createHashHistory } from 'history'
 import moment from 'moment'
@@ -50,6 +51,10 @@ export default class SaleForm extends React.Component {
     this.state = {
       loading: true,
       formData,
+      deliveryLog: null,
+      deliveryVisible: false,
+      deliveryPic: null,
+      deliveryPicVisible: false,
       search: {
         customerId: ''
       },
@@ -97,6 +102,10 @@ export default class SaleForm extends React.Component {
         {
           loading: true,
           formData,
+          deliveryLog: null,
+          deliveryVisible: false,
+          deliveryPic: null,
+          deliveryPicVisible: false,
           search: {
             customerId: ''
           },
@@ -181,6 +190,11 @@ export default class SaleForm extends React.Component {
                     .valueOf(),
                   salesDetails: response.data.salesDetails
                 },
+                deliveryLog:
+                  response.data.salesDeliveryLog.timeStamp === null
+                    ? null
+                    : response.data.salesDeliveryLog,
+                deliveryVisible: response.data.salesDeliveryLog.timeStamp !== null,
                 mappingSearch
               },
               () => resolve(true)
@@ -316,9 +330,7 @@ export default class SaleForm extends React.Component {
       (customer) => customer.customerId.toLowerCase() === value.toLowerCase()
     )
     if (customer) formData.customerName = customer.name
-    this.setState({ search, formData, mappingSearch }, () => {
-      this.remarkRef.focus()
-    })
+    this.setState({ search, formData, mappingSearch }, () => this.remarkRef.focus())
   }
   // get code options
   getCustomerOptions = () => {
@@ -335,7 +347,6 @@ export default class SaleForm extends React.Component {
         (customer) =>
           formData.customerId === customer.customerId || customer.name.includes(search.customerId)
       )
-      console.log(list)
     } else {
       list = customerList.filter(
         (customer) =>
@@ -528,12 +539,6 @@ export default class SaleForm extends React.Component {
                 ref={(target) => (_this.refList[row.detailNo].remark = target)}
                 style={{ width: '100%' }}
               />
-              // <Input
-              //   value={data}
-              //   onChange={_this.onDetailInputChange.bind(_this, row.detailNo, 'remark')}
-              //   onKeyDown={_this.onNoteKeydown.bind(_this, row.detailNo)}
-              //   ref={(target) => (_this.refList[row.detailNo].remark = target)}
-              // />
             )
           )
         }
@@ -702,14 +707,6 @@ export default class SaleForm extends React.Component {
     if (event.keyCode === 13) {
       this.onPriceFocusSwitch = false
       this.refList[detailNo].remark.focus()
-      // const { mappingSearch } = this.state
-      // const keys = Object.keys(mappingSearch)
-      // const index = keys.indexOf(detailNo.toString())
-      // if (index + 1 < keys.length) {
-      //   this.refList[keys[index + 1]].productId.focus()
-      // } else {
-      //   this.onProductAdd()
-      // }
     } else if (event.keyCode === 9) {
       this.onPriceFocusSwitch = false
     }
@@ -808,7 +805,9 @@ export default class SaleForm extends React.Component {
     this.refList[detailNo] = {
       productId: null,
       qty: null,
-      price: null
+      price: null,
+      remark: null,
+      color: null
     }
     this.setState({ formData, mappingSearch }, () => this.refList[detailNo].productId.focus())
   }
@@ -979,60 +978,6 @@ export default class SaleForm extends React.Component {
       }
     }
   ]
-
-  // mapping product search & select
-  getMappingProductDisplay = (product) => {
-    let display = product.desc1
-    if (product.desc2 || product.desc3 || product.desc4 || product.desc5) {
-      let additionDisplay = ''
-      additionDisplay += product.desc2 ? product.desc2 : ''
-      additionDisplay += product.desc3
-        ? additionDisplay !== ''
-          ? `, ${product.desc3}`
-          : product.desc3
-        : ''
-      additionDisplay += product.desc4
-        ? additionDisplay !== ''
-          ? `, ${product.desc4}`
-          : product.desc4
-        : ''
-      additionDisplay += product.desc5
-        ? additionDisplay !== ''
-          ? `, ${product.desc5}`
-          : product.desc5
-        : ''
-      display += ` [${additionDisplay}]`
-    }
-    return display
-  }
-  onMappingSelect = (detailNo, product) => {
-    const { formData, mappingSearch } = this.state
-    const row = formData.salesDetails.find((row) => row.detailNo === detailNo)
-    mappingSearch[detailNo].value = product.data
-    mappingSearch[detailNo].seqNo = product.productSeqNo
-    mappingSearch[detailNo].isVirtual = product.productType === 'VIRTUAL'
-    mappingSearch[detailNo].visible = false
-    mappingSearch[detailNo].select = product
-    this.setState({ mappingSearch, detailLoading: true }, () => {
-      // this.saleAPI.getProductInventory(product.productSeqNo).then((response) => {
-      // row.inventory = response.data
-      this.saleAPI.getProductData(product.productSeqNo, formData.customerId).then((response) => {
-        row.productId = product.data
-        row.productSeqNo = product.productSeqNo
-        row.productName = response.data.name
-        row.kindShortName = response.data.kindShortName
-        row.norm = response.data.norm
-        row.quantity = 1
-        row.price = response.data.price
-        row.amount = response.data.price
-        row.color = ''
-        row.unit = response.data.unit
-        row.vendorProductId = response.data.vendorProductId
-        this.setState({ formData, detailLoading: false })
-      })
-      // })
-    })
-  }
 
   // 新增
   handleCreate = (back, print) => {
@@ -1252,7 +1197,20 @@ export default class SaleForm extends React.Component {
                 <Col span={24}>
                   <FormItem
                     title='銷售單號'
-                    content={<span style={{ color: '#2a9d8f' }}>{this.props.salesId}</span>}
+                    content={
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ color: '#2a9d8f' }}>{this.props.salesId}</span>
+                        {this.state.deliveryLog && (
+                          <Button
+                            className='sale-delivery-switch'
+                            size='small'
+                            onClick={() => this.setState({ deliveryVisible: true })}
+                          >
+                            <SaleDeliveryIcon />
+                          </Button>
+                        )}
+                      </div>
+                    }
                   />
                 </Col>
               )}
@@ -1441,6 +1399,131 @@ export default class SaleForm extends React.Component {
               </Button>
             </Space>
           </div>
+          {this.state.deliveryLog && (
+            <>
+              <Modal
+                className='sales-delivery-log-modal'
+                visible={this.state.deliveryVisible}
+                title='送貨狀況'
+                footer={null}
+                onCancel={() => this.setState({ deliveryVisible: false })}
+              >
+                <table className='view-product-table'>
+                  <tr>
+                    <th>送貨員</th>
+                    <th>出貨時間</th>
+                    <th>送貨更新</th>
+                  </tr>
+                  <tr>
+                    <td>{this.state.deliveryLog.deliveryMan}</td>
+                    <td>{this.state.deliveryLog.timeStamp || '--'}</td>
+                    <td>{this.state.deliveryLog.chTime || '--'}</td>
+                  </tr>
+                </table>
+                <table className='view-product-table'>
+                  <tr>
+                    <th>問題回報</th>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: !this.state.deliveryLog.replyDesc
+                            ? '--'
+                            : this.state.deliveryLog.replyDesc.replace('\n', '<br />')
+                        }}
+                      />
+                    </td>
+                  </tr>
+                </table>
+                <table className='view-product-table addition'>
+                  <tr>
+                    <td>
+                      <div>
+                        {!this.state.deliveryLog.pic1Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img
+                            src={this.state.deliveryLog.pic1Url}
+                            alt={this.state.deliveryLog.salesId}
+                            onClick={() =>
+                              this.setState({
+                                deliveryPic: this.state.deliveryLog.pic1Url,
+                                deliveryPicVisible: true
+                              })
+                            }
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        {!this.state.deliveryLog.pic2Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img
+                            src={this.state.deliveryLog.pic2Url}
+                            alt={this.state.deliveryLog.salesId}
+                            onClick={() =>
+                              this.setState({
+                                deliveryPic: this.state.deliveryLog.pic2Url,
+                                deliveryPicVisible: true
+                              })
+                            }
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        {!this.state.deliveryLog.pic3Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img
+                            src={this.state.deliveryLog.pic3Url}
+                            alt={this.state.deliveryLog.salesId}
+                            onClick={() =>
+                              this.setState({
+                                deliveryPic: this.state.deliveryLog.pic3Url,
+                                deliveryPicVisible: true
+                              })
+                            }
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        {!this.state.deliveryLog.pic4Url ? (
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='尚未上傳' />
+                        ) : (
+                          <img
+                            src={this.state.deliveryLog.pic4Url}
+                            alt={this.state.deliveryLog.salesId}
+                            onClick={() =>
+                              this.setState({
+                                deliveryPic: this.state.deliveryLog.pic4Url,
+                                deliveryPicVisible: true
+                              })
+                            }
+                          />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </Modal>
+              <Modal
+                className='product-real-pic-modal'
+                visible={this.state.deliveryPicVisible}
+                title={null}
+                footer={null}
+                onCancel={() => this.setState({ deliveryPicVisible: false })}
+              >
+                <img src={this.state.deliveryPic} alt='照片放大' />
+              </Modal>
+            </>
+          )}
         </Spin>
       </div>
     )
