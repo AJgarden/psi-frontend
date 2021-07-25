@@ -36,6 +36,8 @@ import SaleDetail from './sale/SaleDetail'
 import SalePrint from './sale/SalePrint'
 import Receive from './receive/Receive'
 import ReceiveDetail from './receive/ReceiveDetail'
+import ProductCode from './qrcode/ProductCode'
+import PrintCode from './qrcode/PrintCode'
 import StaticStorage from '../model/storage/static'
 import GlobalAPI from '../model/api/global'
 import { testRestInstance } from '../model/runner/rest'
@@ -124,6 +126,7 @@ export default class LayoutPage extends React.Component {
               <Layout.Content>
                 <Switch>
                   <Route exact path='/Sale/Print/:salesId' component={SalePrint} />
+                  <Route exact path='/QRCode/Print/:size/:productSeqNo' component={PrintCode} />
                 </Switch>
               </Layout.Content>
             </Layout>
@@ -282,6 +285,7 @@ export default class LayoutPage extends React.Component {
                       render={(props) => <ReceiveDetail {...props} createFlag={false} />}
                     />
                     <Route exact path='/Receive/List' component={Receive} />
+                    <Route exact path='/QRCode' component={ProductCode} />
                     <Route path='/' component={Dashboard} />
                   </Switch>
                   <BackTop target={() => document.getElementById('layout-content-wrapper')} className='layout-content-backtop' />

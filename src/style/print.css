@@ -176,3 +176,99 @@
     display: none;
   }
 }
+
+.qrcode-print {
+  background: #ffffff;
+  width: 100vw;
+  height: 100vh;
+  margin: -40px;
+  padding: 0;
+  text-align: center;
+}
+.qrcode-board {
+  display: block;
+  width: 233px;
+  position: relative;
+  flex-wrap: wrap;
+  height: 109px;
+  margin: auto;
+  padding: 6px 10px;
+  text-align: left;
+}
+.qrcode-board .qrcode-board-id {
+  height: 27px;
+  line-height: 27px;
+  font-size: 20px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qrcode-board .qrcode-board-flex {
+  display: flex;
+}
+.qrcode-board .qrcode-board-code {
+  width: 70px;
+  height: 70px;
+}
+.qrcode-board .qrcode-board-code svg {
+  display: block;
+}
+.qrcode-board .qrcode-board-detail {
+  flex-grow: 1;
+}
+.qrcode-board .qrcode-board-name {
+  display: -webkit-box;
+  height: 44px;
+  line-height: 20px;
+  font-size: 14px;
+  padding: 2px 0 2px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.qrcode-board .qrcode-board-norm {
+  height: 26px;
+  line-height: 20px;
+  font-size: 14px;
+  padding: 4px 0 2px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qrcode-noprint {
+  margin-top: 20px;
+}
+.qrcode-board-24 {
+  height: 90px;
+}
+.qrcode-board-24 .qrcode-board-code {
+  width: 70px;
+  height: 70px;
+}
+.qrcode-board-24 .qrcode-board-id {
+  height: 22px;
+  line-height: 22px;
+  font-size: 18px;
+  padding: 0 10px;
+}
+.qrcode-board-24 .qrcode-board-name,
+.qrcode-board-24 .qrcode-board-norm {
+  height: 24px;
+  line-height: 18px;
+  font-size: 14px;
+  padding: 6px 10px 0;
+}
+
+@media print {
+  .qrcode-print {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+  }
+  .qrcode-noprint {
+    display: none;
+  }
+}

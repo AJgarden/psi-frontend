@@ -7,7 +7,8 @@ import {
   SiderMenuPurchaseIcon,
   SiderMenuSaleIcon,
   SiderMenuDashboardIcon,
-  SiderMenuReceiveIcon
+  SiderMenuReceiveIcon,
+  SiderMenuQRCodeIcon
 } from '../icon/Icon'
 
 export const routes = [
@@ -110,6 +111,10 @@ export const routes = [
   {
     path: '/Receive',
     title: '收款單'
+  },
+  {
+    path: '/QRCode',
+    title: '標籤'
   },
   {
     path: '/',
@@ -310,5 +315,12 @@ export const menuType = [
         accessRoles: ['ROLE_ACCOUNTING_ADD']
       }
     ]
+  },
+  {
+    key: 'QRCode',
+    routes: ['QRCode'],
+    icon: <SiderMenuQRCodeIcon />,
+    title: '標籤',
+    accessRoles: ['ROLE_PRODUCT_LIST']
   }
 ]
