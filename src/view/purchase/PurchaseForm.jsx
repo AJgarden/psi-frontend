@@ -32,6 +32,7 @@ import PurchaseAPI from '../../model/api/purchase'
 export default class PurchaseForm extends React.Component {
   history = createHashHistory()
   purchaseAPI = new PurchaseAPI()
+  vendorRef = null
   remarkRef = null
   refList = {}
   onProductSelectClick = false
@@ -60,6 +61,7 @@ export default class PurchaseForm extends React.Component {
       } else {
         this.setState({ loading: false })
       }
+      this.vendorRef.focus()
     })
   }
 
@@ -851,6 +853,7 @@ export default class PurchaseForm extends React.Component {
               if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
               const formData = JSON.parse(JSON.stringify(initData))
               formData.accountDate = moment().startOf('day')
+              this.vendorRef.focus()
               this.setState({
                 loading: false,
                 formData,
@@ -1030,6 +1033,7 @@ export default class PurchaseForm extends React.Component {
                       style={{ width: '100%' }}
                       notFoundContent={null}
                       disabled={!this.props.createFlag}
+                      ref={(target) => this.vendorRef = target}
                     />
                   }
                 />

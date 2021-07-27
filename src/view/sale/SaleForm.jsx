@@ -40,6 +40,7 @@ import SaleAPI from '../../model/api/sale'
 export default class SaleForm extends React.Component {
   history = createHashHistory()
   saleAPI = new SaleAPI()
+  customerRef = null
   remarkRef = null
   refList = {}
   onProductSelectClick = false
@@ -73,6 +74,7 @@ export default class SaleForm extends React.Component {
       } else {
         this.setState({ loading: false })
       }
+      this.customerRef.focus()
     })
   }
 
@@ -998,12 +1000,16 @@ export default class SaleForm extends React.Component {
               this.history.push('/Sale/List')
             }
           } else {
+            if (print) {
+              window.open(`${window.location.href.split('#')[0]}#/Sale/Print/${salesId}`)
+            }
             const drawerContent = document.querySelector('.ant-drawer-body')
             const layoutContent = document.getElementById('layout-content-wrapper')
             if (drawerContent) drawerContent.scrollTo({ top: 0, behavior: 'smooth' })
             if (layoutContent) layoutContent.scrollTo({ top: 0, behavior: 'smooth' })
             const formData = JSON.parse(JSON.stringify(initData))
             formData.accountDate = moment().startOf('day')
+            this.customerRef.focus()
             this.setState({
               loading: false,
               formData,
@@ -1246,6 +1252,7 @@ export default class SaleForm extends React.Component {
                       style={{ width: '100%' }}
                       notFoundContent={null}
                       disabled={!this.props.createFlag}
+                      ref={(target) => this.customerRef = target}
                     />
                   }
                 />
@@ -1364,9 +1371,9 @@ export default class SaleForm extends React.Component {
                     className='form-option-print'
                     icon={<PrinterOutlined />}
                     disabled={this.state.formData.customerId === ''}
-                    onClick={this.handleCreate.bind(this, true, true)}
+                    onClick={this.handleCreate.bind(this, false, true)}
                   >
-                    儲存並列印
+                    列印並繼續新增
                   </Button>
                 </>
               ) : (

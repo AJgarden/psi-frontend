@@ -15,6 +15,10 @@ export default class SalePrint extends React.Component {
     this.getSalePrintData()
   }
 
+  componentDidMount() {
+    setTimeout(() => window.close(), 1000)
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.salesId !== this.props.salesId) {
       this.setState({ salesId: this.props.match.params.salesId }, () => this.getSalePrintData())
